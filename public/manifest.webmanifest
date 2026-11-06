@@ -1,0 +1,11 @@
+{
+  "name": "토이북 ToyBook",
+  "short_name": "토이북",
+  "description": "AI 동화책 만들기 + 캐릭터 3D 프린팅 (by wow3d)",
+  "lang": "ko",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FFF9F2",
+  "theme_color": "#FFE8D6",
+  "icons": [{ "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }]
+}

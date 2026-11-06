@@ -1,0 +1,31 @@
+{
+  "name": "wow3d-toybook",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "dev:api": "wrangler pages dev dist --port 8788",
+    "build": "tsc -b && vite build",
+    "typecheck": "tsc -b && tsc -p functions",
+    "preview": "npm run build && wrangler pages dev dist --port 8788",
+    "db:migrate:local": "wrangler d1 migrations apply toybook-db --local",
+    "db:migrate:remote": "wrangler d1 migrations apply toybook-db --remote",
+    "db:seed:local": "wrangler d1 execute toybook-db --local --file=seed/demo.sql",
+    "deploy": "npm run build && wrangler pages deploy dist --project-name wow3d-toybook"
+  },
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.30.6"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^5.20261106.1",
+    "@types/react": "^18.3.31",
+    "@types/react-dom": "^18.3.7",
+    "@vitejs/plugin-react": "^4.7.0",
+    "typescript": "^5.9.3",
+    "vite": "^6.4.5",
+    "wrangler": "^4.158.0"
+  }
+}

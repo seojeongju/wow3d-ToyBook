@@ -1,0 +1,15 @@
+# Cloudflare Pages 설정 — 화면(dist) + Pages Functions(functions/) + D1 + R2
+name = "wow3d-toybook"
+compatibility_date = "2025-09-01"
+pages_build_output_dir = "dist"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "toybook-db"
+# `npx wrangler d1 create toybook-db` 출력값으로 교체 (로컬 실행은 이 값 그대로 동작)
+database_id = "00000000-0000-0000-0000-000000000000"
+migrations_dir = "migrations"
+
+[[r2_buckets]]
+binding = "BUCKET"
+bucket_name = "toybook-files"
