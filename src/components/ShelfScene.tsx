@@ -3,6 +3,7 @@ import type { BookSummary } from '../api';
 import { fileUrl } from '../api';
 import type { RoomPalette } from '../rooms/palette';
 import { BOOK, slotCapacity, type RoomTemplate } from '../rooms/templates';
+import { findShelfFigure, type ShelfFigureId } from '../shelfState';
 import ClayArt, { ClayEmoji } from './ClayArt';
 import { LineIcon } from './Icons';
 
@@ -13,6 +14,16 @@ interface Props {
   plaque: string;
   /** 사진에서 뽑은 색 (1.5단계, 없으면 템플릿 기본 색) */
   palette?: RoomPalette | null;
+  /** 다 읽은 책 ID 목록 (표지에 ★ 스티커 표시) */
+  readBookIds?: string[];
+  /** 책장 진열대에 올려둔 대표 3D 피규어 캐릭터 */
+  figureId?: ShelfFigureId;
+  /** 진열대 피규어를 눌렀을 때 호출 */
+  onFigureClick?: () => void;
+  /** 포근한 밤 무드등 켜짐 여부 */
+  nightMode?: boolean;
+  /** 책장 조명(스탠드·별 램프·달님)을 눌렀을 때 호출 */
+  onToggleNight?: () => void;
   /** 책을 고르면 (튀어나오는 연출이 끝난 뒤) 호출 */
   onOpen: (book: BookSummary) => void;
   /** 빈 "새 책" 자리를 누르면 호출 */
@@ -60,11 +71,26 @@ function layout(room: RoomTemplate, books: BookSummary[]): Placed[][] {
   return pages;
 }
 
-export default function ShelfScene({ room, books, plaque, palette, onOpen, onNewBook, onPick }: Props) {
+export default function ShelfScene({
+  room,
+  books,
+  plaque,
+  palette,
+  readBookIds = [],
+  figureId = 'star',
+  onFigureClick,
+  nightMode = false,
+  onToggleNight,
+  onOpen,
+  onNewBook,
+  onPick,
+}: Props) {
   const pages = useMemo(() => layout(room, books), [room, books]);
   const [page, setPage] = useState(0);
+  const [figBounce, setFigBounce] = useState(false);
   const [flying, setFlying] = useState<{ book: BookSummary; rect: DOMRect; tone: string; stage: 'lift' | 'center' | 'open' } | null>(null);
   const timers = useRef<number[]>([]);
+  const activeFigure = findShelfFigure(figureId);
 
   // 템플릿이나 책 수가 바뀌면 첫 장으로
   useEffect(() => setPage(0), [room.id, books.length]);
@@ -88,12 +114,31 @@ export default function ShelfScene({ room, books, plaque, palette, onOpen, onNew
 
   return (
     <div className="room-wrap">
-      <div className="room" style={{ aspectRatio: `1 / ${room.ratio}` }}>
+      <div className={`room ${nightMode ? 'is-night' : ''}`} style={{ aspectRatio: `1 / ${room.ratio}` }}>
         {room.Art ? <room.Art palette={palette} /> : room.imageUrl && <img className="room-art" src={room.imageUrl} alt="" />}
+
+        {/* 밤 무드등 오버레이 */}
+        {nightMode && <div className="room-night-veil" aria-hidden />}
 
         <span className="room-plaque" style={{ left: `${room.plaque.x * 100}%`, top: `${room.plaque.y * 100}%` }}>
           {plaque}
         </span>
+
+        {/* 터치하면 켜지고 꺼지는 방 조명 스위치 */}
+        {room.lamp && onToggleNight && (
+          <button
+            type="button"
+            className={`room-lamp-btn ${nightMode ? 'on' : ''}`}
+            style={{ left: `${room.lamp.x * 100}%`, top: `${room.lamp.y * 100}%` }}
+            onClick={onToggleNight}
+            aria-pressed={nightMode}
+            aria-label={`${room.lamp.label} ${nightMode ? '끄기' : '켜기'}`}
+            title={`${room.lamp.label} 눌러 보기`}
+          >
+            <span className="room-lamp-halo" aria-hidden />
+            <span className="room-lamp-tag">{nightMode ? '🌙 무드등 켜짐' : '💡 조명 터치'}</span>
+          </button>
+        )}
 
         {current.map((p) => {
           const style: CSSProperties = {
@@ -108,31 +153,56 @@ export default function ShelfScene({ room, books, plaque, palette, onOpen, onNew
                 <span className="shelf-plus" aria-hidden>
                   +
                 </span>
+                <span className="shelf-book-label new-label">새 책 만들기</span>
               </button>
             );
           }
           const tone = COVERS[p.index % COVERS.length];
           const b = p.book;
+          const isRead = readBookIds.includes(b.id);
           return (
             <button
               key={b.id}
-              className={`shelf-book tone-${tone} ${flying?.book.id === b.id ? 'is-flying' : ''}`}
+              className={`shelf-book tone-${tone} ${isRead ? 'is-read' : ''} ${flying?.book.id === b.id ? 'is-flying' : ''}`}
               style={style}
               onClick={(e) => pick(b, e.currentTarget, tone)}
-              aria-label={`${b.title} 읽기`}
+              aria-label={`${b.title} 읽기${isRead ? ' (다 읽은 책)' : ''}`}
               title={b.title}
             >
+              <span className={`shelf-status-badge ${isRead ? 'read' : 'unread'}`} aria-hidden>
+                {isRead ? '★' : 'NEW'}
+              </span>
               <span className="shelf-cover">
                 {b.cover_key ? <img src={fileUrl(b.cover_key)} alt="" /> : <ClayEmoji emoji={b.cover_emoji} size={64} />}
               </span>
+              <span className="shelf-book-label">{b.title}</span>
             </button>
           );
         })}
 
+        {/* 책장 위 인터랙티브 3D 피규어 진열대 */}
         {room.figure && (
-          <span className="room-figure-spot" style={{ left: `${room.figure.x * 100}%`, bottom: `${(1 - room.figure.y) * 100}%` }} aria-hidden>
-            <ClayArt name="sparkles" size={34} />
-          </span>
+          <button
+            type="button"
+            className={`room-figure-spot tone-${activeFigure.tone} ${figBounce ? 'is-bouncing' : ''}`}
+            style={{ left: `${room.figure.x * 100}%`, bottom: `${(1 - room.figure.y) * 100}%` }}
+            onClick={() => {
+              setFigBounce(false);
+              window.requestAnimationFrame(() => setFigBounce(true));
+              onFigureClick?.();
+            }}
+            aria-label={`진열된 3D 피규어: ${activeFigure.name} (누르면 인사하고 바꿀 수 있어요)`}
+            title={`${activeFigure.name} 3D 피규어 눌러 보기`}
+          >
+            <span className="room-figure-sparkle" aria-hidden>
+              <ClayArt name="sparkles" size={22} />
+            </span>
+            <span className="room-figure-art" aria-hidden>
+              <ClayArt name={activeFigure.art} size={50} />
+            </span>
+            <span className="room-figure-pedestal" aria-hidden />
+            <span className="room-figure-name">{activeFigure.name}</span>
+          </button>
         )}
       </div>
 

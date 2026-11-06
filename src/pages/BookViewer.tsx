@@ -6,6 +6,7 @@ import { SubHeader } from '../components/SiteHeader';
 import { canSpeak, speak, stopSpeaking as stopTts } from '../speech';
 import { useAsync } from '../useAsync';
 import { ClayEmoji } from '../components/ClayArt';
+import { markBookAsRead } from '../shelfState';
 
 export default function BookViewer() {
   const { bookId = '' } = useParams();
@@ -42,6 +43,16 @@ export default function BookViewer() {
   }, [go]);
 
   useEffect(() => stopSpeaking, [stopSpeaking]);
+
+  // 마지막 페이지까지 읽으면 해당 아이 책장에 '다 읽었어요 ★' 스티커 기록
+  useEffect(() => {
+    if (detail.status !== 'ok') return;
+    const { book, pages: bookPages } = detail.data;
+    if (bookPages.length > 0 && index >= bookPages.length - 1) {
+      if (book.child_id) markBookAsRead(book.child_id, book.id);
+      markBookAsRead('default', book.id);
+    }
+  }, [detail, index]);
 
   const readAloud = () => {
     if (!canTts || !page) return;

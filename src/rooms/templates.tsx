@@ -26,6 +26,8 @@ export interface RoomTemplate {
   plaque: { x: number; y: number };
   /** 3단계: 주문한 피규어를 올려 둘 자리 */
   figure?: { x: number; y: number };
+  /** 터치하면 낮/밤 무드등이 켜지는 조명 위치 */
+  lamp?: { x: number; y: number; label: string };
   /** 기본 템플릿 그림 (사진 템플릿은 imageUrl). palette 를 주면 사진에서 뽑은 색으로 칠함 (1.5단계) */
   Art?: (props: ArtProps) => ReactNode;
   imageUrl?: string;
@@ -240,6 +242,8 @@ export const BUILTIN_ROOMS: RoomTemplate[] = [
       { x0: 0.21, x1: 0.79, y: 570 / 700 },
     ],
     plaque: { x: 0.5, y: 0.1 },
+    figure: { x: 0.89, y: 588 / 700 },
+    lamp: { x: 0.729, y: 58 / 700, label: '별 무드등' },
     Art: WoodArt,
     blurb: '포근한 나무 책장에 책을 꽂아요',
   },
@@ -254,6 +258,8 @@ export const BUILTIN_ROOMS: RoomTemplate[] = [
       { x0: 0.13, x1: 0.56, y: 590 / 700 },
     ],
     plaque: { x: 0.74, y: 0.2 },
+    figure: { x: 0.78, y: 590 / 700 },
+    lamp: { x: 0.89, y: 100 / 700, label: '달님 무드등' },
     Art: CloudArt,
     blurb: '밤하늘 구름 위에 책이 둥실둥실',
   },
@@ -269,6 +275,7 @@ export const BUILTIN_ROOMS: RoomTemplate[] = [
     // 책상 앞면에 붙은 이름표
     plaque: { x: 0.5, y: 537 / 700 },
     figure: { x: 0.855, y: 494 / 700 },
+    lamp: { x: 0.198, y: 396 / 700, label: '책상 스탠드' },
     Art: DeskArt,
     blurb: '책상 위에 책과 피규어를 올려요',
   },
