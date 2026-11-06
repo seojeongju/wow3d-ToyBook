@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { api, fileUrl } from '../api';
 import { LineIcon } from '../components/Icons';
 import { SubHeader } from '../components/SiteHeader';
+import { canSpeak, speak, stopSpeaking as stopTts } from '../speech';
 import { useAsync } from '../useAsync';
 import { ClayEmoji } from '../components/ClayArt';
 
@@ -16,12 +17,12 @@ export default function BookViewer() {
 
   const pages = detail.status === 'ok' ? detail.data.pages : [];
   const page = pages[index];
-  const canTts = typeof window !== 'undefined' && 'speechSynthesis' in window;
+  const canTts = canSpeak;
 
   const stopSpeaking = useCallback(() => {
-    if (canTts) window.speechSynthesis.cancel();
+    stopTts();
     setSpeaking(false);
-  }, [canTts]);
+  }, []);
 
   const go = useCallback(
     (delta: number) => {
@@ -45,13 +46,14 @@ export default function BookViewer() {
   const readAloud = () => {
     if (!canTts || !page) return;
     if (speaking) return stopSpeaking();
-    const u = new SpeechSynthesisUtterance(page.text);
-    u.lang = 'ko-KR';
-    u.rate = 0.9;
-    u.onend = () => setSpeaking(false);
-    u.onerror = () => setSpeaking(false);
-    window.speechSynthesis.speak(u);
-    setSpeaking(true);
+    const started = speak(page.text, {
+      force: true,
+      cacheKey: page.id,
+      style: 'story',
+      useServerTts: true,
+      onEnd: () => setSpeaking(false),
+    });
+    setSpeaking(started);
   };
 
   if (detail.status === 'loading') {
