@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
+import { SubHeader } from '../components/SiteHeader';
 import Tobi from '../components/Tobi';
 import { isParentUnlocked, setParentUnlocked } from '../parentLock';
 
@@ -42,33 +43,36 @@ export default function ParentGate() {
   };
 
   return (
-    <main className="screen center">
-      <form className="gate" onSubmit={submit}>
-        <Tobi pose="peek" size={120} />
-        <h1 className="title-sm">어른만 들어올 수 있어요</h1>
-        <label htmlFor="gate-answer" className="gate-q">
-          {toKoreanNumber(q.a)} 더하기 {toKoreanNumber(q.b)}, 얼마일까요?
-        </label>
-        <input
-          id="gate-answer"
-          inputMode="numeric"
-          pattern="[0-9]*"
-          autoComplete="off"
-          value={answer}
-          onChange={(e) => {
-            setAnswer(e.target.value.replace(/\D/g, ''));
-            setWrong(false);
-          }}
-          autoFocus
-        />
-        {wrong && <p className="error">다시 계산해 주세요</p>}
-        <button className="primary-btn" type="submit" disabled={!answer}>
-          확인
-        </button>
-      </form>
-      <Link to="/profiles" className="parent-link">
-        ← 돌아가기
-      </Link>
+    <main className="screen gate-screen">
+      <SubHeader />
+      <div className="gate-body">
+        <form className="gate" onSubmit={submit}>
+          <Tobi pose="peek" size={120} />
+          <h1 className="title-sm">어른만 들어올 수 있어요</h1>
+          <label htmlFor="gate-answer" className="gate-q">
+            {toKoreanNumber(q.a)} 더하기 {toKoreanNumber(q.b)}, 얼마일까요?
+          </label>
+          <input
+            id="gate-answer"
+            inputMode="numeric"
+            pattern="[0-9]*"
+            autoComplete="off"
+            value={answer}
+            onChange={(e) => {
+              setAnswer(e.target.value.replace(/\D/g, ''));
+              setWrong(false);
+            }}
+            autoFocus
+          />
+          {wrong && <p className="error">다시 계산해 주세요</p>}
+          <button className="primary-btn" type="submit" disabled={!answer}>
+            확인
+          </button>
+        </form>
+        <Link to="/profiles" className="parent-link">
+          ← 돌아가기
+        </Link>
+      </div>
     </main>
   );
 }

@@ -341,9 +341,10 @@ a {
 .hero-title {
   margin: 0;
   font-family: var(--font-display);
-  font-size: clamp(40px, 6.6vw, 68px);
+  font-size: clamp(34px, 4.8vw, 54px);
   font-weight: 400;
-  line-height: 1.2;
+  line-height: 1.24;
+  word-break: keep-all;
 }
 
 .hero-title em {
@@ -357,7 +358,54 @@ a {
 .hero-sub {
   margin: 0;
   color: var(--ink-soft);
-  font-size: clamp(18px, 2.2vw, 21px);
+  font-size: clamp(17px, 2vw, 20px);
+  line-height: 1.65;
+}
+
+.hero-sub strong {
+  color: var(--ink);
+  font-weight: 700;
+}
+
+.hero-flow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.hero-flow li:not(.hero-flow-arrow) {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px 8px 10px;
+  border-radius: 999px;
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+  color: var(--ink);
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.hero-flow-num {
+  display: inline-grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--tile-lavender);
+  color: var(--primary-deep);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.hero-flow-arrow {
+  color: var(--primary);
+  font-weight: 800;
+  font-size: 16px;
 }
 
 .hero-actions {
@@ -1002,25 +1050,100 @@ a {
 }
 
 .sound-toggle {
-  position: absolute;
-  top: 0;
-  right: 0;
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  min-height: 48px;
-  padding: 0 16px;
+  min-height: 44px;
+  padding: 0 14px;
   border: none;
   border-radius: 999px;
-  background: var(--surface);
+  background: var(--tint);
   color: var(--ink-soft);
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 700;
   box-shadow: var(--clay-soft);
 }
 
 .sound-toggle.on {
   color: var(--primary-deep);
+}
+
+/* ───────── 서브 페이지 공통 헤더 메뉴 ───────── */
+.sub-header-wrap {
+  width: 100%;
+  margin-bottom: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.sub-header {
+  width: 100%;
+}
+
+.sub-nav {
+  gap: 4px;
+}
+
+.sub-nav-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  color: var(--ink-soft);
+  font-size: 15px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: background 0.15s, color 0.15s;
+}
+
+.sub-nav-link:hover,
+.sub-nav-link.active {
+  background: var(--tint);
+  color: var(--primary-deep);
+}
+
+.sub-nav-link.home-highlight {
+  color: var(--primary-deep);
+}
+
+.sub-header-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.sub-home-btn {
+  gap: 6px;
+}
+
+.sub-pagebar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 4px 4px 0;
+}
+
+.sub-pagebar-left {
+  display: inline-flex;
+  align-items: center;
+}
+
+.sub-pagebar-title {
+  flex: 1;
+  text-align: left;
+}
+
+@media (max-width: 860px) {
+  .sub-home-btn span {
+    display: none;
+  }
+  .sub-home-btn {
+    padding: 0 12px;
+    min-width: 44px;
+  }
 }
 
 .who-guide {
@@ -1334,61 +1457,362 @@ a {
   padding-bottom: calc(130px + env(safe-area-inset-bottom));
 }
 
-.shelf {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  gap: 22px;
+/* 책장 장면: 좁은 화면에서는 옆으로 밀어서 봄 (책이 너무 작아지지 않게 최소 폭 유지) */
+.room-wrap {
+  margin: 4px -16px 0;
+  padding: 4px 16px 12px;
+  overflow-x: auto;
+  scrollbar-width: thin;
 }
 
-.book-card {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  padding: 10px 10px 14px;
-  border-radius: var(--radius);
-  background: var(--surface);
-  box-shadow: var(--shadow);
-  text-decoration: none;
-  transition: transform 0.15s;
-}
-
-.book-card:hover {
-  transform: translateY(-4px);
-}
-
-.cover {
-  display: grid;
-  place-items: center;
-  aspect-ratio: 3 / 4;
-  border-radius: 12px var(--radius-sm) var(--radius-sm) 12px;
-  background: linear-gradient(145deg, var(--tile-lavender), var(--tile-peach));
-  box-shadow: inset 8px 0 0 rgba(108, 82, 180, 0.1);
-  font-size: 64px;
+.room {
+  position: relative;
+  width: 100%;
+  min-width: 580px;
+  max-width: 1100px;
+  margin: 0 auto;
+  border-radius: 36px;
   overflow: hidden;
+  box-shadow: var(--clay-soft), 0 18px 40px rgba(108, 82, 180, 0.16);
 }
 
-.book-card:nth-child(3n + 2) .cover {
-  background: linear-gradient(145deg, var(--tile-mint), var(--tile-lavender));
-}
-
-.book-card:nth-child(3n) .cover {
-  background: linear-gradient(145deg, var(--tile-yellow), var(--tile-pink));
-}
-
-.cover img {
+.room-art {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
-.book-title {
-  padding: 4px 4px 0;
-  font-weight: 800;
-  line-height: 1.3;
+.room-plaque {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  padding: 6px 18px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #fffdf9, #f6ede2);
+  color: var(--primary-deep);
+  font-family: var(--font-display);
+  font-size: clamp(16px, 2.2vw, 24px);
+  white-space: nowrap;
+  box-shadow: var(--clay-soft);
+  pointer-events: none;
 }
 
-.book-card .small {
-  padding: 0 4px;
+/* 선반 위 책: 앞표지가 보이게 세움, 아래쪽 기준으로 살짝 기울임 */
+.shelf-book {
+  position: absolute;
+  aspect-ratio: 95 / 130;
+  padding: 0;
+  border: none;
+  border-radius: 6px 12px 12px 6px;
+  transform-origin: 50% 100%;
+  transform: rotate(var(--tilt, 0deg));
+  box-shadow: inset 7px 0 0 rgba(43, 40, 80, 0.12), inset 2px 3px 4px rgba(255, 255, 255, 0.7),
+    inset -3px -4px 6px rgba(108, 82, 180, 0.15), 0 6px 10px rgba(91, 63, 168, 0.22);
+  transition: transform 0.18s;
+}
+
+.shelf-book:hover,
+.shelf-book:focus-visible {
+  transform: translateY(-8%) rotate(var(--tilt, 0deg));
+}
+
+.shelf-book:active {
+  transform: translateY(-4%) scale(0.97);
+}
+
+.shelf-book.is-flying {
+  visibility: hidden;
+}
+
+.shelf-cover {
+  position: absolute;
+  inset: 0 0 0 9%;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border-radius: 0 10px 10px 0;
+}
+
+.shelf-cover .clay-art {
+  width: 78%;
+  height: auto;
+}
+
+.shelf-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.shelf-new {
+  display: grid;
+  place-items: center;
+  border: 3px dashed var(--tint-strong);
+  background: rgba(255, 253, 251, 0.65);
+  box-shadow: none;
+  animation: shelf-glow 2.4s ease-in-out infinite;
+}
+
+.shelf-plus {
+  color: var(--primary);
+  font-family: var(--font-display);
+  font-size: clamp(30px, 4vw, 44px);
+  line-height: 1;
+}
+
+@keyframes shelf-glow {
+  50% {
+    border-color: var(--primary);
+    background: rgba(239, 232, 253, 0.85);
+  }
+}
+
+.room-figure-spot {
+  position: absolute;
+  width: 5%;
+  transform: translateX(-50%);
+  opacity: 0.85;
+  pointer-events: none;
+}
+
+.room-figure-spot .clay-art {
+  width: 100%;
+  height: auto;
+}
+
+.room-pager {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  margin-top: 6px;
+  color: var(--ink-soft);
+  font-weight: 800;
+}
+
+.room-skeleton {
+  aspect-ratio: 1 / 0.7;
+  max-width: 1100px;
+  margin: 4px auto 0;
+  border-radius: 36px;
+  background: linear-gradient(100deg, var(--tile-lavender) 30%, #f8f4ff 50%, var(--tile-lavender) 70%);
+  background-size: 300% 100%;
+  animation: who-shimmer 1.4s linear infinite;
+}
+
+/* 책이 튀어나와 가운데에서 펼쳐지는 연출 */
+.fly-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(43, 40, 80, 0);
+  transition: background 0.4s;
+  pointer-events: none;
+}
+
+.fly-layer.stage-center,
+.fly-layer.stage-open {
+  background: rgba(43, 40, 80, 0.28);
+}
+
+.fly-book {
+  position: fixed;
+  perspective: 1400px;
+  transition: left 0.45s cubic-bezier(0.2, 1.3, 0.4, 1), top 0.45s cubic-bezier(0.2, 1.3, 0.4, 1),
+    width 0.45s cubic-bezier(0.2, 1.3, 0.4, 1), height 0.45s cubic-bezier(0.2, 1.3, 0.4, 1);
+}
+
+.fly-pages {
+  position: absolute;
+  inset: 2% 0 2% 4%;
+  border-radius: 4px 14px 14px 4px;
+  background: repeating-linear-gradient(180deg, #fffdf9 0 18px, #f3ebe0 18px 20px);
+  box-shadow: 0 20px 40px rgba(43, 40, 80, 0.3);
+}
+
+.fly-cover {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10%;
+  border-radius: 8px 16px 16px 8px;
+  transform-origin: 0 50%;
+  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  backface-visibility: hidden;
+  box-shadow: inset 12px 0 0 rgba(43, 40, 80, 0.12), var(--clay-soft);
+  text-align: center;
+}
+
+.fly-cover strong {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 400;
+  line-height: 1.3;
+  color: var(--ink);
+}
+
+.fly-cover img {
+  width: 100%;
+  border-radius: 8px;
+}
+
+.stage-open .fly-cover {
+  transform: rotateY(-160deg);
+}
+
+/* 책장 꾸미기 */
+.decorate-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 52px;
+  padding: 0 16px 0 10px;
+  border: none;
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--primary-deep);
+  font-size: 16px;
+  font-weight: 800;
+  box-shadow: var(--clay-soft);
+}
+
+.sheet-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  background: rgba(43, 40, 80, 0.3);
+  animation: sheet-fade 0.2s ease-out;
+}
+
+.sheet {
+  width: min(900px, 100%);
+  max-height: 88dvh;
+  overflow-y: auto;
+  padding: 18px 18px calc(22px + env(safe-area-inset-bottom));
+  border-radius: 32px 32px 0 0;
+  background: var(--bg);
+  box-shadow: 0 -10px 40px rgba(43, 40, 80, 0.2);
+  animation: sheet-up 0.28s cubic-bezier(0.2, 1.1, 0.4, 1);
+}
+
+@keyframes sheet-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes sheet-up {
+  from {
+    transform: translateY(40%);
+  }
+}
+
+.sheet-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.sheet-head h2 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(22px, 4vw, 28px);
+  font-weight: 400;
+}
+
+.sheet-head .icon-btn svg {
+  transform: rotate(-90deg);
+}
+
+.room-options {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+}
+
+.room-option {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  padding: 10px 10px 14px;
+  border: 3px solid transparent;
+  border-radius: 26px;
+  background: var(--surface);
+  text-align: left;
+  box-shadow: var(--clay-soft);
+}
+
+.room-option.on {
+  border-color: var(--primary);
+}
+
+.room-option strong {
+  padding: 4px 6px 0;
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 400;
+}
+
+.room-option > span:not(.room-thumb):not(.room-check) {
+  padding: 0 6px;
+  color: var(--ink-soft);
+  font-size: 14px;
+}
+
+.room-thumb {
+  position: relative;
+  display: block;
+  width: 100%;
+  overflow: hidden;
+  border-radius: 18px;
+}
+
+.room-thumb-photo {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1 / 0.7;
+  border: 3px dashed var(--tint-strong);
+  background: var(--tile-lavender);
+}
+
+.room-check {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--primary);
+  color: #fff;
+  box-shadow: var(--clay-color);
+}
+
+@media (min-width: 760px) {
+  .room-options {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (max-width: 560px) {
+  .decorate-btn span {
+    display: none;
+  }
+  .decorate-btn {
+    padding: 0 11px;
+  }
 }
 
 .bottom-menu {
@@ -1529,6 +1953,21 @@ a {
 }
 
 /* 부모 잠금 / 부모 모드 */
+.gate-screen {
+  display: flex;
+  flex-direction: column;
+}
+
+.gate-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  text-align: center;
+}
+
 .gate {
   display: flex;
   flex-direction: column;
@@ -1590,26 +2029,20 @@ a {
 .login-page {
   position: relative;
   min-height: 100dvh;
-  display: grid;
-  place-items: center;
-  padding: 72px 16px 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 16px;
+  padding: 16px 16px 32px;
   background: linear-gradient(180deg, #d9cbf7, #cbb8f2);
   overflow: hidden;
 }
 
-.login-back {
-  position: absolute;
-  top: 16px;
-  left: 16px;
-  z-index: 2;
-  display: grid;
-  place-items: center;
-  width: 52px;
-  height: 52px;
-  border-radius: 18px;
-  background: var(--surface);
-  color: var(--ink);
-  box-shadow: var(--shadow-sm);
+.login-header-wrap {
+  position: relative;
+  z-index: 3;
+  width: min(1100px, 100%);
 }
 
 .login-decor svg {
@@ -1891,15 +2324,22 @@ a {
 }
 
 /* ───────── 대시보드 ───────── */
+.dash-shell {
+  max-width: 1280px;
+  min-height: 100dvh;
+  margin: 0 auto;
+  padding: 16px;
+}
+
+.dash-header-wrap {
+  margin-bottom: 14px;
+}
+
 .dash {
   display: grid;
   grid-template-columns: 1fr;
   align-content: start;
   gap: 18px;
-  max-width: 1280px;
-  min-height: 100dvh;
-  margin: 0 auto;
-  padding: 16px;
 }
 
 .dash-side {
@@ -2531,8 +2971,6 @@ a {
 /* 제목은 모든 화면에서 둥근 주아체 (주아체는 굵기가 하나뿐이라 400 고정) */
 .title,
 .title-sm,
-.profile-name,
-.book-title,
 .gate-q,
 .login-title,
 .dash-top h1,
@@ -2563,7 +3001,6 @@ a {
 .clay-tile,
 .dash-avatar,
 .dash-thumb,
-.cover,
 .preview-cover,
 .promise-check {
   box-shadow: var(--clay-soft);
@@ -2602,7 +3039,6 @@ a {
 }
 
 .dash-hero-copy h2 .clay-art,
-.cover .clay-art,
 .illust .clay-art {
   display: inline-block;
   vertical-align: middle;

@@ -1,18 +1,18 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { LineIcon } from './Icons';
 
 export function Logo({ variant = 'header' }: { variant?: 'header' | 'hero' }) {
   if (variant === 'hero') {
     return (
-      <Link to="/" className="logo logo-hero" aria-label="와우쓰리디 토이북 처음으로">
+      <Link to="/" className="logo logo-hero" aria-label="와우쓰리디 토이북 메인페이지로">
         <img src="/logo.jpg" alt="wow3d-Toybook · 와우쓰리디 - 토이북" className="logo-hero-img" />
       </Link>
     );
   }
 
   return (
-    <Link to="/" className="logo" aria-label="와우쓰리디 토이북 처음으로">
+    <Link to="/" className="logo" aria-label="와우쓰리디 토이북 메인페이지로">
       <img src="/icon.svg" width="42" height="42" alt="" aria-hidden className="logo-mark" />
       <span className="logo-wordmark">
         <strong className="logo-en">
@@ -30,6 +30,85 @@ const NAV = [
   { href: '/#safety', label: '안심 약속' },
   { href: '/#faq', label: '자주 묻는 질문' },
 ];
+
+const SUB_NAV = [
+  { to: '/', icon: 'home' as const, label: '메인페이지' },
+  { to: '/profiles', icon: 'book' as const, label: '아이 책장' },
+  { to: '/parent', icon: 'grid' as const, label: '부모 모드' },
+  { to: '/login', icon: 'users' as const, label: '로그인' },
+];
+
+export interface SubHeaderProps {
+  /** 페이지 왼쪽 보조 버튼 (뒤로가기·프로필 전환 등) */
+  left?: ReactNode;
+  /** 현재 화면 제목 */
+  title?: string;
+  /** 페이지 오른쪽 보조 버튼 (소리 켜기·읽어 주기 등) */
+  right?: ReactNode;
+}
+
+/**
+ * 모든 서브 페이지 상단에 표시되는 공통 헤더 메뉴.
+ * 로고 클릭 또는 '메인페이지' 메뉴 버튼으로 언제든 홈(/)으로 이동할 수 있음.
+ */
+export function SubHeader({ left, title, right }: SubHeaderProps) {
+  const { pathname } = useLocation();
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => setOpen(false), [pathname]);
+
+  return (
+    <header className={`sub-header-wrap ${open ? 'menu-open' : ''}`}>
+      <div className="site-header sub-header">
+        <Logo />
+
+        <nav id="sub-site-nav" className="site-nav sub-nav" aria-label="서브 페이지 이동 메뉴">
+          {SUB_NAV.map((item) => {
+            const active = item.to === '/' ? pathname === '/' : pathname.startsWith(item.to);
+            return (
+              <Link
+                key={item.to}
+                to={item.to}
+                className={`sub-nav-link ${active ? 'active' : ''} ${item.to === '/' ? 'home-highlight' : ''}`}
+                onClick={() => setOpen(false)}
+              >
+                <LineIcon name={item.icon} size={18} />
+                <span>{item.label}</span>
+              </Link>
+            );
+          })}
+        </nav>
+
+        <div className="sub-header-actions">
+          {right}
+          <Link to="/" className="pill-btn small-pill sub-home-btn" aria-label="메인페이지로 이동">
+            <LineIcon name="home" size={18} />
+            <span>메인으로</span>
+          </Link>
+          <button
+            type="button"
+            className="menu-toggle"
+            aria-expanded={open}
+            aria-controls="sub-site-nav"
+            aria-label={open ? '메뉴 닫기' : '메뉴 열기'}
+            onClick={() => setOpen((v) => !v)}
+          >
+            <span />
+            <span />
+            <span />
+          </button>
+        </div>
+      </div>
+
+      {(left || title) && (
+        <div className="sub-pagebar">
+          {left && <div className="sub-pagebar-left">{left}</div>}
+          {title && <h1 className="title-sm sub-pagebar-title">{title}</h1>}
+        </div>
+      )}
+    </header>
+  );
+}
 
 export default function SiteHeader() {
   const [open, setOpen] = useState(false);

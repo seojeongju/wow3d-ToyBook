@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { api, type Child } from '../api';
 import ClayArt, { ClayEmoji, type ClayArtName } from '../components/ClayArt';
 import { LineIcon } from '../components/Icons';
-import { Logo } from '../components/SiteHeader';
+import { Logo, SubHeader } from '../components/SiteHeader';
 import Tobi from '../components/Tobi';
 import { canSpeak, isSoundOn, setSoundOn, speak, stopSpeaking, timeGreeting } from '../speech';
 import { useAsync } from '../useAsync';
@@ -78,20 +78,25 @@ export default function ProfileSelect() {
 
   return (
     <main className="screen who">
-      <header className="who-top">
+      <SubHeader
+        right={
+          canSpeak ? (
+            <button
+              className={`sound-toggle ${sound ? 'on' : ''}`}
+              onClick={toggleSound}
+              aria-pressed={sound}
+              aria-label={sound ? '소리 끄기' : '소리 켜기'}
+            >
+              <LineIcon name={sound ? 'speaker' : 'mute'} size={22} />
+              <span>{sound ? '소리 켜짐' : '소리 꺼짐'}</span>
+            </button>
+          ) : undefined
+        }
+      />
+
+      <div className="who-top">
         <Logo variant="hero" />
-        {canSpeak && (
-          <button
-            className={`sound-toggle ${sound ? 'on' : ''}`}
-            onClick={toggleSound}
-            aria-pressed={sound}
-            aria-label={sound ? '소리 끄기' : '소리 켜기'}
-          >
-            <LineIcon name={sound ? 'speaker' : 'mute'} size={22} />
-            <span>{sound ? '소리 켜짐' : '소리 꺼짐'}</span>
-          </button>
-        )}
-      </header>
+      </div>
 
       <section className="who-guide">
         <div className={`who-tobi ${talking ? 'talking' : ''}`}>

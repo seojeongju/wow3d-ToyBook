@@ -95,17 +95,36 @@ export default function Home() {
 
       <section className="hero">
         <div className="hero-copy">
-          <span className="eyebrow-pill">3~12세 우리 아이 맞춤 그림책</span>
+          <span className="eyebrow-pill">AI 그림책 창작부터 3D 프린팅 피규어까지 한 번에</span>
           <h1 className="hero-title">
-            읽는 책이
+            세상에 단 한 권뿐인 우리 아이 책,
             <br />
-            <em>손에 쥐는 장난감</em>으로
+            화면 밖 <em>3D 장난감</em>으로 튀어나와요
           </h1>
           <p className="hero-sub">
-            우리 아이가 주인공인 그림책을 만들고,
-            <br />
-            책 속 친구를 3D 피규어로 받아 보세요.
+            <strong>와우쓰리디 토이북</strong>은 아이의 이름·이야기·손그림으로 맞춤 그림책을 만들고, 책 속 주인공을 실물 피규어로 받아 보는{' '}
+            <strong>온 가족 AI 동화 공방</strong>입니다. 광고 없는 안전한 화면에서 아이의 상상력을 실물로 선물하세요.
           </p>
+          <ul className="hero-flow" aria-label="핵심 제공 기능">
+            <li>
+              <span className="hero-flow-num">1</span>
+              <span>AI 맞춤 동화책 제작</span>
+            </li>
+            <li className="hero-flow-arrow" aria-hidden>
+              →
+            </li>
+            <li>
+              <span className="hero-flow-num">2</span>
+              <span>음성 읽어 주기</span>
+            </li>
+            <li className="hero-flow-arrow" aria-hidden>
+              →
+            </li>
+            <li>
+              <span className="hero-flow-num">3</span>
+              <span>캐릭터 3D 피규어 출력·배송</span>
+            </li>
+          </ul>
           <div className="hero-actions">
             <a href="#preview" className="pill-btn">
               그림책 미리 읽기 <LineIcon name="arrow" size={20} />

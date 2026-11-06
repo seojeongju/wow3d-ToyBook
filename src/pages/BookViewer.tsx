@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { api, fileUrl } from '../api';
 import { LineIcon } from '../components/Icons';
+import { SubHeader } from '../components/SiteHeader';
 import { useAsync } from '../useAsync';
 import { ClayEmoji } from '../components/ClayArt';
 
@@ -53,8 +54,22 @@ export default function BookViewer() {
     setSpeaking(true);
   };
 
-  if (detail.status === 'loading') return <main className="screen center muted">책을 펼치는 중…</main>;
-  if (detail.status === 'error') return <main className="screen center error">{detail.message}</main>;
+  if (detail.status === 'loading') {
+    return (
+      <main className="screen viewer">
+        <SubHeader />
+        <p className="muted center-text">책을 펼치는 중…</p>
+      </main>
+    );
+  }
+  if (detail.status === 'error') {
+    return (
+      <main className="screen viewer">
+        <SubHeader />
+        <p className="error center-text">{detail.message}</p>
+      </main>
+    );
+  }
 
   const { book } = detail.data;
 
@@ -69,17 +84,21 @@ export default function BookViewer() {
         touchX.current = null;
       }}
     >
-      <header className="topbar">
-        <button className="icon-btn" onClick={() => navigate(book.child_id ? `/shelf/${book.child_id}` : '/profiles')} aria-label="책장으로">
-          <LineIcon name="back" />
-        </button>
-        <h1 className="title-sm">{book.title}</h1>
-        {canTts && (
-          <button className={`icon-btn ${speaking ? 'active' : ''}`} onClick={readAloud} aria-label="읽어 주기">
-            <LineIcon name={speaking ? 'stop' : 'speaker'} />
+      <SubHeader
+        left={
+          <button className="icon-btn" onClick={() => navigate(book.child_id ? `/shelf/${book.child_id}` : '/profiles')} aria-label="책장으로">
+            <LineIcon name="back" />
           </button>
-        )}
-      </header>
+        }
+        title={book.title}
+        right={
+          canTts ? (
+            <button className={`icon-btn ${speaking ? 'active' : ''}`} onClick={readAloud} aria-label="읽어 주기">
+              <LineIcon name={speaking ? 'stop' : 'speaker'} />
+            </button>
+          ) : undefined
+        }
+      />
 
       {page ? (
         <article className="page" key={page.id}>

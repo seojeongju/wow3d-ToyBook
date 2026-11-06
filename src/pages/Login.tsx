@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { LineIcon } from '../components/Icons';
+import { SubHeader } from '../components/SiteHeader';
 import Tobi from '../components/Tobi';
 import ClayArt from '../components/ClayArt';
 
@@ -23,9 +24,9 @@ export default function Login() {
   return (
     <div className="login-page">
       <Decor />
-      <Link to="/" className="login-back" aria-label="홈으로">
-        <LineIcon name="back" />
-      </Link>
+      <div className="login-header-wrap">
+        <SubHeader />
+      </div>
 
       <section className="login-card">
         <span className="login-heart" aria-hidden>
