@@ -206,12 +206,56 @@ a {
 .logo {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   font-family: var(--font-display);
-  font-size: 27px;
-  font-weight: 400;
   text-decoration: none;
   color: var(--ink);
+}
+
+.logo-mark {
+  width: 42px;
+  height: 42px;
+  flex: none;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(108, 82, 180, 0.14);
+}
+
+.logo-wordmark {
+  display: inline-flex;
+  flex-direction: column;
+  line-height: 1.08;
+}
+
+.logo-en {
+  font-family: var(--font-display);
+  font-size: 21px;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+}
+
+.logo-wow {
+  color: var(--primary-deep);
+}
+
+.logo-ko {
+  font-family: var(--font);
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--ink-soft);
+  letter-spacing: 0.01em;
+}
+
+.logo-hero {
+  display: inline-flex;
+  justify-content: center;
+}
+
+.logo-hero-img {
+  width: min(220px, 56vw);
+  height: auto;
+  border-radius: 28px;
+  box-shadow: var(--shadow);
 }
 
 .site-nav {
@@ -323,10 +367,53 @@ a {
   gap: 12px;
 }
 
+.hero-art-wrap {
+  position: relative;
+  margin: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 .hero-art {
   width: 100%;
   height: auto;
   max-height: 460px;
+}
+
+.hero-art-img {
+  display: block;
+  object-fit: cover;
+  border-radius: calc(var(--radius) + 8px);
+  border: 6px solid rgba(255, 253, 251, 0.92);
+  box-shadow:
+    0 20px 44px rgba(108, 82, 180, 0.16),
+    0 4px 12px rgba(43, 40, 80, 0.06);
+}
+
+.hero-badge {
+  position: absolute;
+  right: 18px;
+  bottom: 18px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 999px;
+  background: rgba(255, 253, 251, 0.92);
+  backdrop-filter: blur(8px);
+  box-shadow: var(--shadow-sm);
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.hero-badge-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #ffc94d, #ff9e7d);
+  box-shadow: 0 0 0 3px rgba(255, 201, 77, 0.28);
 }
 
 .stats {
@@ -2191,3 +2278,81 @@ a {
   font-family: var(--font-display);
   font-weight: 400;
 }
+
+/* ───────── 점토(클레이) 질감: 아이콘 버튼·색 버튼·그림 타일 ─────────
+   왼쪽 위 빛(안쪽 밝은 그림자) + 오른쪽 아래 그늘(안쪽 어두운 그림자) + 바닥 그림자 */
+:root {
+  --clay-soft: inset 2px 3px 4px rgba(255, 255, 255, 0.85), inset -3px -4px 7px rgba(108, 82, 180, 0.13),
+    0 6px 14px rgba(108, 82, 180, 0.14);
+  --clay-color: inset 2px 3px 5px rgba(255, 255, 255, 0.38), inset -3px -5px 8px rgba(52, 26, 128, 0.28),
+    0 10px 20px var(--primary-glow);
+}
+
+.icon-btn,
+.dash-round,
+.dash-play,
+.faq-icon,
+.menu-toggle,
+.social-btn,
+.login-back,
+.see-all,
+.clay-tile,
+.avatar,
+.dash-avatar,
+.dash-thumb,
+.cover,
+.preview-cover,
+.promise-check {
+  box-shadow: var(--clay-soft);
+}
+
+.pill-btn,
+.big-btn,
+.primary-btn,
+.login-btn,
+.preview-go,
+.field-icon,
+.step-no,
+.promo-btn {
+  box-shadow: var(--clay-color);
+}
+
+.pill-btn:hover {
+  box-shadow: var(--clay-color), 0 14px 26px var(--primary-glow);
+}
+
+/* 누르면 말랑하게 눌리는 느낌 */
+.icon-btn:active,
+.dash-play:active,
+.pill-btn:active,
+.big-btn:active,
+.primary-btn:active,
+.login-btn:active,
+.social-btn:active,
+.menu-btn:active {
+  transform: translateY(1px) scale(0.97);
+}
+
+.clay-art {
+  display: block;
+  flex: none;
+}
+
+.dash-hero-copy h2 .clay-art,
+.cover .clay-art,
+.illust .clay-art {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.illust .clay-art {
+  width: min(220px, 60%);
+  height: auto;
+}
+
+.login-heart {
+  top: -22px;
+  text-shadow: none;
+  filter: drop-shadow(0 4px 6px rgba(212, 86, 106, 0.3));
+}
+

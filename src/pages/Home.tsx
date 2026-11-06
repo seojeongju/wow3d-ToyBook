@@ -2,9 +2,10 @@ import { Link } from 'react-router-dom';
 import { api } from '../api';
 import HeroArt from '../components/HeroArt';
 import { ClayIcon, LineIcon, type ClayIconName } from '../components/Icons';
-import SiteHeader from '../components/SiteHeader';
+import SiteHeader, { Logo } from '../components/SiteHeader';
 import Tobi from '../components/Tobi';
 import { useAsync } from '../useAsync';
+import ClayArt, { ClayEmoji } from '../components/ClayArt';
 
 // 성능 목표(PRD 4.1)는 아직 측정 전이라 싣지 않고, 정해진 사양만 보여 줌
 const FACTS: { icon: ClayIconName; value: string; label: string }[] = [
@@ -153,7 +154,7 @@ export default function Home() {
             {books.data.map((b) => (
               <Link key={b.id} to={`/book/${b.id}`} className="preview-card">
                 <span className="preview-cover" aria-hidden>
-                  {b.cover_emoji}
+                  <ClayEmoji emoji={b.cover_emoji} size={70} />
                 </span>
                 <span className="preview-body">
                   <strong>{b.title}</strong>
@@ -191,7 +192,7 @@ export default function Home() {
           {AGES.map((a) => (
             <article key={a.name} className={`age-card tone-${a.tone}`}>
               <span className="age-emoji" aria-hidden>
-                {a.emoji}
+                <ClayEmoji emoji={a.emoji} size={72} />
               </span>
               <h3>
                 {a.name} <span>{a.age}</span>
@@ -254,10 +255,10 @@ export default function Home() {
       </section>
 
       <footer className="site-footer">
-        <strong>토이북</strong>
+        <Logo />
         <span>wow3d가 만드는 우리 아이 맞춤 그림책과 피규어</span>
         <span className="footer-links">개인정보처리방침 · 이용약관 · 사업자 정보 (정식 출시 때 공개)</span>
-        <span>© 2026 wow3d</span>
+        <span>© 2026 wow3d-Toybook (와우쓰리디 - 토이북)</span>
       </footer>
     </div>
   );
@@ -270,7 +271,7 @@ function SectionHead({ eyebrow, title }: { eyebrow: string; title: string }) {
       <h2 className="section-title">{title}</h2>
       <div className="divider" aria-hidden>
         <span />
-        <i>♥</i>
+        <ClayArt name="heart" size={18} />
         <span />
       </div>
     </header>

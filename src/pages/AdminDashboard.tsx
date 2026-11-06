@@ -4,6 +4,7 @@ import { BarChart, DonutChart } from '../components/Charts';
 import DashLayout, { type DashMenuItem } from '../components/DashLayout';
 import { ClayIcon, LineIcon, type ClayIconName } from '../components/Icons';
 import Tobi from '../components/Tobi';
+import ClayArt, { ClayEmoji } from '../components/ClayArt';
 
 const MENU: DashMenuItem[] = [
   { icon: 'grid', label: '대시보드', to: '/admin' },
@@ -85,7 +86,9 @@ export default function AdminDashboard() {
           <Tobi pose="wave" size={150} />
         </div>
         <div className="dash-hero-copy">
-          <h2>오늘도 반짝이는 피규어를 만들어요 ✨</h2>
+          <h2>
+            오늘도 반짝이는 피규어를 만들어요 <ClayArt name="sparkles" size={30} />
+          </h2>
           <p>검수 대기 5건이 작업자 확인을 기다리고 있어요.</p>
           <button className="pill-btn small-pill" onClick={() => setNotice('출력 검수 화면은 주문 기능과 함께 열려요')}>
             검수 시작하기 <LineIcon name="arrow" size={18} />
@@ -146,7 +149,7 @@ export default function AdminDashboard() {
           {QUEUE.map((q) => (
             <li key={q.id}>
               <span className="dash-thumb" aria-hidden>
-                {q.emoji}
+                <ClayEmoji emoji={q.emoji} size={40} />
               </span>
               <div>
                 <strong>

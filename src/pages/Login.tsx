@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { LineIcon } from '../components/Icons';
 import Tobi from '../components/Tobi';
+import ClayArt from '../components/ClayArt';
 
 type Role = 'parent' | 'admin';
 
@@ -28,7 +29,7 @@ export default function Login() {
 
       <section className="login-card">
         <span className="login-heart" aria-hidden>
-          ♥
+          <ClayArt name="heart" size={40} />
         </span>
         <h1 className="login-title">
           <span className="spark" aria-hidden />

@@ -1,8 +1,70 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <rect width="512" height="512" rx="112" fill="#EFE8FD"/>
-  <path d="M96 150c56-22 112-22 160 10v230c-48-32-104-32-160-10z" fill="#8B6FDC"/>
-  <path d="M416 150c-56-22-112-22-160 10v230c48-32 104-32 160-10z" fill="#FFC6B3"/>
-  <circle cx="256" cy="118" r="44" fill="#FFC94D"/>
-  <circle cx="242" cy="112" r="6" fill="#2B2850"/>
-  <circle cx="270" cy="112" r="6" fill="#2B2850"/>
+  <defs>
+    <linearGradient id="iconBgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F6F0FD" />
+      <stop offset="55%" stop-color="#FCF7F3" />
+      <stop offset="100%" stop-color="#FFE7DD" />
+    </linearGradient>
+    <linearGradient id="lavPage" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#A48BE8" />
+      <stop offset="100%" stop-color="#7B5CD6" />
+    </linearGradient>
+    <linearGradient id="peachPage" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FFD5C6" />
+      <stop offset="100%" stop-color="#FFAF96" />
+    </linearGradient>
+    <linearGradient id="starBear" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FFE07D" />
+      <stop offset="100%" stop-color="#FFB930" />
+    </linearGradient>
+  </defs>
+
+  <!-- Rounded App Icon Base -->
+  <rect width="512" height="512" rx="116" fill="url(#iconBgGrad)" />
+
+  <!-- Open Book Cover Shadow -->
+  <path d="M68 380 C140 348, 208 354, 256 390 C304 354, 372 348, 444 380 L456 404 C378 374, 304 380, 256 414 C208 380, 134 374, 56 404 Z" fill="#6D50C9" />
+
+  <!-- Left Lavender Book Cover & Cream Pages -->
+  <path d="M76 238 C144 210, 208 218, 256 256 L256 394 C208 358, 144 350, 76 378 Z" fill="url(#lavPage)" />
+  <path d="M92 224 C154 198, 212 208, 251 244 L251 374 C210 342, 154 334, 92 358 Z" fill="#FFFDFB" />
+
+  <!-- Right Peach Book Cover & Cream Pages -->
+  <path d="M436 238 C368 210, 304 218, 256 256 L256 394 C304 358, 368 350, 436 378 Z" fill="url(#peachPage)" />
+  <path d="M420 224 C358 198, 300 208, 261 244 L261 374 C302 342, 358 334, 420 358 Z" fill="#FFFDFB" />
+
+  <!-- Center Spine -->
+  <rect x="247" y="240" width="18" height="160" rx="9" fill="#6D50C9" />
+
+  <!-- Pop-up Golden Star-Bear Mascot -->
+  <!-- Bear Ears -->
+  <circle cx="196" cy="128" r="28" fill="url(#starBear)" />
+  <circle cx="196" cy="128" r="14" fill="#FF9E7D" />
+  <circle cx="316" cy="128" r="28" fill="url(#starBear)" />
+  <circle cx="316" cy="128" r="14" fill="#FF9E7D" />
+
+  <!-- Star-shaped Chubby Body & Head -->
+  <path d="M256 84 C272 84, 286 106, 302 114 C324 124, 354 134, 354 156 C354 176, 330 194, 322 214 C316 232, 322 262, 302 272 C284 280, 270 264, 256 264 C242 264, 228 280, 210 272 C190 262, 196 232, 190 214 C182 194, 158 176, 158 156 C158 134, 188 124, 210 114 C226 106, 240 84, 256 84 Z" fill="url(#starBear)" />
+
+  <!-- Cute Face Details -->
+  <ellipse cx="218" cy="186" rx="12" ry="7.5" fill="#FF8B7B" opacity="0.65" />
+  <ellipse cx="294" cy="186" rx="12" ry="7.5" fill="#FF8B7B" opacity="0.65" />
+  <circle cx="230" cy="168" r="8.5" fill="#2B2850" />
+  <circle cx="227" cy="165" r="3" fill="#FFFFFF" />
+  <circle cx="282" cy="168" r="8.5" fill="#2B2850" />
+  <circle cx="279" cy="165" r="3" fill="#FFFFFF" />
+  <ellipse cx="256" cy="182" rx="18" ry="14" fill="#FFFDFB" opacity="0.9" />
+  <ellipse cx="256" cy="177" rx="7" ry="5" fill="#2B2850" />
+  <path d="M247 185 Q256 194 265 185" stroke="#2B2850" stroke-width="4.5" stroke-linecap="round" fill="none" />
+
+  <!-- Floating 3D Wireframe Cube & Toy Blocks (Concept 1 Motifs) -->
+  <g transform="translate(364, 72) rotate(12)">
+    <polygon points="28,0 56,14 56,44 28,58 0,44 0,14" fill="#FFF1CF" stroke="#2B2850" stroke-width="5" stroke-linejoin="round" />
+    <polyline points="0,14 28,28 56,14" fill="none" stroke="#2B2850" stroke-width="5" stroke-linejoin="round" />
+    <line x1="28" y1="28" x2="28" y2="58" stroke="#2B2850" stroke-width="5" stroke-linecap="round" />
+  </g>
+  <!-- Sparkles -->
+  <path d="M124 88 L131 108 L151 115 L131 122 L124 142 L117 122 L97 115 L117 108 Z" fill="#FFB930" />
+  <rect x="118" y="256" width="32" height="22" rx="6" transform="rotate(-18 118 256)" fill="#FFB930" />
+  <rect x="358" y="244" width="30" height="22" rx="6" transform="rotate(22 358 244)" fill="#8B6FDC" />
 </svg>

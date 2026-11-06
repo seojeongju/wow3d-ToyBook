@@ -3,6 +3,7 @@ import { api } from '../api';
 import { LineIcon } from '../components/Icons';
 import { Logo } from '../components/SiteHeader';
 import { useAsync } from '../useAsync';
+import { ClayEmoji } from '../components/ClayArt';
 
 export default function ProfileSelect() {
   const navigate = useNavigate();
@@ -10,7 +11,7 @@ export default function ProfileSelect() {
 
   return (
     <main className="screen center">
-      <Logo />
+      <Logo variant="hero" />
       <h1 className="title">누가 볼까요?</h1>
 
       {children.status === 'loading' && <p className="muted">불러오는 중…</p>}
@@ -20,7 +21,7 @@ export default function ProfileSelect() {
           {children.data.map((c) => (
             <button key={c.id} className="profile" onClick={() => navigate(`/shelf/${c.id}`)}>
               <span className="avatar" aria-hidden>
-                {c.avatar}
+                <ClayEmoji emoji={c.avatar} size={110} />
               </span>
               <span className="profile-name">{c.nickname}</span>
             </button>

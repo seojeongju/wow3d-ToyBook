@@ -1,0 +1,116 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" width="100%" height="100%">
+  <defs>
+    <!-- Soft clay shadows and gradients matching wow3d-ToyBook design tokens -->
+    <linearGradient id="bgGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F6F0FD" />
+      <stop offset="50%" stop-color="#FCF7F3" />
+      <stop offset="100%" stop-color="#FFE7DD" />
+    </linearGradient>
+    <linearGradient id="lavenderClay" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#A48BE8" />
+      <stop offset="100%" stop-color="#7B5CD6" />
+    </linearGradient>
+    <linearGradient id="peachClay" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FFD5C6" />
+      <stop offset="100%" stop-color="#FFAF96" />
+    </linearGradient>
+    <linearGradient id="yellowClay" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FFE07D" />
+      <stop offset="100%" stop-color="#FFB930" />
+    </linearGradient>
+    <linearGradient id="mintClay" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#BCEAD5" />
+      <stop offset="100%" stop-color="#7FD1AE" />
+    </linearGradient>
+    <filter id="clayShadow" x="-15%" y="-15%" width="130%" height="135%">
+      <feDropShadow dx="0" dy="10" stdDeviation="12" flood-color="#6C52B4" flood-opacity="0.18" />
+    </filter>
+    <filter id="softGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#2B2850" flood-opacity="0.10" />
+    </filter>
+  </defs>
+
+  <!-- Background Card -->
+  <rect width="800" height="500" rx="44" fill="url(#bgGrad1)" />
+  <circle cx="140" cy="110" r="85" fill="#EFE8FD" opacity="0.7" />
+  <circle cx="670" cy="390" r="105" fill="#FFE7DD" opacity="0.6" />
+
+  <!-- Symbol Group: Pop-up Magic Book + 3D Character -->
+  <g transform="translate(0, -10)" filter="url(#clayShadow)">
+    <!-- Book Base Cover -->
+    <path d="M245 268 C300 248, 355 252, 400 278 C445 252, 500 248, 555 268 L565 285 C505 265, 445 270, 400 295 C355 270, 295 265, 235 285 Z" fill="#6D50C9" />
+
+    <!-- Left Book Page (Lavender Clay) -->
+    <path d="M250 165 C305 145, 360 152, 400 180 L400 282 C360 256, 305 250, 250 270 Z" fill="url(#lavenderClay)" />
+    <!-- Left Page Inner Cream Sheet -->
+    <path d="M262 156 C312 138, 362 146, 396 172 L396 268 C360 244, 312 238, 262 256 Z" fill="#FFFDFB" opacity="0.92" />
+    <!-- Left Page Decorative Lines -->
+    <path d="M285 186 C318 176, 350 180, 374 194" stroke="#B6A2F2" stroke-width="6" stroke-linecap="round" fill="none" />
+    <path d="M285 210 C318 200, 345 204, 366 215" stroke="#DDD0FB" stroke-width="6" stroke-linecap="round" fill="none" />
+
+    <!-- Right Book Page (Peach Clay) -->
+    <path d="M550 165 C495 145, 440 152, 400 180 L400 282 C440 256, 495 250, 550 270 Z" fill="url(#peachClay)" />
+    <!-- Right Page Inner Cream Sheet -->
+    <path d="M538 156 C488 138, 438 146, 404 172 L404 268 C440 244, 488 238, 538 256 Z" fill="#FFFDFB" opacity="0.88" />
+    <!-- 3D Layer Grid Hint on Right Page -->
+    <path d="M426 194 C450 180, 482 176, 515 186" stroke="#FFC6B3" stroke-width="6" stroke-linecap="round" fill="none" />
+    <path d="M434 215 C455 204, 482 200, 515 210" stroke="#FFE0D4" stroke-width="6" stroke-linecap="round" fill="none" />
+
+    <!-- Center Book Spine -->
+    <rect x="393" y="170" width="14" height="116" rx="7" fill="#6D50C9" />
+
+    <!-- 3D Printing Platform Ring Rising from Book -->
+    <ellipse cx="400" cy="176" rx="52" ry="15" fill="url(#mintClay)" />
+    <ellipse cx="400" cy="173" rx="40" ry="10" fill="#FFFDFB" opacity="0.7" />
+
+    <!-- Cute 3D Toy Bear/Star Mascot Popping Out -->
+    <!-- Ears -->
+    <circle cx="362" cy="88" r="19" fill="url(#yellowClay)" />
+    <circle cx="362" cy="88" r="10" fill="#FF9E7D" />
+    <circle cx="438" cy="88" r="19" fill="url(#yellowClay)" />
+    <circle cx="438" cy="88" r="10" fill="#FF9E7D" />
+    <!-- Body/Torso -->
+    <path d="M366 142 C366 122, 434 122, 434 142 L440 172 C440 180, 360 180, 360 172 Z" fill="url(#lavenderClay)" />
+    <!-- 3D Layer Stripes on Toy Shirt -->
+    <path d="M368 153 Q400 160 432 153" stroke="#EFE8FD" stroke-width="3.5" stroke-linecap="round" fill="none" opacity="0.75" />
+    <path d="M365 164 Q400 171 435 164" stroke="#EFE8FD" stroke-width="3.5" stroke-linecap="round" fill="none" opacity="0.75" />
+    <!-- Head -->
+    <circle cx="400" cy="116" r="42" fill="url(#yellowClay)" />
+    <!-- Cheeks -->
+    <ellipse cx="376" cy="123" rx="8" ry="5" fill="#FF8B7B" opacity="0.65" />
+    <ellipse cx="424" cy="123" rx="8" ry="5" fill="#FF8B7B" opacity="0.65" />
+    <!-- Eyes -->
+    <circle cx="384" cy="112" r="5.5" fill="#2B2850" />
+    <circle cx="382" cy="110" r="2" fill="#FFFFFF" />
+    <circle cx="416" cy="112" r="5.5" fill="#2B2850" />
+    <circle cx="414" cy="110" r="2" fill="#FFFFFF" />
+    <!-- Smile & Nose -->
+    <ellipse cx="400" cy="119" rx="5" ry="3.8" fill="#2B2850" />
+    <path d="M393 126 Q400 133 407 126" stroke="#2B2850" stroke-width="3.2" stroke-linecap="round" fill="none" />
+
+    <!-- Floating 3D Cube & Sparkles -->
+    <g transform="translate(295, 78) rotate(-14)">
+      <rect x="0" y="0" width="28" height="28" rx="7" fill="url(#mintClay)" />
+      <text x="14" y="19" font-family="'Jua', 'Pretendard Variable', sans-serif" font-size="14" font-weight="800" fill="#2B2850" text-anchor="middle">3D</text>
+    </g>
+    <!-- Sparkle Stars -->
+    <path d="M488 74 L493 88 L507 93 L493 98 L488 112 L483 98 L469 93 L483 88 Z" fill="#FFC94D" />
+    <path d="M272 130 L275 139 L284 142 L275 145 L272 154 L269 145 L260 142 L269 139 Z" fill="#8B6FDC" />
+    <circle cx="518" cy="132" r="6" fill="#FFAF96" />
+  </g>
+
+  <!-- Typography Section -->
+  <g filter="url(#softGlow)">
+    <!-- English Main Title: wow3d-Toybook -->
+    <text x="400" y="362" text-anchor="middle" font-family="'Jua', 'Pretendard Variable', 'Malgun Gothic', sans-serif" font-size="60" font-weight="800" letter-spacing="-0.5">
+      <tspan fill="#6D50C9">wow3d</tspan><tspan fill="#FF9E7D">-</tspan><tspan fill="#2B2850">Toybook</tspan>
+    </text>
+
+    <!-- Korean Subtitle Pill Badge: 와우쓰리디- 토이북 -->
+    <rect x="235" y="388" width="330" height="54" rx="27" fill="#EFE8FD" stroke="#B6A2F2" stroke-width="2" />
+    <text x="400" y="423" text-anchor="middle" font-family="'Jua', 'Pretendard Variable', 'Malgun Gothic', sans-serif" font-size="28" font-weight="700" fill="#2B2850" letter-spacing="1">
+      <tspan fill="#6D50C9">와우쓰리디</tspan><tspan fill="#78749B">- </tspan><tspan fill="#2B2850">토이북</tspan>
+    </text>
+  </g>
+</svg>
+

@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom';
 import { api, fileUrl } from '../api';
 import { ClayIcon, type ClayIconName } from '../components/Icons';
 import { useAsync } from '../useAsync';
+import { ClayEmoji } from '../components/ClayArt';
 
 const MENU: { key: string; icon: ClayIconName; label: string }[] = [
   { key: 'shelf', icon: 'home', label: '우리 집 책장' },
@@ -23,7 +24,7 @@ export default function Bookshelf() {
     <main className="screen with-menu">
       <header className="topbar">
         <Link to="/profiles" className="icon-btn" aria-label="프로필 바꾸기">
-          {child?.avatar ?? '👤'}
+          <ClayEmoji emoji={child?.avatar ?? '🐻'} size={46} />
         </Link>
         <h1 className="title-sm">{child ? `${child.nickname}의 책장` : '우리 집 책장'}</h1>
       </header>
@@ -35,7 +36,7 @@ export default function Bookshelf() {
           {books.data.map((b) => (
             <Link key={b.id} to={`/book/${b.id}`} className="book-card">
               <div className="cover">
-                {b.cover_key ? <img src={fileUrl(b.cover_key)} alt="" /> : <span aria-hidden>{b.cover_emoji}</span>}
+                {b.cover_key ? <img src={fileUrl(b.cover_key)} alt="" /> : <ClayEmoji emoji={b.cover_emoji} size={96} />}
               </div>
               <span className="book-title">{b.title}</span>
               <span className="muted small">{b.page_count}쪽</span>

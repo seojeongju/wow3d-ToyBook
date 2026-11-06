@@ -1,11 +1,14 @@
 {
-  "name": "토이북",
-  "short_name": "토이북",
-  "description": "우리 아이 맞춤 그림책 만들기와 캐릭터 피규어 (wow3d)",
+  "name": "wow3d-Toybook · 와우쓰리디 - 토이북",
+  "short_name": "와우쓰리디 토이북",
+  "description": "우리 아이 맞춤 그림책 만들기와 캐릭터 피규어 (wow3d-Toybook)",
   "lang": "ko",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#FBF6F3",
   "theme_color": "#8B6FDC",
-  "icons": [{ "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }]
+  "icons": [
+    { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" },
+    { "src": "/logo.jpg", "sizes": "1024x1024", "type": "image/jpeg", "purpose": "any" }
+  ]
 }

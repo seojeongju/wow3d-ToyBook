@@ -1,0 +1,84 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bgGrad2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FCF7F3" />
+      <stop offset="100%" stop-color="#EFE8FD" />
+    </linearGradient>
+    <linearGradient id="cubeTop" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFE58F" />
+      <stop offset="100%" stop-color="#FFC94D" />
+    </linearGradient>
+    <linearGradient id="cubeLeft" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#9B80E6" />
+      <stop offset="100%" stop-color="#6D50C9" />
+    </linearGradient>
+    <linearGradient id="cubeRight" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FFC6B3" />
+      <stop offset="100%" stop-color="#FF9B7B" />
+    </linearGradient>
+    <filter id="badgeShadow" x="-15%" y="-15%" width="130%" height="135%">
+      <feDropShadow dx="0" dy="12" stdDeviation="14" flood-color="#2B2850" flood-opacity="0.14" />
+    </filter>
+  </defs>
+
+  <!-- Soft Cream & Lavender Background -->
+  <rect width="800" height="500" rx="44" fill="url(#bgGrad2)" />
+
+  <!-- Circular Emblem Badge -->
+  <g filter="url(#badgeShadow)">
+    <circle cx="400" cy="175" r="122" fill="#FFFDFB" stroke="#ECE5FD" stroke-width="8" />
+    <circle cx="400" cy="175" r="106" fill="#F6F0FD" />
+
+    <!-- 3D Printer Nozzle Top Accent -->
+    <rect x="386" y="64" width="28" height="16" rx="5" fill="#2B2850" />
+    <path d="M391 80 L409 80 L404 92 L396 92 Z" fill="#FF9B7B" />
+    <circle cx="400" cy="99" r="4.5" fill="#FFC94D" />
+
+    <!-- Isometric 3D Toy Cube + Open Book Hybrid -->
+    <!-- Top Diamond Face (Yellow Toy Block with Stud) -->
+    <path d="M400 108 L476 146 L400 184 L324 146 Z" fill="url(#cubeTop)" stroke="#FFFDFB" stroke-width="2" stroke-linejoin="round" />
+    <!-- Toy Block Stud on Top -->
+    <ellipse cx="400" cy="144" rx="22" ry="11" fill="#FFB930" />
+    <ellipse cx="400" cy="139" rx="22" ry="11" fill="#FFE89E" />
+
+    <!-- Left Cube Face (Lavender Book Page) -->
+    <path d="M324 146 L400 184 L400 264 L324 226 Z" fill="url(#cubeLeft)" stroke="#FFFDFB" stroke-width="2" stroke-linejoin="round" />
+    <!-- Cute Eyes on Left Face -->
+    <circle cx="352" cy="196" r="5.5" fill="#FFFDFB" />
+    <circle cx="376" cy="208" r="5.5" fill="#FFFDFB" />
+    <path d="M358 212 Q364 220 371 216" stroke="#FFFDFB" stroke-width="3" stroke-linecap="round" fill="none" />
+
+    <!-- Right Cube Face (Peach Book Page with 3D Layer Lines) -->
+    <path d="M476 146 L400 184 L400 264 L476 226 Z" fill="url(#cubeRight)" stroke="#FFFDFB" stroke-width="2" stroke-linejoin="round" />
+    <line x1="418" y1="195" x2="458" y2="175" stroke="#FFFDFB" stroke-width="5" stroke-linecap="round" opacity="0.85" />
+    <line x1="418" y1="215" x2="458" y2="195" stroke="#FFFDFB" stroke-width="5" stroke-linecap="round" opacity="0.85" />
+    <line x1="418" y1="235" x2="446" y2="221" stroke="#FFFDFB" stroke-width="5" stroke-linecap="round" opacity="0.85" />
+
+    <!-- Mint Sparkle Badges -->
+    <circle cx="305" cy="125" r="10" fill="#DEF4EA" stroke="#7FD1AE" stroke-width="3" />
+    <circle cx="495" cy="125" r="10" fill="#FFE7DD" stroke="#FFAF96" stroke-width="3" />
+  </g>
+
+  <!-- Ribbon / Emblem Typography -->
+  <g>
+    <!-- Main Brand Name -->
+    <text x="400" y="360" text-anchor="middle" font-family="'Jua', 'Pretendard Variable', 'Malgun Gothic', sans-serif" font-size="58" font-weight="800" fill="#2B2850">
+      <tspan fill="#8B6FDC">wow</tspan><tspan fill="#FFB930">3d</tspan><tspan fill="#78749B">-</tspan><tspan fill="#2B2850">Toybook</tspan>
+    </text>
+
+    <!-- Korean Name with Decorative Dividers -->
+    <line x1="210" y1="412" x2="265" y2="412" stroke="#B6A2F2" stroke-width="4" stroke-linecap="round" />
+    <circle cx="277" cy="412" r="4" fill="#FF9B7B" />
+    <text x="400" y="422" text-anchor="middle" font-family="'Jua', 'Pretendard Variable', 'Malgun Gothic', sans-serif" font-size="30" font-weight="700" fill="#2B2850" letter-spacing="1.5">
+      와우쓰리디- 토이북
+    </text>
+    <circle cx="523" cy="412" r="4" fill="#FF9B7B" />
+    <line x1="535" y1="412" x2="590" y2="412" stroke="#B6A2F2" stroke-width="4" stroke-linecap="round" />
+
+    <!-- Tagline -->
+    <text x="400" y="460" text-anchor="middle" font-family="'Pretendard Variable', 'Malgun Gothic', sans-serif" font-size="16" font-weight="600" fill="#78749B" letter-spacing="2">
+      AI STORYBOOK &amp; 3D TOY STUDIO
+    </text>
+  </g>
+</svg>
+

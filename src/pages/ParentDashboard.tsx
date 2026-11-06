@@ -7,6 +7,7 @@ import { ClayIcon, LineIcon, type ClayIconName } from '../components/Icons';
 import Tobi from '../components/Tobi';
 import { isParentUnlocked, setParentUnlocked } from '../parentLock';
 import { useAsync } from '../useAsync';
+import { ClayEmoji } from '../components/ClayArt';
 
 const MENU: DashMenuItem[] = [
   { icon: 'grid', label: '대시보드', to: '/dashboard' },
@@ -77,7 +78,7 @@ export default function ParentDashboard() {
           <Tobi pose="wave" size={150} />
         </div>
         <div className="dash-hero-copy">
-          <h2>안녕하세요, 부모님! 👋</h2>
+          <h2>안녕하세요, 부모님!</h2>
           <p>오늘은 아이와 어떤 이야기를 만들어 볼까요?</p>
           <button className="pill-btn small-pill" onClick={() => setNotice('이야기 공방(AI 책 만들기)은 곧 열려요')}>
             새 책 만들기 <LineIcon name="arrow" size={18} />
@@ -127,7 +128,7 @@ export default function ParentDashboard() {
             {bookList.slice(0, 4).map((b) => (
               <li key={b.id}>
                 <span className="dash-thumb" aria-hidden>
-                  {b.cover_emoji}
+                  <ClayEmoji emoji={b.cover_emoji} size={40} />
                 </span>
                 <div>
                   <strong>{b.title}</strong>

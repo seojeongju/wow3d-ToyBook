@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { api, fileUrl } from '../api';
 import { LineIcon } from '../components/Icons';
 import { useAsync } from '../useAsync';
+import { ClayEmoji } from '../components/ClayArt';
 
 export default function BookViewer() {
   const { bookId = '' } = useParams();
@@ -86,7 +87,7 @@ export default function BookViewer() {
             {page.image_key ? (
               <img src={fileUrl(page.image_key)} alt="" />
             ) : (
-              <span aria-hidden>{page.layout.emoji ?? book.cover_emoji}</span>
+              <ClayEmoji emoji={page.layout.emoji ?? book.cover_emoji} size={220} />
             )}
           </div>
           <p className="page-text">{page.text}</p>
