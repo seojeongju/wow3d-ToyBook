@@ -95,36 +95,53 @@ export default function Home() {
 
       <section className="hero">
         <div className="hero-copy">
-          <span className="eyebrow-pill">AI 그림책 창작부터 3D 프린팅 피규어까지 한 번에</span>
+          <div className="hero-tags">
+            <span className="eyebrow-pill">✨ 온 가족 AI 동화 · 3D 피규어 공방</span>
+            <span className="eyebrow-safe">
+              <LineIcon name="check" size={15} /> 광고·채팅 0% 안심 화면
+            </span>
+          </div>
+
           <h1 className="hero-title">
-            세상에 단 한 권뿐인 우리 아이 책,
+            우리 아이 맞춤 그림책이
             <br />
-            화면 밖 <em>3D 장난감</em>으로 튀어나와요
+            화면 밖 <em>3D 장난감</em>으로!
           </h1>
-          <p className="hero-sub">
-            <strong>와우쓰리디 토이북</strong>은 아이의 이름·이야기·손그림으로 맞춤 그림책을 만들고, 책 속 주인공을 실물 피규어로 받아 보는{' '}
-            <strong>온 가족 AI 동화 공방</strong>입니다. 광고 없는 안전한 화면에서 아이의 상상력을 실물로 선물하세요.
-          </p>
-          <ul className="hero-flow" aria-label="핵심 제공 기능">
-            <li>
-              <span className="hero-flow-num">1</span>
-              <span>AI 맞춤 동화책 제작</span>
-            </li>
-            <li className="hero-flow-arrow" aria-hidden>
-              →
-            </li>
-            <li>
-              <span className="hero-flow-num">2</span>
-              <span>음성 읽어 주기</span>
-            </li>
-            <li className="hero-flow-arrow" aria-hidden>
-              →
-            </li>
-            <li>
-              <span className="hero-flow-num">3</span>
-              <span>캐릭터 3D 피규어 출력·배송</span>
-            </li>
-          </ul>
+
+          <p className="hero-sub">아이 이름과 손그림으로 만든 동화 속 친구를 실물 피규어로 만나 보세요.</p>
+
+          {/* 한눈에 보는 3단계 인포그래픽 카드 */}
+          <div className="hero-infographic" role="list" aria-label="토이북 3단계 핵심 과정">
+            <div className="hero-info-card tone-peach" role="listitem">
+              <span className="hero-info-step">STEP 1</span>
+              <ClayIcon name="studio" size={44} tile={false} />
+              <strong>AI 동화책 제작</strong>
+              <span>이름·손그림으로 15분 완성</span>
+            </div>
+
+            <span className="hero-info-connector" aria-hidden>
+              <LineIcon name="next" size={20} />
+            </span>
+
+            <div className="hero-info-card tone-lavender" role="listitem">
+              <span className="hero-info-step">STEP 2</span>
+              <ClayIcon name="theater" size={44} tile={false} />
+              <strong>음성 동화 극장</strong>
+              <span>연령별 화면 · TTS 읽어 주기</span>
+            </div>
+
+            <span className="hero-info-connector" aria-hidden>
+              <LineIcon name="next" size={20} />
+            </span>
+
+            <div className="hero-info-card tone-mint" role="listitem">
+              <span className="hero-info-step">STEP 3</span>
+              <ClayIcon name="factory" size={44} tile={false} />
+              <strong>3D 피규어 배송</strong>
+              <span>360° 프리뷰 · wow3d 출력</span>
+            </div>
+          </div>
+
           <div className="hero-actions">
             <a href="#preview" className="pill-btn">
               그림책 미리 읽기 <LineIcon name="arrow" size={20} />
