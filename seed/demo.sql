@@ -11,12 +11,12 @@ INSERT INTO books (id, parent_id, child_id, title, cover_emoji, status) VALUES
   ('book-dino',  'demo-parent', 'child-junho', '준호와 꼬마 공룡 로봇', '🦖', 'done');
 
 INSERT INTO book_pages (id, book_id, page_no, text, layout_json) VALUES
-  ('p-brush-1', 'book-brush', 1, '어느 날 밤, 민지의 칫솔이 반짝반짝 빛나기 시작했어요.', '{"emoji":"🌙","bg":"#E4E8FC"}'),
-  ('p-brush-2', 'book-brush', 2, '"안녕, 민지야! 나는 치카 요정이야." 작은 요정이 웃으며 인사했어요.', '{"emoji":"🧚","bg":"#E6EEFD"}'),
-  ('p-brush-3', 'book-brush', 3, '"이를 닦지 않으면 충치 벌레들이 놀러 온단다." 요정이 말했어요.', '{"emoji":"🦷","bg":"#DCE8FB"}'),
-  ('p-brush-4', 'book-brush', 4, '민지는 위아래로 치카치카, 동글동글 치카치카 이를 닦았어요.', '{"emoji":"🪥","bg":"#E2ECFB"}'),
-  ('p-brush-5', 'book-brush', 5, '충치 벌레들은 깜짝 놀라 멀리멀리 도망갔어요. 민지의 이가 반짝반짝!', '{"emoji":"✨","bg":"#EAF0FE"}'),
-  ('p-dino-1',  'book-dino',  1, '준호는 블록으로 아주 커다란 공룡 로봇을 만들었어요.', '{"emoji":"🧱","bg":"#E6EEFD"}'),
-  ('p-dino-2',  'book-dino',  2, '그런데 갑자기 로봇이 "쿠웅!" 하고 눈을 떴어요.', '{"emoji":"🤖","bg":"#DCE8FB"}'),
-  ('p-dino-3',  'book-dino',  3, '"준호야, 우리 같이 공룡 섬으로 모험을 떠나자!"', '{"emoji":"🏝️","bg":"#E2ECFB"}'),
-  ('p-dino-4',  'book-dino',  4, '공룡 섬 친구들과 신나게 놀고, 둘은 노을을 보며 집으로 돌아왔어요.', '{"emoji":"🌅","bg":"#E6EEFD"}');
+  ('p-brush-1', 'book-brush', 1, '어느 날 밤, 민지의 칫솔이 반짝반짝 빛나기 시작했어요.', '{"emoji":"🌙","bg":"#ECE5FD"}'),
+  ('p-brush-2', 'book-brush', 2, '"안녕, 민지야! 나는 치카 요정이야." 작은 요정이 웃으며 인사했어요.', '{"emoji":"🧚","bg":"#FFE7DD"}'),
+  ('p-brush-3', 'book-brush', 3, '"이를 닦지 않으면 충치 벌레들이 놀러 온단다." 요정이 말했어요.', '{"emoji":"🦷","bg":"#DEF4EA"}'),
+  ('p-brush-4', 'book-brush', 4, '민지는 위아래로 치카치카, 동글동글 치카치카 이를 닦았어요.', '{"emoji":"🪥","bg":"#FFF1CF"}'),
+  ('p-brush-5', 'book-brush', 5, '충치 벌레들은 깜짝 놀라 멀리멀리 도망갔어요. 민지의 이가 반짝반짝!', '{"emoji":"✨","bg":"#FDE4EA"}'),
+  ('p-dino-1',  'book-dino',  1, '준호는 블록으로 아주 커다란 공룡 로봇을 만들었어요.', '{"emoji":"🧱","bg":"#FFE7DD"}'),
+  ('p-dino-2',  'book-dino',  2, '그런데 갑자기 로봇이 "쿠웅!" 하고 눈을 떴어요.', '{"emoji":"🤖","bg":"#DEF4EA"}'),
+  ('p-dino-3',  'book-dino',  3, '"준호야, 우리 같이 공룡 섬으로 모험을 떠나자!"', '{"emoji":"🏝️","bg":"#FFF1CF"}'),
+  ('p-dino-4',  'book-dino',  4, '공룡 섬 친구들과 신나게 놀고, 둘은 노을을 보며 집으로 돌아왔어요.', '{"emoji":"🌅","bg":"#FFE7DD"}');

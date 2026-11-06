@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../api';
+import { LineIcon } from '../components/Icons';
 import { useAsync } from '../useAsync';
 
 const UNLOCK_KEY = 'toybook.parentUnlocked';
@@ -90,7 +91,7 @@ export default function ParentGate() {
             확인
           </button>
         </form>
-        <Link to="/" className="parent-link">
+        <Link to="/profiles" className="parent-link">
           ← 돌아가기
         </Link>
       </main>
@@ -108,11 +109,11 @@ function ParentHome({ onLock }: { onLock: () => void }) {
     <main className="screen">
       <header className="topbar">
         <Link to="/" className="icon-btn" aria-label="처음으로">
-          🏠
+          <LineIcon name="home" />
         </Link>
         <h1 className="title-sm">부모 모드</h1>
         <button className="icon-btn" onClick={onLock} aria-label="잠그기">
-          🔒
+          <LineIcon name="lock" />
         </button>
       </header>
 

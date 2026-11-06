@@ -1,14 +1,15 @@
 import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { api, fileUrl } from '../api';
+import { ClayIcon, type ClayIconName } from '../components/Icons';
 import { useAsync } from '../useAsync';
 
-const MENU = [
-  { key: 'shelf', icon: '🏠', label: '우리 집 책장' },
-  { key: 'studio', icon: '🎨', label: '이야기 공방' },
-  { key: 'magic', icon: '✨', label: '마법 상자' },
-  { key: 'factory', icon: '🧸', label: '장난감 공장' },
-] as const;
+const MENU: { key: string; icon: ClayIconName; label: string }[] = [
+  { key: 'shelf', icon: 'home', label: '우리 집 책장' },
+  { key: 'studio', icon: 'studio', label: '이야기 공방' },
+  { key: 'magic', icon: 'magic', label: '마법 상자' },
+  { key: 'factory', icon: 'factory', label: '장난감 공장' },
+];
 
 export default function Bookshelf() {
   const { childId = '' } = useParams();
@@ -21,7 +22,7 @@ export default function Bookshelf() {
   return (
     <main className="screen with-menu">
       <header className="topbar">
-        <Link to="/" className="icon-btn" aria-label="프로필 바꾸기">
+        <Link to="/profiles" className="icon-btn" aria-label="프로필 바꾸기">
           {child?.avatar ?? '👤'}
         </Link>
         <h1 className="title-sm">{child ? `${child.nickname}의 책장` : '우리 집 책장'}</h1>
@@ -57,9 +58,7 @@ export default function Bookshelf() {
             className={`menu-btn ${m.key === 'shelf' ? 'active' : ''}`}
             onClick={() => setNotice(m.key === 'shelf' ? null : `${m.label}은(는) 곧 열려요!`)}
           >
-            <span className="menu-icon" aria-hidden>
-              {m.icon}
-            </span>
+            <ClayIcon name={m.icon} size={40} tile={false} />
             {m.label}
           </button>
         ))}

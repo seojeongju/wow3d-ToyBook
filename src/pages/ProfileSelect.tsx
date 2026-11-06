@@ -1,5 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { api } from '../api';
+import { LineIcon } from '../components/Icons';
+import { Logo } from '../components/SiteHeader';
 import { useAsync } from '../useAsync';
 
 export default function ProfileSelect() {
@@ -8,6 +10,7 @@ export default function ProfileSelect() {
 
   return (
     <main className="screen center">
+      <Logo />
       <h1 className="title">누가 볼까요?</h1>
 
       {children.status === 'loading' && <p className="muted">불러오는 중…</p>}
@@ -27,7 +30,7 @@ export default function ProfileSelect() {
       )}
 
       <Link to="/parent" className="parent-link">
-        🔒 부모 모드
+        <LineIcon name="lock" size={18} /> 부모 모드
       </Link>
     </main>
   );

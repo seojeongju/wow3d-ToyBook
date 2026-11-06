@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { api, fileUrl } from '../api';
+import { LineIcon } from '../components/Icons';
 import { useAsync } from '../useAsync';
 
 export default function BookViewer() {
@@ -68,13 +69,13 @@ export default function BookViewer() {
       }}
     >
       <header className="topbar">
-        <button className="icon-btn" onClick={() => navigate(book.child_id ? `/shelf/${book.child_id}` : '/')} aria-label="책장으로">
-          ⬅️
+        <button className="icon-btn" onClick={() => navigate(book.child_id ? `/shelf/${book.child_id}` : '/profiles')} aria-label="책장으로">
+          <LineIcon name="back" />
         </button>
         <h1 className="title-sm">{book.title}</h1>
         {canTts && (
           <button className={`icon-btn ${speaking ? 'active' : ''}`} onClick={readAloud} aria-label="읽어 주기">
-            {speaking ? '⏹️' : '🔊'}
+            <LineIcon name={speaking ? 'stop' : 'speaker'} />
           </button>
         )}
       </header>
@@ -96,13 +97,13 @@ export default function BookViewer() {
 
       <footer className="pager">
         <button className="big-btn" onClick={() => go(-1)} disabled={index === 0} aria-label="이전 쪽">
-          ◀
+          <LineIcon name="prev" size={30} />
         </button>
         <span className="page-no">
           {pages.length ? index + 1 : 0} / {pages.length}
         </span>
         <button className="big-btn" onClick={() => go(1)} disabled={index >= pages.length - 1} aria-label="다음 쪽">
-          ▶
+          <LineIcon name="next" size={30} />
         </button>
       </footer>
     </main>
