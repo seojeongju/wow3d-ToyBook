@@ -980,48 +980,312 @@ a {
   color: var(--danger);
 }
 
-/* 프로필 선택 */
-.profiles {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 28px;
-}
-
-.profile {
+/* 누가 볼까요? (프로필 선택) */
+.who {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
-  border: none;
-  background: none;
-  padding: 8px;
+  gap: 22px;
+  padding-bottom: 96px;
 }
 
-.avatar {
+.who-top {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.who .logo-hero-img {
+  width: min(150px, 38vw);
+}
+
+.sound-toggle {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 48px;
+  padding: 0 16px;
+  border: none;
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--ink-soft);
+  font-size: 15px;
+  font-weight: 700;
+  box-shadow: var(--clay-soft);
+}
+
+.sound-toggle.on {
+  color: var(--primary-deep);
+}
+
+.who-guide {
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+  max-width: 640px;
+}
+
+.who-tobi {
+  flex: none;
+  margin-bottom: -8px;
+}
+
+/* 말할 때 토비가 통통 */
+.who-tobi.talking {
+  animation: tobi-talk 0.5s ease-in-out infinite alternate;
+}
+
+@keyframes tobi-talk {
+  to {
+    transform: translateY(-6px) rotate(-3deg);
+  }
+}
+
+.who-bubble {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  padding: 18px 22px;
+  border-radius: 28px 28px 28px 8px;
+  background: var(--surface);
+  box-shadow: var(--clay-soft);
+}
+
+.who-greeting {
+  color: var(--primary);
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.who-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(30px, 6vw, 44px);
+  font-weight: 400;
+  line-height: 1.2;
+}
+
+.who-sub {
+  margin: 2px 0 0;
+  color: var(--ink-soft);
+  font-size: clamp(18px, 3vw, 22px);
+  font-weight: 700;
+}
+
+.listen-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 48px;
+  margin-top: 4px;
+  padding: 0 18px;
+  border: none;
+  border-radius: 999px;
+  background: var(--tint);
+  color: var(--primary-deep);
+  font-size: 17px;
+  font-weight: 800;
+  box-shadow: var(--clay-soft);
+}
+
+.who-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 22px;
+  width: 100%;
+}
+
+.who-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  width: clamp(150px, 40vw, 200px);
+  padding: 18px 12px 16px;
+  border: none;
+  border-radius: 36px;
+  color: var(--ink);
+  text-decoration: none;
+  box-shadow: var(--clay-soft), 0 12px 26px rgba(108, 82, 180, 0.12);
+  transition: transform 0.18s, opacity 0.25s;
+}
+
+.who-card:hover {
+  transform: translateY(-4px) rotate(-1.5deg);
+}
+
+.who-card:active {
+  transform: scale(0.96);
+}
+
+.who-card:disabled {
+  opacity: 1;
+  cursor: default;
+}
+
+/* 고른 친구는 통통 튀고, 나머지는 살짝 흐려짐 */
+.who-card.picked {
+  animation: who-pick 0.6s ease-out;
+}
+
+.who-card.dim {
+  opacity: 0.4;
+}
+
+@keyframes who-pick {
+  30% {
+    transform: scale(1.12) rotate(-3deg);
+  }
+  60% {
+    transform: scale(0.96) rotate(2deg);
+  }
+  100% {
+    transform: scale(1.04);
+  }
+}
+
+.who-face {
   display: grid;
   place-items: center;
-  width: clamp(120px, 28vw, 168px);
+  width: 100%;
   aspect-ratio: 1;
-  border-radius: 38%;
-  background: linear-gradient(145deg, #f4effe, var(--tint-strong));
-  box-shadow: var(--shadow), inset 0 -6px 0 rgba(108, 82, 180, 0.08);
-  font-size: clamp(56px, 14vw, 84px);
-  transition: transform 0.15s;
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.55);
+  box-shadow: inset 2px 3px 6px rgba(255, 255, 255, 0.9), inset -3px -4px 8px rgba(108, 82, 180, 0.1);
 }
 
-.profile:nth-child(2n) .avatar {
-  background: linear-gradient(145deg, #fff3ec, #ffd9c9);
+.who-face .clay-art {
+  width: 78%;
+  height: auto;
 }
 
-.profile:active .avatar,
-.profile:hover .avatar {
-  transform: scale(1.06) rotate(-2deg);
+.who-name {
+  margin-top: 4px;
+  font-family: var(--font-display);
+  font-size: 28px;
 }
 
-.profile-name {
-  font-size: 24px;
+.who-mode {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 12px 3px 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.7);
+  color: var(--primary-deep);
+  font-size: 14px;
   font-weight: 800;
+}
+
+.tone-pink {
+  background: var(--tile-pink);
+}
+
+.who-add {
+  justify-content: center;
+  border: 3px dashed var(--tint-strong);
+  background: rgba(255, 253, 251, 0.6);
+  box-shadow: none;
+}
+
+.who-plus {
+  display: grid;
+  place-items: center;
+  width: 72px;
+  height: 72px;
+  margin: 18px 0 6px;
+  border-radius: 50%;
+  background: var(--tint);
+  color: var(--primary-deep);
+  font-family: var(--font-display);
+  font-size: 48px;
+  line-height: 1;
+  box-shadow: var(--clay-soft);
+}
+
+.who-add .who-mode {
+  padding: 3px 12px;
+  background: transparent;
+  color: var(--ink-soft);
+}
+
+.who-card.skeleton {
+  height: 250px;
+  background: linear-gradient(100deg, var(--tile-lavender) 30%, #f8f4ff 50%, var(--tile-lavender) 70%);
+  background-size: 300% 100%;
+  animation: who-shimmer 1.4s linear infinite;
+}
+
+@keyframes who-shimmer {
+  to {
+    background-position: -150% 0;
+  }
+}
+
+.who-empty,
+.who-hint {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 18px;
+  text-align: center;
+}
+
+/* 부모 모드는 화면 구석 자물쇠 (PRD 9.2) */
+.parent-corner {
+  position: fixed;
+  right: max(16px, env(safe-area-inset-right));
+  bottom: max(16px, env(safe-area-inset-bottom));
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 52px;
+  padding: 0 18px;
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--ink-soft);
+  font-size: 15px;
+  font-weight: 700;
+  text-decoration: none;
+  box-shadow: var(--clay-soft);
+}
+
+@media (max-width: 560px) {
+  .sound-toggle span {
+    display: none;
+  }
+  .sound-toggle {
+    padding: 0 13px;
+  }
+  .who-tobi .tobi {
+    width: 90px;
+    height: auto;
+  }
+  .who-card {
+    width: calc(50% - 11px);
+  }
+  .who-name {
+    font-size: 24px;
+  }
+  /* 작은 화면에서는 카드를 가리지 않도록 맨 아래에 둠 */
+  .who {
+    padding-bottom: 24px;
+  }
+  .parent-corner {
+    position: static;
+    margin-top: 8px;
+  }
 }
 
 .parent-link {
@@ -2297,7 +2561,6 @@ a {
 .login-back,
 .see-all,
 .clay-tile,
-.avatar,
 .dash-avatar,
 .dash-thumb,
 .cover,

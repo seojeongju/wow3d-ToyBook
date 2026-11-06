@@ -172,7 +172,7 @@ export function ClayIcon({ name, size = 56, tile = true }: { name: ClayIconName;
 export type LineIconName =
   | 'back' | 'speaker' | 'stop' | 'lock' | 'arrow' | 'prev' | 'next' | 'home'
   | 'grid' | 'book' | 'smile' | 'cube' | 'box' | 'gear' | 'check' | 'users' | 'flag' | 'bell' | 'search'
-  | 'eye' | 'eyeOff' | 'mail' | 'logout' | 'heart';
+  | 'eye' | 'eyeOff' | 'mail' | 'logout' | 'heart' | 'mute';
 
 export function LineIcon({ name, size = 26 }: { name: LineIconName; size?: number }) {
   const paths: Record<LineIconName, ReactNode> = {
@@ -297,6 +297,12 @@ export function LineIcon({ name, size = 26 }: { name: LineIconName; size?: numbe
       <>
         <path d="M14 4 H7 a2 2 0 0 0 -2 2 v12 a2 2 0 0 0 2 2 h7" />
         <path d="M11 12 H21 M17 8 l4 4 l-4 4" />
+      </>
+    ),
+    mute: (
+      <>
+        <path d="M4 10 v4 h4 l5 4 V6 L8 10 Z" />
+        <path d="M16.5 9.5 l5 5 M21.5 9.5 l-5 5" />
       </>
     ),
     heart: <path d="M12 20 s-7.5 -4.5 -7.5 -10 a4 4 0 0 1 7.5 -2 a4 4 0 0 1 7.5 2 c0 5.5 -7.5 10 -7.5 10 z" />,
