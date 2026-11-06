@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import type { BookSummary } from '../api';
 import { fileUrl } from '../api';
+import type { RoomPalette } from '../rooms/palette';
 import { BOOK, slotCapacity, type RoomTemplate } from '../rooms/templates';
 import ClayArt, { ClayEmoji } from './ClayArt';
 import { LineIcon } from './Icons';
@@ -10,6 +11,8 @@ interface Props {
   books: BookSummary[];
   /** 이름표 글자 (예: "민지의 책장") */
   plaque: string;
+  /** 사진에서 뽑은 색 (1.5단계, 없으면 템플릿 기본 색) */
+  palette?: RoomPalette | null;
   /** 책을 고르면 (튀어나오는 연출이 끝난 뒤) 호출 */
   onOpen: (book: BookSummary) => void;
   /** 빈 "새 책" 자리를 누르면 호출 */
@@ -57,7 +60,7 @@ function layout(room: RoomTemplate, books: BookSummary[]): Placed[][] {
   return pages;
 }
 
-export default function ShelfScene({ room, books, plaque, onOpen, onNewBook, onPick }: Props) {
+export default function ShelfScene({ room, books, plaque, palette, onOpen, onNewBook, onPick }: Props) {
   const pages = useMemo(() => layout(room, books), [room, books]);
   const [page, setPage] = useState(0);
   const [flying, setFlying] = useState<{ book: BookSummary; rect: DOMRect; tone: string; stage: 'lift' | 'center' | 'open' } | null>(null);
@@ -86,7 +89,7 @@ export default function ShelfScene({ room, books, plaque, onOpen, onNewBook, onP
   return (
     <div className="room-wrap">
       <div className="room" style={{ aspectRatio: `1 / ${room.ratio}` }}>
-        {room.Art ? <room.Art /> : room.imageUrl && <img className="room-art" src={room.imageUrl} alt="" />}
+        {room.Art ? <room.Art palette={palette} /> : room.imageUrl && <img className="room-art" src={room.imageUrl} alt="" />}
 
         <span className="room-plaque" style={{ left: `${room.plaque.x * 100}%`, top: `${room.plaque.y * 100}%` }}>
           {plaque}

@@ -3985,3 +3985,100 @@ a {
   transform: translateX(-50%);
   box-shadow: var(--shadow);
 }
+
+/* 책장 꾸미기: 우리 방 색으로 꾸미기 (1.5단계) */
+.room-extra {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.ghost-pill {
+  min-height: 44px;
+  padding: 0 16px;
+  border: 2px solid var(--tint-strong);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--primary-deep);
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.tint-help {
+  margin: 0 0 14px;
+  color: var(--ink-soft);
+  font-size: 16px;
+  line-height: 1.7;
+}
+
+.tint-help strong {
+  color: var(--ink);
+}
+
+.tint-body {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+.tint-photo,
+.tint-result {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-height: 220px;
+  padding: 16px;
+  border-radius: 24px;
+  background: var(--surface);
+  box-shadow: var(--clay-soft);
+  text-align: center;
+}
+
+.tint-photo img {
+  width: 100%;
+  max-height: 240px;
+  object-fit: cover;
+  border-radius: 16px;
+}
+
+.tint-pick {
+  cursor: pointer;
+}
+
+.tint-swatches {
+  display: flex;
+  gap: 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink-soft);
+}
+
+.tint-swatches li {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.tint-dot {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  box-shadow: var(--clay-soft);
+}
+
+.tint-preview {
+  max-width: 360px;
+}
+
+@media (min-width: 760px) {
+  .tint-body {
+    grid-template-columns: 1fr 1fr;
+  }
+}

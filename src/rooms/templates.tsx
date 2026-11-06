@@ -1,4 +1,5 @@
 import { useId, type ReactNode } from 'react';
+import { applyPalette, type RoomPalette, type ToneRole } from './palette';
 
 /**
  * 우리 집 책장 템플릿.
@@ -25,8 +26,8 @@ export interface RoomTemplate {
   plaque: { x: number; y: number };
   /** 3단계: 주문한 피규어를 올려 둘 자리 */
   figure?: { x: number; y: number };
-  /** 기본 템플릿 그림 (사진 템플릿은 imageUrl) */
-  Art?: () => ReactNode;
+  /** 기본 템플릿 그림 (사진 템플릿은 imageUrl). palette 를 주면 사진에서 뽑은 색으로 칠함 (1.5단계) */
+  Art?: (props: ArtProps) => ReactNode;
   imageUrl?: string;
   /** 고르기 화면에 보여 줄 한 줄 설명 */
   blurb: string;
@@ -57,25 +58,38 @@ function ClayDefs({ p, tones }: { p: string; tones: Record<string, [string, stri
 
 const usePrefix = () => useId().replace(/:/g, '');
 
+export interface ArtProps {
+  palette?: RoomPalette | null;
+}
+
+// 사진 색을 입힐 때 각 색이 맡는 역할 (역할이 없는 잎·전구·별 등은 원래 색 유지)
+const WOOD_ROLES: Record<string, ToneRole> = { wall: 'wall', floor: 'floor', frame: 'main', back: 'mainLight', plank: 'main', rug: 'accent', pot: 'accent' };
+const CLOUD_ROLES: Record<string, ToneRole> = { sky: 'wall', cloud: 'mainLight', pink: 'accent', lav: 'main' };
+const DESK_ROLES: Record<string, ToneRole> = { wall: 'wall', floor: 'floor', frame: 'accent', wood: 'main', stand: 'accent' };
+
 /* ───────── 1. 나무 책장 ───────── */
-function WoodArt() {
+function WoodArt({ palette }: ArtProps) {
   const p = usePrefix();
   const u = (k: string) => `url(#${p}${k})`;
   return (
     <svg viewBox="0 0 1000 700" className="room-art" aria-hidden>
       <ClayDefs
         p={p}
-        tones={{
-          wall: ['#fbf6ff', '#f1e9fd', '#e2d6f7'],
-          floor: ['#ffe9dc', '#f6cdb4', '#e3ab8b'],
-          frame: ['#f2c9a0', '#d79d6c', '#b07444'],
-          back: ['#fff4e6', '#f7e1c8', '#e8c9a6'],
-          plank: ['#f6d4ae', '#e0a978', '#bf8452'],
-          rug: ['#e6dcfc', '#c4b2f3', '#9f88e3'],
-          pot: ['#ffd9c9', '#ffae8f', '#ef8466'],
-          leaf: ['#d2f3e4', '#6cc79c', '#3f9d72'],
-          lamp: ['#fff3c4', '#ffc94d', '#e6a51f'],
-        }}
+        tones={applyPalette(
+          {
+            wall: ['#fbf6ff', '#f1e9fd', '#e2d6f7'],
+            floor: ['#ffe9dc', '#f6cdb4', '#e3ab8b'],
+            frame: ['#f2c9a0', '#d79d6c', '#b07444'],
+            back: ['#fff4e6', '#f7e1c8', '#e8c9a6'],
+            plank: ['#f6d4ae', '#e0a978', '#bf8452'],
+            rug: ['#e6dcfc', '#c4b2f3', '#9f88e3'],
+            pot: ['#ffd9c9', '#ffae8f', '#ef8466'],
+            leaf: ['#d2f3e4', '#6cc79c', '#3f9d72'],
+            lamp: ['#fff3c4', '#ffc94d', '#e6a51f'],
+          },
+          WOOD_ROLES,
+          palette,
+        )}
       />
       <rect width="1000" height="700" fill={u('wall')} />
       <rect y="600" width="1000" height="100" fill={u('floor')} />
@@ -105,7 +119,7 @@ function WoodArt() {
 }
 
 /* ───────── 2. 구름 책장 ───────── */
-function CloudArt() {
+function CloudArt({ palette }: ArtProps) {
   const p = usePrefix();
   const u = (k: string) => `url(#${p}${k})`;
   const cloud = (x0: number, x1: number, y: number) => {
@@ -124,14 +138,18 @@ function CloudArt() {
     <svg viewBox="0 0 1000 700" className="room-art" aria-hidden>
       <ClayDefs
         p={p}
-        tones={{
-          sky: ['#f4eefe', '#e6dcfc', '#f9dfe9'],
-          cloud: ['#ffffff', '#f6f1fc', '#ddd2ef'],
-          moon: ['#fff3c4', '#ffc94d', '#e6a51f'],
-          star: ['#fff3c4', '#ffd166', '#f0b43a'],
-          pink: ['#ffdbe2', '#f4a0b2', '#d97890'],
-          lav: ['#e3d9fc', '#a993ea', '#7b62cf'],
-        }}
+        tones={applyPalette(
+          {
+            sky: ['#f4eefe', '#e6dcfc', '#f9dfe9'],
+            cloud: ['#ffffff', '#f6f1fc', '#ddd2ef'],
+            moon: ['#fff3c4', '#ffc94d', '#e6a51f'],
+            star: ['#fff3c4', '#ffd166', '#f0b43a'],
+            pink: ['#ffdbe2', '#f4a0b2', '#d97890'],
+            lav: ['#e3d9fc', '#a993ea', '#7b62cf'],
+          },
+          CLOUD_ROLES,
+          palette,
+        )}
       />
       <rect width="1000" height="700" fill={u('sky')} />
       <path d="M880 40 A70 70 0 1 0 930 160 A56 56 0 1 1 880 40 Z" fill={u('moon')} />
@@ -159,24 +177,28 @@ function CloudArt() {
 }
 
 /* ───────── 3. 내 책상 ───────── */
-function DeskArt() {
+function DeskArt({ palette }: ArtProps) {
   const p = usePrefix();
   const u = (k: string) => `url(#${p}${k})`;
   return (
     <svg viewBox="0 0 1000 700" className="room-art" aria-hidden>
       <ClayDefs
         p={p}
-        tones={{
-          wall: ['#fffaf4', '#fbefe4', '#f1dccb'],
-          floor: ['#efe7fd', '#ddd0fb', '#c3b1f2'],
-          sky: ['#eef6ff', '#cfe3fb', '#a9c8f2'],
-          frame: ['#e3d9fc', '#a993ea', '#7b62cf'],
-          cloud: ['#ffffff', '#f6f1fc', '#ddd2ef'],
-          wood: ['#f6d4ae', '#e0a978', '#bf8452'],
-          lamp: ['#d2f3e4', '#6cc79c', '#3f9d72'],
-          bulb: ['#fff3c4', '#ffc94d', '#e6a51f'],
-          stand: ['#ffd9c9', '#ffae8f', '#ef8466'],
-        }}
+        tones={applyPalette(
+          {
+            wall: ['#fffaf4', '#fbefe4', '#f1dccb'],
+            floor: ['#efe7fd', '#ddd0fb', '#c3b1f2'],
+            sky: ['#eef6ff', '#cfe3fb', '#a9c8f2'],
+            frame: ['#e3d9fc', '#a993ea', '#7b62cf'],
+            cloud: ['#ffffff', '#f6f1fc', '#ddd2ef'],
+            wood: ['#f6d4ae', '#e0a978', '#bf8452'],
+            lamp: ['#d2f3e4', '#6cc79c', '#3f9d72'],
+            bulb: ['#fff3c4', '#ffc94d', '#e6a51f'],
+            stand: ['#ffd9c9', '#ffae8f', '#ef8466'],
+          },
+          DESK_ROLES,
+          palette,
+        )}
       />
       <rect width="1000" height="700" fill={u('wall')} />
       <rect y="640" width="1000" height="60" fill={u('floor')} />

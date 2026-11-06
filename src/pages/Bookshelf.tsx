@@ -7,6 +7,7 @@ import RoomPicker from '../components/RoomPicker';
 import ShelfScene from '../components/ShelfScene';
 import { SubHeader } from '../components/SiteHeader';
 import { josa } from '../korean';
+import { loadPalette, savePalette } from '../rooms/palette';
 import { findRoom, loadRoomId, saveRoomId } from '../rooms/templates';
 import { speak, stopSpeaking } from '../speech';
 import { useAsync } from '../useAsync';
@@ -25,12 +26,17 @@ export default function Bookshelf() {
   const children = useAsync(api.children, []);
   const [notice, setNotice] = useState<string | null>(null);
   const [room, setRoom] = useState(() => findRoom(loadRoomId(childId)));
+  // 1.5단계: 방 사진에서 뽑은 색 (기기에만 기억)
+  const [palette, setPalette] = useState(() => loadPalette(childId));
   const [picking, setPicking] = useState(false);
 
   const child = children.status === 'ok' ? children.data.find((c) => c.id === childId) : undefined;
   const title = child ? `${child.nickname}의 책장` : '우리 집 책장';
 
-  useEffect(() => setRoom(findRoom(loadRoomId(childId))), [childId]);
+  useEffect(() => {
+    setRoom(findRoom(loadRoomId(childId)));
+    setPalette(loadPalette(childId));
+  }, [childId]);
   useEffect(() => () => stopSpeaking(), []);
 
   // 오프라인 보기: 책장에 꽂힌 책 내용을 미리 받아 두면 인터넷이 끊겨도 읽을 수 있음 (서비스 워커가 보관)
@@ -81,6 +87,7 @@ export default function Bookshelf() {
         <>
           <ShelfScene
             room={room}
+            palette={palette}
             books={books.data}
             plaque={title}
             onPick={(b) => speak(`${josa(b.title, '을', '를')} 펼쳐요!`)}
@@ -94,12 +101,19 @@ export default function Bookshelf() {
       {picking && (
         <RoomPicker
           current={room.id}
+          palette={palette}
           onClose={() => setPicking(false)}
           onPick={(r) => {
             setRoom(r);
             saveRoomId(childId, r.id);
             setPicking(false);
             tell(`${josa(r.name, '으로', '로')} 바꿨어요!`);
+          }}
+          onPalette={(p) => {
+            setPalette(p);
+            savePalette(childId, p);
+            setPicking(false);
+            tell(p ? '우리 방 색으로 꾸몄어요!' : '원래 색으로 돌아왔어요!');
           }}
           onPhoto={() => tell('내 방 사진으로 책장을 만드는 기능은 곧 열려요. 어른과 함께 해요!')}
         />
