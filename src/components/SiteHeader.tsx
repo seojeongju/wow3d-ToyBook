@@ -64,6 +64,7 @@ export interface SubHeaderProps {
 export function SubHeader({ left, title, right }: SubHeaderProps) {
   const { pathname } = useLocation();
   const [open, setOpen] = useState(false);
+  const hasPageBar = Boolean(left || title);
 
   useEffect(() => setOpen(false), [pathname]);
 
@@ -90,7 +91,7 @@ export function SubHeader({ left, title, right }: SubHeaderProps) {
         </nav>
 
         <div className="sub-header-actions">
-          {right}
+          {!hasPageBar && right}
           <Link to="/" className="pill-btn small-pill sub-home-btn" aria-label="메인페이지로 이동">
             <LineIcon name="home" size={18} />
             <span>메인으로</span>
@@ -110,10 +111,11 @@ export function SubHeader({ left, title, right }: SubHeaderProps) {
         </div>
       </div>
 
-      {(left || title) && (
+      {hasPageBar && (
         <div className="sub-pagebar">
           {left && <div className="sub-pagebar-left">{left}</div>}
           {title && <h1 className="title-sm sub-pagebar-title">{title}</h1>}
+          {right && <div className="sub-pagebar-right">{right}</div>}
         </div>
       )}
     </header>
