@@ -1,18 +1,26 @@
-import { useEffect, useState, type ReactNode } from 'react';
+import { useEffect, useState, type MouseEvent, type ReactNode } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { LineIcon } from './Icons';
 
 export function Logo({ variant = 'header' }: { variant?: 'header' | 'hero' }) {
+  const goLandingWithReload = (e: MouseEvent<HTMLAnchorElement>) => {
+    // Ctrl/Cmd/Shift 클릭이나 새 탭 열기는 브라우저 기본 동작 유지
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+    e.preventDefault();
+    window.scrollTo(0, 0);
+    window.location.href = '/';
+  };
+
   if (variant === 'hero') {
     return (
-      <Link to="/" className="logo logo-hero" aria-label="와우쓰리디 토이북 메인페이지로">
+      <a href="/" onClick={goLandingWithReload} className="logo logo-hero" aria-label="와우쓰리디 토이북 메인페이지 새로고침 및 이동">
         <img src="/logo.jpg" alt="wow3d-Toybook · 와우쓰리디 - 토이북" className="logo-hero-img" />
-      </Link>
+      </a>
     );
   }
 
   return (
-    <Link to="/" className="logo" aria-label="와우쓰리디 토이북 메인페이지로">
+    <a href="/" onClick={goLandingWithReload} className="logo" aria-label="와우쓰리디 토이북 메인페이지 새로고침 및 이동">
       <img src="/icon.svg" width="42" height="42" alt="" aria-hidden className="logo-mark" />
       <span className="logo-wordmark">
         <strong className="logo-en">
@@ -20,7 +28,7 @@ export function Logo({ variant = 'header' }: { variant?: 'header' | 'hero' }) {
         </strong>
         <small className="logo-ko">와우쓰리디 - 토이북</small>
       </span>
-    </Link>
+    </a>
   );
 }
 
