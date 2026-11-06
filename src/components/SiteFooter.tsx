@@ -21,7 +21,14 @@ export default function SiteFooter() {
           </Link>
         ))}
       </nav>
-      <span className="footer-links">개인정보처리방침 · 이용약관 · 사업자 정보 (정식 출시 때 공개)</span>
+      <nav className="footer-nav footer-legal" aria-label="약관과 정책">
+        <Link to="/privacy">
+          <strong>개인정보처리방침</strong>
+        </Link>
+        <Link to="/terms">이용약관</Link>
+        <Link to="/licenses">오픈소스 라이선스</Link>
+      </nav>
+      <span className="footer-links">사업자 정보는 정식 출시 때 공개해요</span>
       <span>© 2026 wow3d-Toybook (와우쓰리디 - 토이북)</span>
     </footer>
   );

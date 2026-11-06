@@ -8,6 +8,7 @@ import ParentGate from './pages/ParentGate';
 import ParentDashboard from './pages/ParentDashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import { AboutPage, FaqPage, FigurePage, SafetyPage } from './pages/InfoPages';
+import { LicensesPage, PrivacyPage, TermsPage } from './pages/LegalPages';
 import { useSeo } from './seo';
 
 export default function App() {
@@ -22,6 +23,9 @@ export default function App() {
       <Route path="/figure" element={<FigurePage />} />
       <Route path="/safety" element={<SafetyPage />} />
       <Route path="/faq" element={<FaqPage />} />
+      <Route path="/privacy" element={<PrivacyPage />} />
+      <Route path="/terms" element={<TermsPage />} />
+      <Route path="/licenses" element={<LicensesPage />} />
       <Route path="/login" element={<Login />} />
       <Route path="/profiles" element={<ProfileSelect />} />
       <Route path="/shelf/:childId" element={<Bookshelf />} />

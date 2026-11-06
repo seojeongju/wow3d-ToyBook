@@ -63,6 +63,27 @@ export const PAGE_META: Record<string, PageMeta> = {
     priority: 0.7,
     changefreq: 'monthly',
   },
+  '/privacy': {
+    title: '개인정보처리방침 | 와우쓰리디 토이북',
+    description:
+      '토이북이 처리하는 정보와 목적, 만 14세 미만 아동 개인정보 보호, 보관 기간과 파기, 처리 위탁과 국외 이전, 이용자 권리를 안내해요. 정식 출시 전 초안이에요.',
+    priority: 0.3,
+    changefreq: 'monthly',
+  },
+  '/terms': {
+    title: '이용약관 | 와우쓰리디 토이북',
+    description:
+      '토이북 서비스 내용, 보호자 회원과 아동 이용, 만든 그림책과 캐릭터의 권리, 주문 제작 피규어의 청약철회 안내를 담은 이용약관이에요. 정식 출시 전 초안이에요.',
+    priority: 0.3,
+    changefreq: 'monthly',
+  },
+  '/licenses': {
+    title: '오픈소스 라이선스 | 와우쓰리디 토이북',
+    description:
+      '토이북이 사용하는 React, React Router, 프리텐다드, 배민 주아체 등 오픈소스 소프트웨어와 글꼴의 저작권자와 라이선스(MIT, SIL Open Font License) 안내예요.',
+    priority: 0.2,
+    changefreq: 'monthly',
+  },
 };
 
 export const PUBLIC_ROUTES = Object.keys(PAGE_META);
