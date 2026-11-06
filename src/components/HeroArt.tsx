@@ -105,7 +105,11 @@ interface Burst {
  */
 export default function HeroArt() {
   const stageRef = useRef<HTMLDivElement>(null);
-  const [charId, setCharId] = useState<HeroCharId>('star');
+  const [charIdx, setCharIdx] = useState(0);
+  // 왼쪽 하단 버튼에 순차 표시되는 캐릭터 인덱스 (평소에는 하나씩 순환, 클릭 시 즉시 변신)
+  const [pickerIdx, setPickerIdx] = useState(1);
+  const [pickerHovered, setPickerHovered] = useState(false);
+  const [swapCount, setSwapCount] = useState(0);
   const [lineIdx, setLineIdx] = useState(0);
   const [currentSpeech, setCurrentSpeech] = useState(HERO_CHARACTERS[0].lines[0]);
   const [bouncing, setBouncing] = useState(false);
@@ -113,9 +117,10 @@ export default function HeroArt() {
   const [bursts, setBursts] = useState<Burst[]>([]);
   const bounceTimer = useRef<number>();
 
-  const activeChar = HERO_CHARACTERS.find((c) => c.id === charId) ?? HERO_CHARACTERS[0];
+  const activeChar = HERO_CHARACTERS[charIdx] ?? HERO_CHARACTERS[0];
+  const pickerChar = HERO_CHARACTERS[pickerIdx] ?? HERO_CHARACTERS[0];
 
-  // 달님 토끼·꼬마 공룡 이미지 미리 로드 (클릭 시 지연 없이 즉시 전환)
+  // 5종 캐릭터 이미지 미리 로드 (클릭 시 지연 없이 즉시 전환)
   useEffect(() => {
     HERO_CHARACTERS.forEach((c) => {
       const img = new Image();
@@ -126,6 +131,15 @@ export default function HeroArt() {
       stopSpeaking();
     };
   }, []);
+
+  // 왼쪽 하단 캐릭터명 버튼을 2.6초마다 순차 변경 (마우스 오버 중에는 멈춰서 클릭하기 쉽게 유지)
+  useEffect(() => {
+    if (pickerHovered) return;
+    const timer = window.setInterval(() => {
+      setPickerIdx((prev) => (prev + 1) % HERO_CHARACTERS.length);
+    }, 2600);
+    return () => window.clearInterval(timer);
+  }, [pickerHovered, charIdx]);
 
   const handlePointerMove = (e: PointerEvent<HTMLDivElement>) => {
     const el = stageRef.current;
@@ -190,10 +204,18 @@ export default function HeroArt() {
     triggerBounceAndSpeak(text);
   };
 
-  const selectCharacter = (e: MouseEvent<HTMLButtonElement>, target: HeroCharacter) => {
+  const handleCycleCharacter = (e: MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
-    spawnBurst(52, 42);
-    setCharId(target.id);
+    // 버튼에 표시 중인 캐릭터가 현재 캐릭터와 다르면 그 캐릭터로 즉시 변신,
+    // 같으면(연속 클릭 시) 다음 순서 캐릭터로 즉시 변신
+    const nextCharIdx =
+      pickerIdx !== charIdx ? pickerIdx : (charIdx + 1) % HERO_CHARACTERS.length;
+    const target = HERO_CHARACTERS[nextCharIdx];
+
+    spawnBurst(60, 36);
+    setCharIdx(nextCharIdx);
+    setPickerIdx(nextCharIdx);
+    setSwapCount((c) => c + 1);
     setLineIdx(1);
     triggerBounceAndSpeak(target.lines[0]);
   };
@@ -208,7 +230,7 @@ export default function HeroArt() {
         onClick={handleStageClick}
         role="button"
         tabIndex={0}
-        aria-label={`${activeChar.name} 3D 피규어 마법 무대 — 누르면 인사를 건네고 아래 버튼으로 캐릭터를 바꿀 수 있어요`}
+        aria-label={`${activeChar.name} 3D 피규어 마법 무대 — 누르면 인사를 건네고 왼쪽 아래 버튼으로 캐릭터를 바꿀 수 있어요`}
         onKeyDown={(e) => {
           if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();
@@ -219,16 +241,17 @@ export default function HeroArt() {
         {/* 뒤쪽 오로라 후광 */}
         <div className="hero-aura" aria-hidden />
 
-        {/* 메인 3D 클레이 히어로 이미지 카드 (캐릭터 전환 시 팝 애니메이션) */}
+        {/* 메인 3D 클레이 히어로 이미지 카드 (캐릭터 전환 시 줌인 → 제자리 복귀 애니메이션) */}
         <div className="hero-card-3d">
           <img
-            key={activeChar.id}
+            key={`${activeChar.id}-${swapCount}`}
             src={activeChar.image}
             alt={activeChar.alt}
-            className="hero-art hero-art-img hero-char-swap"
+            className={`hero-art hero-art-img ${swapCount > 0 ? 'hero-char-zoom-settle' : ''}`}
             width={1200}
             height={900}
           />
+          {swapCount > 0 && <span key={swapCount} className="hero-zoom-ring" aria-hidden />}
 
           {/* 동화책에서 피어오르는 마법 빛 방울 6개 */}
           <div className="hero-particles" aria-hidden>
@@ -278,32 +301,23 @@ export default function HeroArt() {
           <ClayArt name="heart" size={40} />
         </div>
 
-        {/* 하단: 클릭해서 캐릭터를 바꾸는 3D 주인공 변신 선택 바 */}
-        <div
-          className="hero-char-picker"
-          role="group"
-          aria-label="책 속 주인공 3D 캐릭터 바꿔 보기"
-          onClick={(e) => e.stopPropagation()}
+        {/* 왼쪽 하단: 캐릭터명이 하나씩 순차 변경되고 클릭하면 즉시 변신하는 단일 버튼 */}
+        <button
+          type="button"
+          className={`hero-char-cycler tone-${pickerChar.tone}`}
+          onClick={handleCycleCharacter}
+          onMouseEnter={() => setPickerHovered(true)}
+          onMouseLeave={() => setPickerHovered(false)}
+          aria-label={`주인공 캐릭터 바꾸기 — 현재 표시: ${pickerChar.name} (클릭하면 변신해요)`}
         >
-          <span className="hero-picker-label">주인공 변신</span>
-          {HERO_CHARACTERS.map((c) => {
-            const on = c.id === activeChar.id;
-            return (
-              <button
-                key={c.id}
-                type="button"
-                className={`hero-char-btn tone-${c.tone} ${on ? 'active' : ''}`}
-                aria-pressed={on}
-                onClick={(e) => selectCharacter(e, c)}
-              >
-                <span className="hero-char-avatar" aria-hidden>
-                  <ClayArt name={c.art} size={26} />
-                </span>
-                <span className="hero-char-name">{c.name}</span>
-              </button>
-            );
-          })}
-        </div>
+          <span key={pickerChar.id} className="hero-cycler-inner">
+            <span className="hero-char-avatar" aria-hidden>
+              <ClayArt name={pickerChar.art} size={28} />
+            </span>
+            <span className="hero-char-name">{pickerChar.name}</span>
+          </span>
+          <span className="hero-cycler-tag">변신 ↻</span>
+        </button>
       </div>
     </figure>
   );
