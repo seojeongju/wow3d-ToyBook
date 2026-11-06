@@ -1,5 +1,5 @@
 import type { Env } from '../_lib/env';
-import { error, familyPrefix, json, newId, requireParent } from '../_lib/http';
+import { error, familyPrefix, json, newId, requireParentForWrite } from '../_lib/http';
 
 const MAX_BYTES = 20 * 1024 * 1024;
 
@@ -12,7 +12,7 @@ const ALLOWED: Record<string, string> = {
 };
 
 export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
-  const parentId = await requireParent(request, env);
+  const parentId = await requireParentForWrite(request, env);
   if (parentId instanceof Response) return parentId;
 
   let form: FormData;

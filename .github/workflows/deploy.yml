@@ -1,0 +1,56 @@
+# main 에 push 하면 Cloudflare Pages(wow3d-toybook)로 자동 배포
+# 필요한 저장소 Secrets: CLOUDFLARE_API_TOKEN (권한: Cloudflare Pages 편집, D1 편집), CLOUDFLARE_ACCOUNT_ID
+name: Deploy to Cloudflare Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - name: Check secrets
+        id: check
+        run: |
+          if [ -z "$CLOUDFLARE_API_TOKEN" ]; then
+            echo "::warning::CLOUDFLARE_API_TOKEN 이 없어 배포를 건너뜁니다 (README 의 배포 절 참고)"
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/checkout@v4
+        if: steps.check.outputs.ready == 'true'
+
+      - uses: actions/setup-node@v4
+        if: steps.check.outputs.ready == 'true'
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install
+        if: steps.check.outputs.ready == 'true'
+        run: npm ci
+
+      - name: Typecheck & build
+        if: steps.check.outputs.ready == 'true'
+        run: npm run typecheck && npm run build
+
+      - name: Apply D1 migrations
+        if: steps.check.outputs.ready == 'true'
+        run: npx wrangler d1 migrations apply toybook-db --remote
+
+      - name: Deploy
+        if: steps.check.outputs.ready == 'true'
+        run: npx wrangler pages deploy dist --project-name wow3d-toybook --branch main --commit-hash "$GITHUB_SHA"

@@ -32,24 +32,38 @@ cd D:\Program_DEV\wow3d-ToyBook
 npm install
 npm run db:migrate:local     # 로컬 D1 에 테이블 만들기
 npm run db:seed:local        # 데모 아이·책 넣기
+copy .dev.vars.example .dev.vars   # 로컬 비밀값 (책 생성·업로드 허용 포함)
 npm run preview              # 빌드 후 http://localhost:8788 에서 화면+API 함께 실행
 ```
 
 로컬 D1·R2 는 `.wrangler/` 폴더 안에 흉내 내서 만들어지므로 Cloudflare 계정 없이도 돌아갑니다.
 
-## Cloudflare 에 배포하기
+## Cloudflare 배포 (운영 중)
 
-1. 로그인: `npx wrangler login`
-2. D1 만들기: `npx wrangler d1 create toybook-db` → 출력된 `database_id` 를 `wrangler.toml` 에 붙여 넣기
-3. R2 만들기: `npx wrangler r2 bucket create toybook-files`
-4. 운영 DB 에 테이블 만들기: `npm run db:migrate:remote`
-5. 배포 방법 중 하나 선택
-   - **직접 올리기:** `npm run deploy` (처음 한 번은 Pages 프로젝트 이름을 물어봄 → `wow3d-toybook`)
-   - **GitHub 연결(권장):** 이 폴더를 GitHub 저장소에 올리고, Cloudflare 대시보드 > Workers & Pages > 만들기 > Pages > Git 연결. 빌드 명령 `npm run build`, 출력 폴더 `dist`. 이후 push 할 때마다 자동 배포
-6. Pages 프로젝트 > 설정 > 바인딩에서 D1 `DB` → `toybook-db`, R2 `BUCKET` → `toybook-files` 가 연결됐는지 확인 (`wrangler.toml` 이 있으면 자동 적용)
-7. API 키는 Pages > 설정 > 환경 변수에 **암호화**로 추가 (`.dev.vars.example` 참고)
+- 주소: **https://wow3d-toybook.pages.dev**
+- 리소스 (모두 APAC): Pages 프로젝트 `wow3d-toybook`, D1 `toybook-db`, R2 `toybook-files`. 바인딩은 `wrangler.toml` 에서 자동 적용
+- **로그인 연동 전까지 운영은 보기 전용**입니다. 책 생성·업로드 API 는 `ALLOW_DEMO_WRITES=true` 인 곳(로컬 `.dev.vars`)에서만 열립니다. 운영 환경 변수에는 넣지 마세요.
+- 운영 DB 에는 지금 데모 데이터(`seed/demo.sql`)가 들어 있습니다. 로그인 연동 후 실제 가입을 받기 전에 지웁니다.
 
-> 데모 데이터(`seed/demo.sql`)는 운영 DB 에는 넣지 마세요.
+### 자동 배포 (GitHub Actions)
+
+`main` 에 push 하면 `.github/workflows/deploy.yml` 이 타입 검사 → 빌드 → D1 마이그레이션 → Pages 배포를 합니다.
+처음 한 번 GitHub 저장소 **Settings > Secrets and variables > Actions > New repository secret** 에 두 값을 등록해야 합니다 (없으면 배포 단계는 건너뜀).
+
+| 이름 | 값 |
+|---|---|
+| `CLOUDFLARE_ACCOUNT_ID` | `85c8e953bdefb825af5374f0d66ca5dc` |
+| `CLOUDFLARE_API_TOKEN` | Cloudflare 대시보드 > 내 프로필 > API 토큰 > 토큰 만들기 > 사용자 지정 토큰. 권한: **계정 · Cloudflare Pages · 편집**, **계정 · D1 · 편집** |
+
+### 손으로 배포
+
+```powershell
+npx wrangler login
+npm run db:migrate:remote   # 새 마이그레이션이 있을 때
+npm run deploy
+```
+
+API 키(Claude, 이미지, Meshy 등)는 Pages 프로젝트 > 설정 > 변수 및 비밀에 **암호화**로 추가합니다 (`.dev.vars.example` 참고).
 
 ## 폴더 구조
 
@@ -65,6 +79,7 @@ src/                  화면 (React)
   pages/              ProfileSelect, Bookshelf, BookViewer, ParentGate
   styles.css          디자인 토큰 (PRD 8.3 크림 배경·파스텔·주황 강조, 64px 버튼)
 wrangler.toml         Cloudflare 설정 (D1·R2 바인딩)
+.github/workflows/    main push → Cloudflare Pages 자동 배포
 ```
 
 ## 다음 개발 순서 (PRD 13장 MVP 기준)

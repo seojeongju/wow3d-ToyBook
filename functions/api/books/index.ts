@@ -1,5 +1,5 @@
 import type { Env } from '../../_lib/env';
-import { error, familyPrefix, json, newId, requireParent } from '../../_lib/http';
+import { error, familyPrefix, json, newId, requireParent, requireParentForWrite } from '../../_lib/http';
 
 const MAX_PAGES = 32;
 const MAX_TEXT = 1000;
@@ -29,7 +29,7 @@ interface CreateBookBody {
 }
 
 export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
-  const parentId = await requireParent(request, env);
+  const parentId = await requireParentForWrite(request, env);
   if (parentId instanceof Response) return parentId;
 
   let body: CreateBookBody;

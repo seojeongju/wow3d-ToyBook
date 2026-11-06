@@ -1,5 +1,8 @@
 # 로컬 개발용 비밀값: 이 파일을 .dev.vars 로 복사해서 채우기 (.dev.vars 는 git 에 올리지 않음)
 # 운영 환경은 Cloudflare Pages > 설정 > 환경 변수에 "암호화" 로 추가
+# 로그인 연동 전 임시: 로컬에서만 책 생성·업로드 허용 (운영에는 넣지 말 것)
+ALLOW_DEMO_WRITES=true
+
 ANTHROPIC_API_KEY=
 IMAGE_API_KEY=
 MESHY_API_KEY=

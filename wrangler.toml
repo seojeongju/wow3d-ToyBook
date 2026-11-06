@@ -6,8 +6,8 @@ pages_build_output_dir = "dist"
 [[d1_databases]]
 binding = "DB"
 database_name = "toybook-db"
-# `npx wrangler d1 create toybook-db` 출력값으로 교체 (로컬 실행은 이 값 그대로 동작)
-database_id = "00000000-0000-0000-0000-000000000000"
+# 운영 D1 (APAC). 로컬 실행은 .wrangler/ 의 흉내 DB 를 쓰므로 영향 없음
+database_id = "9444985d-45df-4aa1-ae33-869615b982f2"
 migrations_dir = "migrations"
 
 [[r2_buckets]]
