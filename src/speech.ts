@@ -135,16 +135,24 @@ export interface SpeakOptions {
   cacheKey?: string;
   style?: 'story' | 'mascot';
   useServerTts?: boolean;
+  /** 읽는 진행률 0~1 (동화 극장 글자 하이라이트용) */
+  onProgress?: (fraction: number) => void;
 }
 
-function playAudioUrl(url: string, onEnd?: () => void, onFallback?: () => void) {
+function playAudioUrl(url: string, onEnd?: () => void, onFallback?: () => void, onProgress?: (fraction: number) => void) {
   const audio = new Audio(url);
   currentAudio = audio;
+  if (onProgress) {
+    audio.ontimeupdate = () => {
+      if (audio.duration > 0 && isFinite(audio.duration)) onProgress(Math.min(1, audio.currentTime / audio.duration));
+    };
+  }
   let finished = false;
   const done = () => {
     if (finished) return;
     finished = true;
     if (currentAudio === audio) currentAudio = null;
+    onProgress?.(1);
     onEnd?.();
   };
   audio.onended = done;
@@ -184,7 +192,14 @@ function speakWithBrowser(text: string, opts: SpeakOptions) {
 
   u.rate = opts.style === 'story' ? 0.94 : 0.98;
   u.pitch = 1.0;
-  u.onend = () => opts.onEnd?.();
+  if (opts.onProgress) {
+    const total = Math.max(1, cleaned.length);
+    u.onboundary = (e) => opts.onProgress?.(Math.min(1, (e.charIndex + (e.charLength || 1)) / total));
+  }
+  u.onend = () => {
+    opts.onProgress?.(1);
+    opts.onEnd?.();
+  };
   u.onerror = () => opts.onEnd?.();
   synth.speak(u);
 }
@@ -200,14 +215,14 @@ export function speak(text: string, opts: SpeakOptions = {}): boolean {
 
   const presetUrl = (opts.cacheKey && PRESET_AUDIO[opts.cacheKey]) || PRESET_AUDIO[trimmed];
   if (presetUrl) {
-    playAudioUrl(presetUrl, opts.onEnd, () => speakWithBrowser(trimmed, opts));
+    playAudioUrl(presetUrl, opts.onEnd, () => speakWithBrowser(trimmed, opts), opts.onProgress);
     return true;
   }
 
   const memKey = `${opts.style ?? 'story'}:${trimmed}`;
   const cachedBlobUrl = blobCache.get(memKey);
   if (cachedBlobUrl) {
-    playAudioUrl(cachedBlobUrl, opts.onEnd, () => speakWithBrowser(trimmed, opts));
+    playAudioUrl(cachedBlobUrl, opts.onEnd, () => speakWithBrowser(trimmed, opts), opts.onProgress);
     return true;
   }
 
@@ -233,7 +248,7 @@ export function speak(text: string, opts: SpeakOptions = {}): boolean {
           const blob = await res.blob();
           const url = URL.createObjectURL(blob);
           blobCache.set(memKey, url);
-          playAudioUrl(url, opts.onEnd, () => speakWithBrowser(trimmed, opts));
+          playAudioUrl(url, opts.onEnd, () => speakWithBrowser(trimmed, opts), opts.onProgress);
           return;
         }
 
