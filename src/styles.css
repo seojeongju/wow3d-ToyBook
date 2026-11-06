@@ -1,3 +1,12 @@
+/* 주아체 화면용 작은 파일 (scripts/subset-fonts.mjs 가 빌드 때 생성, index.html 에서 미리 불러옴) */
+@font-face {
+  font-family: 'Jua UI';
+  src: url('/fonts/jua-ui.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
 /* 디자인 토큰: 라벤더 + 파스텔(살구·분홍·노랑·민트) 톤, 점토 질감 아이콘, 둥근 카드.
    눈부심 방지로 순백·형광 배경은 쓰지 않음. 버튼은 최소 64px (PRD 8.4) */
 :root {
@@ -27,7 +36,7 @@
   --shadow-sm: 0 4px 14px rgba(108, 82, 180, 0.08);
   /* 본문: 프리텐다드, 제목: 둥근 주아체 (둘 다 자체 호스팅) */
   --font: 'Pretendard Variable', Pretendard, 'Apple SD Gothic Neo', 'Malgun Gothic', system-ui, sans-serif;
-  --font-display: 'Jua', var(--font);
+  --font-display: 'Jua UI', 'Jua', var(--font);
 
   color-scheme: light;
 }
@@ -50,7 +59,7 @@ html {
 
 html.fonts-loading body {
   opacity: 0;
-  animation: fonts-timeout 0s linear 3s forwards;
+  animation: fonts-timeout 0s linear 2s forwards;
 }
 
 @keyframes fonts-timeout {
@@ -3450,7 +3459,7 @@ a {
   }
   /* 폰트 대기 화면의 3초 안전장치는 움직임 줄이기 설정에서도 유지 */
   html.fonts-loading body {
-    animation: fonts-timeout 0s linear 3s forwards !important;
+    animation: fonts-timeout 0s linear 2s forwards !important;
   }
 }
 
@@ -3541,3 +3550,241 @@ a {
   filter: drop-shadow(0 4px 6px rgba(212, 86, 106, 0.3));
 }
 
+/* ───────── 공개 소개 페이지 (토이북 소개·피규어 안내·안심 약속·자주 묻는 질문) ───────── */
+.crumbs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 22px 8px 0;
+  color: var(--ink-soft);
+  font-size: 15px;
+}
+
+.crumbs a {
+  color: var(--primary-deep);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.info-hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin-top: 14px;
+  padding: 30px 30px 30px 34px;
+  border-radius: calc(var(--radius) + 8px);
+  background: linear-gradient(135deg, #efe7fd, #fdf3ee);
+  box-shadow: var(--shadow);
+}
+
+.info-hero .clay-art {
+  flex: none;
+}
+
+.info-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(30px, 5vw, 46px);
+  font-weight: 400;
+  line-height: 1.25;
+}
+
+.info-lead {
+  margin: 12px 0 0;
+  max-width: 720px;
+  color: var(--ink);
+  font-size: clamp(17px, 2.2vw, 20px);
+  line-height: 1.75;
+}
+
+.info-toc {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 20px 0 0;
+}
+
+.info-toc a {
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--primary-deep);
+  font-size: 15px;
+  font-weight: 700;
+  text-decoration: none;
+  box-shadow: var(--clay-soft);
+}
+
+.info-section {
+  margin-top: 40px;
+  scroll-margin-top: 96px;
+}
+
+.info-section h2,
+.info-related h2 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(24px, 3.6vw, 32px);
+  font-weight: 400;
+  line-height: 1.35;
+}
+
+.info-answer {
+  margin: 10px 0 0;
+  max-width: 780px;
+  font-size: 18px;
+  line-height: 1.8;
+}
+
+.info-cards {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+  margin: 18px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.info-cards li,
+.info-steps li {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 18px;
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.info-cards h3,
+.info-steps h3 {
+  margin: 2px 0 4px;
+  font-family: var(--font-display);
+  font-size: 21px;
+  font-weight: 400;
+}
+
+.info-cards p,
+.info-steps p {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+.info-steps {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+  margin: 18px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.info-steps .step-no {
+  position: static;
+  flex: none;
+}
+
+.info-promises {
+  margin-top: 18px;
+}
+
+.info-section .faq {
+  margin: 18px 0 0;
+  max-width: none;
+}
+
+.info-links {
+  margin: 12px 0 0;
+  font-weight: 700;
+}
+
+.info-links a,
+.section-more a {
+  color: var(--primary-deep);
+}
+
+.section-more {
+  margin: 16px 0 0;
+  text-align: center;
+  font-weight: 800;
+}
+
+.info-related {
+  margin-top: 56px;
+}
+
+.related-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.related-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 64px;
+  padding: 0 20px;
+  border-radius: 22px;
+  background: var(--surface);
+  color: var(--ink);
+  font-weight: 800;
+  text-decoration: none;
+  box-shadow: var(--clay-soft);
+}
+
+.related-card svg {
+  color: var(--primary-deep);
+}
+
+.footer-nav {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px 16px;
+  margin: 6px 0;
+}
+
+.footer-nav a {
+  color: var(--ink-soft);
+  font-size: 15px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.footer-nav a:hover {
+  color: var(--primary-deep);
+}
+
+@media (min-width: 640px) {
+  .info-cards,
+  .related-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 900px) {
+  .info-cards.three {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .related-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .info-hero {
+    flex-direction: column-reverse;
+    align-items: flex-start;
+    padding: 24px;
+  }
+  .info-hero .clay-art {
+    width: 96px;
+    height: 96px;
+  }
+}

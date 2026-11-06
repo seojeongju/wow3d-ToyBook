@@ -131,11 +131,13 @@ export default function HeroArt() {
         {/* 메인 3D 클레이 히어로 이미지 카드 */}
         <div className="hero-card-3d">
           <img
-            src="/hero-art.jpg"
+            src="/hero-art.webp"
+            srcSet="/hero-art-800.webp 800w, /hero-art.webp 1200w"
+            sizes="(min-width: 900px) 560px, 92vw"
             alt="책상 위 펼친 그림책에서 귀여운 별곰 3D 피규어와 장난감 블록이 마법처럼 튀어나오는 모습"
             className="hero-art hero-art-img"
             width={1200}
-            height={900}
+            height={896}
             fetchPriority="high"
           />
 

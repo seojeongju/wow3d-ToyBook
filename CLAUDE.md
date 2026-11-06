@@ -12,7 +12,7 @@
 검색엔진(SEO), AI 답변 엔진(AEO: 네이버 AI 브리핑, 구글 AI 개요), 생성형 검색(GEO: ChatGPT·Claude·Perplexity·Gemini)이 **자바스크립트 없이도** 내용을 읽고 인용할 수 있어야 한다.
 
 ### 공개 페이지(검색 노출 대상)를 만들거나 고칠 때
-1. **미리 그리기(prerender)**: `src/seo.ts` 의 `PAGE_META` 에 경로를 추가하면 빌드(`npm run build`) 때 `scripts/prerender.mjs` 가 완성된 HTML 을 만든다. 빌드 후 `dist/<경로>/index.html` 에 본문 글자가 들어 있는지 확인. 미리 그리는 페이지는 첫 화면에서 `window`·`localStorage` 를 바로 쓰지 말 것(효과·이벤트 안에서만).
+1. **미리 그리기(prerender)**: `src/seo.ts` 의 `PAGE_META` 에 경로를 추가하면 빌드(`npm run build`) 때 `scripts/prerender.mjs` 가 완성된 HTML 을 만든다. 빌드 후 `dist/<경로>.html`(홈은 `dist/index.html`)에 본문 글자가 들어 있는지 확인. 주소는 끝에 `/` 없이(`/about`) 씀. 미리 그리는 페이지는 첫 화면에서 `window`·`localStorage` 를 바로 쓰지 말 것(효과·이벤트 안에서만).
 2. **페이지 정보**: `PAGE_META` 에 제목(브랜드 포함 60자 이내)·설명(80~160자) 작성 → `App.tsx` 의 `useSeo` 와 미리 그리기가 제목·설명·대표 주소(canonical)·공유 정보를 적용. 제목은 페이지마다 달라야 함.
 3. **제목 구조**: 페이지당 `<h1>` 하나, 그 아래 `<h2>`·`<h3>` 순서대로. 섹션은 `<section>` + 제목.
 4. **답이 되는 문장(AEO/GEO)**: 질문형 제목 아래 첫 문장에 바로 답("토이북은 ~예요"). 숫자·기준은 구체적으로(3~12세, 5·8·12cm). 확인되지 않은 수치·과장은 쓰지 않음.

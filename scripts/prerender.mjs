@@ -44,7 +44,8 @@ for (const route of PUBLIC_ROUTES) {
   const html = template
     .replace(/<!--seo-->[\s\S]*?<!--\/seo-->/, `<!--seo-->\n    ${headFor(route)}\n    <!--/seo-->`)
     .replace('<div id="root"></div>', `<div id="root" data-prerendered="${route}">${body}</div>`);
-  const out = route === '/' ? path.join(DIST, 'index.html') : path.join(DIST, route.replace(/^\//, ''), 'index.html');
+  // Cloudflare Pages 는 about.html 을 /about 으로 바로 내보냄 (about/index.html 이면 /about/ 로 308 이동이 생겨 대표 주소와 어긋남)
+  const out = route === '/' ? path.join(DIST, 'index.html') : path.join(DIST, route.replace(/^\//, '') + '.html');
   fs.mkdirSync(path.dirname(out), { recursive: true });
   fs.writeFileSync(out, html);
   pages++;

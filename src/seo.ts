@@ -35,6 +35,34 @@ export const PAGE_META: Record<string, PageMeta> = {
     priority: 1,
     changefreq: 'weekly',
   },
+  '/about': {
+    title: '토이북은 어떤 서비스인가요? | 와우쓰리디 토이북 소개',
+    description:
+      '토이북은 3D프린팅 회사 wow3d가 만든 3~12세 어린이 그림책 서비스예요. AI 맞춤 그림책, 읽어 주기, 3D 피규어까지 무엇을 할 수 있는지 소개해요.',
+    priority: 0.8,
+    changefreq: 'monthly',
+  },
+  '/figure': {
+    title: '그림책 캐릭터 3D 피규어 만들기 안내 | 와우쓰리디 토이북',
+    description:
+      '책 속 캐릭터가 5·8·12cm 3D 피규어가 되기까지. 3D 미리 보기, 출력 가능성 검사, wow3d 작업자 검수, 국내 출력·배송 과정과 아이 안전 안내를 정리했어요.',
+    priority: 0.8,
+    changefreq: 'monthly',
+  },
+  '/safety': {
+    title: '아이 안전·개인정보 보호 약속 | 와우쓰리디 토이북',
+    description:
+      '토이북은 아이 실명과 연락처를 받지 않고, 아이 사진을 AI 학습에 쓰지 않으며, 광고·채팅 없이 결제는 부모 잠금 뒤에 둬요. 어린이 안전 약속을 확인하세요.',
+    priority: 0.7,
+    changefreq: 'monthly',
+  },
+  '/faq': {
+    title: '자주 묻는 질문 | 와우쓰리디 토이북 어린이 그림책',
+    description:
+      '몇 살부터 쓸 수 있는지, 아이 사진은 안전한지, 피규어 크기와 주문, 사용 기기와 요금까지 토이북에 대해 부모님이 자주 묻는 질문에 답했어요.',
+    priority: 0.7,
+    changefreq: 'monthly',
+  },
 };
 
 export const PUBLIC_ROUTES = Object.keys(PAGE_META);
@@ -42,7 +70,8 @@ export const PUBLIC_ROUTES = Object.keys(PAGE_META);
 /** 검색에서 빼야 하는 화면 (아이 콘텐츠·개인 화면). robots.txt·_headers 와 맞춤 */
 export const PRIVATE_PREFIXES = ['/profiles', '/shelf/', '/book/', '/parent', '/dashboard', '/admin', '/login', '/api/'];
 
-export const OG_IMAGE = `${SITE_URL}/logo.jpg`;
+/** 공유 미리보기 이미지 1200×630 (scripts/optimize-images.mjs 로 생성) */
+export const OG_IMAGE = `${SITE_URL}/og-image.jpg`;
 
 /* ───────── 화면별 제목·설명 적용 (브라우저에서만) ───────── */
 
@@ -127,6 +156,28 @@ export function webAppLd(description: string) {
     description,
     audience: { '@type': 'PeopleAudience', suggestedMinAge: 3, suggestedMaxAge: 12 },
     publisher: { '@id': `${SITE_URL}/#organization` },
+  };
+}
+
+export function webPageLd(path: string, name: string, description: string) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'WebPage',
+    '@id': `${SITE_URL}${path}#webpage`,
+    url: SITE_URL + path,
+    name,
+    description,
+    inLanguage: 'ko-KR',
+    isPartOf: { '@id': `${SITE_URL}/#website` },
+    publisher: { '@id': `${SITE_URL}/#organization` },
+  };
+}
+
+export function breadcrumbLd(items: { name: string; path: string }[]) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: items.map((it, i) => ({ '@type': 'ListItem', position: i + 1, name: it.name, item: SITE_URL + it.path })),
   };
 }
 

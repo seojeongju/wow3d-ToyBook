@@ -7,6 +7,7 @@ import BookViewer from './pages/BookViewer';
 import ParentGate from './pages/ParentGate';
 import ParentDashboard from './pages/ParentDashboard';
 import AdminDashboard from './pages/AdminDashboard';
+import { AboutPage, FaqPage, FigurePage, SafetyPage } from './pages/InfoPages';
 import { useSeo } from './seo';
 
 export default function App() {
@@ -16,6 +17,11 @@ export default function App() {
   return (
     <Routes>
       <Route path="/" element={<Home />} />
+      {/* 공개 소개 페이지 (src/seo.ts PAGE_META 에 등록 → 미리 그리기·사이트맵) */}
+      <Route path="/about" element={<AboutPage />} />
+      <Route path="/figure" element={<FigurePage />} />
+      <Route path="/safety" element={<SafetyPage />} />
+      <Route path="/faq" element={<FaqPage />} />
       <Route path="/login" element={<Login />} />
       <Route path="/profiles" element={<ProfileSelect />} />
       <Route path="/shelf/:childId" element={<Bookshelf />} />

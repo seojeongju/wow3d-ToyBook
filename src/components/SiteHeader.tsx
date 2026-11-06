@@ -14,7 +14,7 @@ export function Logo({ variant = 'header' }: { variant?: 'header' | 'hero' }) {
   if (variant === 'hero') {
     return (
       <a href="/" onClick={goLandingWithReload} className="logo logo-hero" aria-label="와우쓰리디 토이북 메인페이지 새로고침 및 이동">
-        <img src="/logo.jpg" alt="wow3d-Toybook · 와우쓰리디 - 토이북" className="logo-hero-img" />
+        <img src="/logo-440.webp" width={440} height={440} alt="wow3d-Toybook · 와우쓰리디 - 토이북" className="logo-hero-img" />
       </a>
     );
   }
@@ -32,11 +32,13 @@ export function Logo({ variant = 'header' }: { variant?: 'header' | 'hero' }) {
   );
 }
 
+// 공개 페이지는 실제 주소로 연결 (검색엔진이 따라가는 내부 링크), 홈 섹션은 해시 링크
 const NAV = [
+  { href: '/about', label: '토이북 소개' },
   { href: '/#how', label: '만드는 방법' },
-  { href: '/#preview', label: '미리 읽기' },
-  { href: '/#safety', label: '안심 약속' },
-  { href: '/#faq', label: '자주 묻는 질문' },
+  { href: '/figure', label: '피규어 안내' },
+  { href: '/safety', label: '안심 약속' },
+  { href: '/faq', label: '자주 묻는 질문' },
 ];
 
 const SUB_NAV = [
@@ -129,11 +131,17 @@ export default function SiteHeader() {
     <header className={`site-header ${open ? 'menu-open' : ''}`}>
       <Logo />
       <nav id="site-nav" className="site-nav" aria-label="주요 메뉴">
-        {NAV.map((n) => (
-          <a key={n.href} href={n.href} onClick={() => setOpen(false)}>
-            {n.label}
-          </a>
-        ))}
+        {NAV.map((n) =>
+          n.href.includes('#') ? (
+            <a key={n.href} href={n.href} onClick={() => setOpen(false)}>
+              {n.label}
+            </a>
+          ) : (
+            <Link key={n.href} to={n.href} onClick={() => setOpen(false)}>
+              {n.label}
+            </Link>
+          ),
+        )}
         <Link to="/login" className="nav-login">
           로그인
         </Link>

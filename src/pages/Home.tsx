@@ -2,12 +2,14 @@ import { Link } from 'react-router-dom';
 import { api } from '../api';
 import HeroArt from '../components/HeroArt';
 import { ClayIcon, LineIcon, type ClayIconName } from '../components/Icons';
-import SiteHeader, { Logo } from '../components/SiteHeader';
+import SiteHeader from '../components/SiteHeader';
 import Tobi from '../components/Tobi';
 import { useAsync } from '../useAsync';
 import ClayArt, { ClayEmoji } from '../components/ClayArt';
 import JsonLd from '../components/JsonLd';
 import { faqLd, howToLd, organizationLd, PAGE_META, webAppLd, websiteLd } from '../seo';
+import SiteFooter from '../components/SiteFooter';
+import { AGES, FAQ_HOME as FAQ, PROMISES, STEPS } from '../content/site';
 
 // 성능 목표(PRD 4.1)는 아직 측정 전이라 싣지 않고, 정해진 사양만 보여 줌
 const FACTS: { icon: ClayIconName; value: string; label: string }[] = [
@@ -17,24 +19,6 @@ const FACTS: { icon: ClayIconName; value: string; label: string }[] = [
   { icon: 'shield', value: '광고 0 · 채팅 0', label: '아이 화면 안심 설계' },
 ];
 
-const STEPS: { icon: ClayIconName; title: string; body: string }[] = [
-  {
-    icon: 'drawing',
-    title: '아이 이야기 들려주기',
-    body: '이름과 나이, 좋아하는 것, 들려주고 싶은 주제(양치하기, 정리정돈, 동생 생긴 날…)를 골라요.',
-  },
-  {
-    icon: 'studio',
-    title: '그림책 완성하기',
-    body: 'AI가 아이 눈높이에 맞는 문장과 그림으로 책을 만들고, 부모님이 한 쪽씩 다듬어요.',
-  },
-  {
-    icon: 'factory',
-    title: '피규어로 받기',
-    body: '책 속 캐릭터를 3D로 미리 보고, wow3d 작업자가 꼼꼼히 검수한 뒤 출력해 보내 드려요.',
-  },
-];
-
 const FEATURES: { icon: ClayIconName; title: string; body: string }[] = [
   { icon: 'studio', title: '이야기 공방', body: '아이 이름과 좋아하는 것을 넣으면 AI가 줄거리와 그림을 함께 만들어요.' },
   { icon: 'theater', title: '동화 극장', body: '한 쪽씩 넘기며 읽고, 소리 버튼을 누르면 또박또박 읽어 줘요.' },
@@ -42,55 +26,6 @@ const FEATURES: { icon: ClayIconName; title: string; body: string }[] = [
   { icon: 'factory', title: '장난감 공장', body: '마음에 드는 캐릭터를 wow3d가 검수하고 출력해 피규어로 보내 드려요.' },
   { icon: 'drawing', title: '내 그림이 주인공', body: '아이가 종이에 그린 그림을 찍으면 책 속 그림이 되고 3D 캐릭터가 돼요.' },
   { icon: 'shield', title: '부모님 안심', body: '결제와 주문은 부모 잠금 뒤에 있어요. 광고도, 낯선 사람과의 채팅도 없어요.' },
-];
-
-// PRD 8.5 연령별 모드
-const AGES = [
-  { emoji: '🐣', name: '새싹', age: '3~5세', tone: 'yellow', body: '그림 고르기와 말로 하기만으로 책을 만들고, 읽어 주기와 스티커 중심으로 즐겨요.' },
-  { emoji: '🌱', name: '꼬마 작가', age: '6~8세', tone: 'mint', body: '쉬운 문장 고치기, 내 그림 올리기, 3D 마법 상자까지 이야기 공방을 모두 써요.' },
-  { emoji: '🌳', name: '작가', age: '9~12세', tone: 'lavender', body: '웹툰 칸 나누기, 말풍선 직접 쓰기, 피규어 받침대 이름 넣기까지 해 봐요.' },
-];
-
-// PRD 10장 비기능 요구사항(아동 개인정보·안전 환경·저작권·제품 안전)
-const PROMISES = [
-  { title: '아이 실명과 연락처를 받지 않아요', body: '아이는 부모님 계정 안에서 별명과 나이만으로 들어와요.' },
-  { title: '아이 사진과 그림은 우리 가족만 봐요', body: '가족별로 따로 보관하고, AI 학습에는 쓰지 않아요.' },
-  { title: '광고·외부 링크·채팅이 없어요', body: '아이 화면에는 다른 사이트로 나가는 길도, 모르는 사람과 대화하는 기능도 없어요.' },
-  { title: '결제와 주문은 부모님만', body: '아이는 "갖고 싶어요"만 누를 수 있고, 승인과 결제는 부모 잠금 뒤에서 해요.' },
-  { title: '유명 캐릭터는 만들지 않아요', body: '다른 작가와 회사의 캐릭터·그림체를 따라 하지 않도록 막아 저작권을 지켜요.' },
-  { title: '출력 전에 사람이 직접 검수해요', body: 'wow3d 작업자가 얇은 부분, 작은 부품, 마감 상태를 확인한 뒤 출력해요.' },
-];
-
-// 화면의 자주 묻는 질문과 FAQPage 구조화 데이터가 같은 내용을 씀 (AEO)
-const FAQ = [
-  {
-    q: '토이북은 어떤 서비스인가요?',
-    a: '토이북은 3D프린팅 회사 wow3d가 만든 어린이 그림책 서비스예요. 우리 아이가 주인공인 그림책을 AI로 만들어 읽고, 책 속 캐릭터를 3D 피규어로 받아 볼 수 있어요.',
-  },
-  {
-    q: '몇 살 아이가 쓸 수 있나요?',
-    a: '3~12세 어린이를 위해 만들었어요. 나이에 따라 새싹(3~5세), 꼬마 작가(6~8세), 작가(9~12세) 화면으로 바뀌어서 글을 아직 못 읽는 아이도 그림과 소리로 쓸 수 있어요.',
-  },
-  {
-    q: '아이 혼자 써도 괜찮나요?',
-    a: '부모님 계정 아래에 아이 프로필을 만들어 쓰는 방식이에요. 아이 화면에는 광고와 외부 링크가 없고, 결제·주문·설정은 어른만 풀 수 있는 부모 잠금 뒤에 있어요.',
-  },
-  {
-    q: '아이 사진이나 그림을 올려도 안전한가요?',
-    a: '올린 사진과 그림은 가족별로 나뉜 보관함에 비공개로 저장되고, 다른 가족은 열어 볼 수 없어요. AI 학습 데이터로도 쓰지 않아요.',
-  },
-  {
-    q: '피규어 가격과 제작 기간은 어떻게 되나요?',
-    a: '주문 기능을 여는 시점에 크기(5·8·12cm)와 재질별 가격, 제작·배송 기간을 함께 안내해 드릴게요. 모든 피규어는 국내에서 출력해 보내 드려요.',
-  },
-  {
-    q: '3세 미만 아이에게 피규어를 줘도 되나요?',
-    a: '피규어에는 작은 부분이 있을 수 있어 3세 미만 아이에게는 권하지 않아요. 주문할 때 크기와 재질에 맞는 안전 안내를 꼭 확인해 주세요.',
-  },
-  {
-    q: '지금 바로 쓸 수 있나요?',
-    a: '지금은 미리 보기 단계라 데모 그림책 읽기와 읽어 주기를 해 볼 수 있어요. 책 만들기, 3D 미리 보기, 피규어 주문은 차례로 열릴 예정이에요.',
-  },
 ];
 
 export default function Home() {
@@ -293,6 +228,9 @@ export default function Home() {
             </details>
           ))}
         </div>
+        <p className="section-more">
+          <Link to="/faq">질문 더 보기 →</Link>
+        </p>
       </section>
 
       <section className="cta-banner">
@@ -306,12 +244,7 @@ export default function Home() {
         </Link>
       </section>
 
-      <footer className="site-footer">
-        <Logo />
-        <span>wow3d가 만드는 우리 아이 맞춤 그림책과 피규어</span>
-        <span className="footer-links">개인정보처리방침 · 이용약관 · 사업자 정보 (정식 출시 때 공개)</span>
-        <span>© 2026 wow3d-Toybook (와우쓰리디 - 토이북)</span>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }
