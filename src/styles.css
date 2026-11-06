@@ -3964,3 +3964,24 @@ a {
 .footer-legal a {
   font-size: 14px;
 }
+
+/* 오프라인 안내 */
+.offline-notice {
+  position: fixed;
+  left: 50%;
+  top: calc(12px + env(safe-area-inset-top));
+  z-index: 120;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: max-content;
+  max-width: calc(100% - 24px);
+  padding: 8px 18px 8px 10px;
+  border-radius: 999px;
+  background: var(--ink);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+  transform: translateX(-50%);
+  box-shadow: var(--shadow);
+}

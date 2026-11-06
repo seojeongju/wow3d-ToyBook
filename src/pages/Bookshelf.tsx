@@ -33,6 +33,12 @@ export default function Bookshelf() {
   useEffect(() => setRoom(findRoom(loadRoomId(childId))), [childId]);
   useEffect(() => () => stopSpeaking(), []);
 
+  // 오프라인 보기: 책장에 꽂힌 책 내용을 미리 받아 두면 인터넷이 끊겨도 읽을 수 있음 (서비스 워커가 보관)
+  useEffect(() => {
+    if (books.status !== 'ok' || !navigator.serviceWorker?.controller) return;
+    for (const b of books.data) fetch(`/api/books/${encodeURIComponent(b.id)}`).catch(() => {});
+  }, [books]);
+
   // 안내는 잠깐 보여 주고 사라짐 (말로도 읽어 줌)
   const tell = (text: string) => {
     setNotice(text);

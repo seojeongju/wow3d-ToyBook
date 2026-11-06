@@ -44,3 +44,12 @@ requestAnimationFrame(() => {
     new Promise((done) => setTimeout(done, 1500)),
   ]).then(reveal);
 });
+
+// 오프라인 보기(PRD R-03): 운영 빌드에서 서비스 워커 등록 (public/sw.js)
+if (import.meta.env.PROD && 'serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(() => {
+      /* 등록 실패해도 온라인 이용에는 영향 없음 */
+    });
+  });
+}

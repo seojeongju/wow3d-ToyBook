@@ -26,6 +26,9 @@
 /api/*
   X-Robots-Tag: noindex, nofollow
 
+/sw.js
+  Cache-Control: no-cache
+
 /robots.txt
   Content-Type: text/plain; charset=utf-8
 /llms.txt

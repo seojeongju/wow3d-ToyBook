@@ -77,5 +77,9 @@ fs.writeFileSync(
 // llms.txt (생성형 AI 용 사이트 요약)
 fs.writeFileSync(path.join(DIST, 'llms.txt'), llmsTxt());
 
+// 서비스 워커 보관본 버전 (배포마다 새로 → 이전 보관본 정리)
+const swPath = path.join(DIST, 'sw.js');
+if (fs.existsSync(swPath)) fs.writeFileSync(swPath, fs.readFileSync(swPath, 'utf8').replace('__BUILD_ID__', Date.now().toString(36)));
+
 fs.rmSync(SSR, { recursive: true, force: true });
 console.log(`미리 그리기 완료: 페이지 ${pages}개, robots.txt · sitemap.xml · llms.txt 생성 (${SITE_URL})`);
