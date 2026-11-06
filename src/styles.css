@@ -43,7 +43,24 @@ body,
   min-height: 100%;
 }
 
+/* 폰트 준비 전에는 배경만 보여 주기 (main.tsx 가 fonts-loading 을 지움, 3초 뒤엔 CSS 만으로도 표시) */
+html {
+  background: var(--bg);
+}
+
+html.fonts-loading body {
+  opacity: 0;
+  animation: fonts-timeout 0s linear 3s forwards;
+}
+
+@keyframes fonts-timeout {
+  to {
+    opacity: 1;
+  }
+}
+
 body {
+  transition: opacity 0.25s ease-out;
   position: relative;
   overflow-x: hidden;
   background: var(--bg);
@@ -2153,6 +2170,10 @@ a {
   * {
     animation: none !important;
     transition: none !important;
+  }
+  /* 폰트 대기 화면의 3초 안전장치는 움직임 줄이기 설정에서도 유지 */
+  html.fonts-loading body {
+    animation: fonts-timeout 0s linear 3s forwards !important;
   }
 }
 
