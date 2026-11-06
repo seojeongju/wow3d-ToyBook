@@ -1,7 +1,7 @@
 {
-  "name": "토이북 ToyBook",
+  "name": "토이북",
   "short_name": "토이북",
-  "description": "AI 동화책 만들기 + 캐릭터 3D 프린팅 (by wow3d)",
+  "description": "우리 아이 맞춤 그림책 만들기와 캐릭터 피규어 (wow3d)",
   "lang": "ko",
   "start_url": "/",
   "display": "standalone",
