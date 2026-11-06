@@ -5290,3 +5290,82 @@ a {
   font-size: 14px;
   text-align: center;
 }
+
+/* 우리 집 책장: 넓은 화면에서는 스크롤 없이 한 화면에 (방이 남은 높이에 맞춰 커지고 줄어듦) */
+@media (min-width: 700px) and (min-height: 560px) {
+  .shelf-screen {
+    display: flex;
+    flex-direction: column;
+    height: 100dvh;
+    min-height: 0;
+    overflow: hidden;
+    /* 아래 고정 메뉴(한 줄, 약 86px) 만큼 비워 둠 */
+    padding-bottom: calc(98px + env(safe-area-inset-bottom));
+  }
+
+  .shelf-screen > * {
+    flex: none;
+  }
+
+  .shelf-screen .sub-header-wrap {
+    margin-bottom: 10px;
+  }
+
+  .shelf-screen .room-wrap {
+    display: flex;
+    flex: 1 1 0;
+    flex-direction: column;
+    min-height: 0;
+    margin: 0;
+    padding: 0;
+    overflow: visible;
+  }
+
+  .shelf-screen .room-fit {
+    display: grid;
+    flex: 1 1 0;
+    place-items: center;
+    min-height: 0;
+    container-type: size;
+  }
+
+  /* 너비와 높이 중 더 빠듯한 쪽에 맞춤 (비율은 방 모양 그대로) */
+  .shelf-screen .room {
+    width: min(100cqw, 100cqh / var(--room-ratio, 0.7));
+    min-width: 0;
+  }
+
+  .shelf-screen .room-pager {
+    margin-top: 4px;
+  }
+
+  /* 아래 메뉴는 그림과 글을 한 줄로 (누르는 높이 60px 유지) */
+  .shelf-screen .menu-btn {
+    flex-direction: row;
+    gap: 8px;
+    min-height: 60px;
+    font-size: 15px;
+  }
+
+  .shelf-screen .toast {
+    bottom: calc(108px + env(safe-area-inset-bottom));
+  }
+
+  .shelf-screen .room-skeleton {
+    flex: 1 1 0;
+    width: 100%;
+    min-height: 0;
+    aspect-ratio: auto;
+  }
+}
+
+/* 넓은 화면: 독서 별·피규어·바로 읽기 줄을 제목 줄 가운데 빈자리에 올려 방을 더 크게 */
+@media (min-width: 1180px) and (min-height: 560px) {
+  .shelf-screen .shelf-status-bar {
+    position: relative;
+    z-index: 1;
+    margin: -74px auto 14px;
+    padding: 6px 10px;
+    flex-wrap: nowrap;
+  }
+}

@@ -113,97 +113,100 @@ export default function ShelfScene({
   const current = pages[Math.min(page, pages.length - 1)] ?? [];
 
   return (
-    <div className="room-wrap">
-      <div className={`room ${nightMode ? 'is-night' : ''}`} style={{ aspectRatio: `1 / ${room.ratio}` }}>
-        {room.Art ? <room.Art palette={palette} /> : room.imageUrl && <img className="room-art" src={room.imageUrl} alt="" />}
+    <div className={`room-wrap ${pages.length > 1 ? 'has-pager' : ''}`}>
+      {/* 넓은 화면: 남은 화면 높이에 맞춰 방 크기를 정함 (스크롤 없이 한눈에) */}
+      <div className="room-fit" style={{ ['--room-ratio' as string]: room.ratio }}>
+        <div className={`room ${nightMode ? 'is-night' : ''}`} style={{ aspectRatio: `1 / ${room.ratio}` }}>
+          {room.Art ? <room.Art palette={palette} /> : room.imageUrl && <img className="room-art" src={room.imageUrl} alt="" />}
 
-        {/* 밤 무드등 오버레이 */}
-        {nightMode && <div className="room-night-veil" aria-hidden />}
+          {/* 밤 무드등 오버레이 */}
+          {nightMode && <div className="room-night-veil" aria-hidden />}
 
-        <span className="room-plaque" style={{ left: `${room.plaque.x * 100}%`, top: `${room.plaque.y * 100}%` }}>
-          {plaque}
-        </span>
+          <span className="room-plaque" style={{ left: `${room.plaque.x * 100}%`, top: `${room.plaque.y * 100}%` }}>
+            {plaque}
+          </span>
 
-        {/* 터치하면 켜지고 꺼지는 방 조명 스위치 */}
-        {room.lamp && onToggleNight && (
-          <button
-            type="button"
-            className={`room-lamp-btn ${nightMode ? 'on' : ''}`}
-            style={{ left: `${room.lamp.x * 100}%`, top: `${room.lamp.y * 100}%` }}
-            onClick={onToggleNight}
-            aria-pressed={nightMode}
-            aria-label={`${room.lamp.label} ${nightMode ? '끄기' : '켜기'}`}
-            title={`${room.lamp.label} 눌러 보기`}
-          >
-            <span className="room-lamp-halo" aria-hidden />
-            <span className="room-lamp-tag">{nightMode ? '🌙 무드등 켜짐' : '💡 조명 터치'}</span>
-          </button>
-        )}
+          {/* 터치하면 켜지고 꺼지는 방 조명 스위치 */}
+          {room.lamp && onToggleNight && (
+            <button
+              type="button"
+              className={`room-lamp-btn ${nightMode ? 'on' : ''}`}
+              style={{ left: `${room.lamp.x * 100}%`, top: `${room.lamp.y * 100}%` }}
+              onClick={onToggleNight}
+              aria-pressed={nightMode}
+              aria-label={`${room.lamp.label} ${nightMode ? '끄기' : '켜기'}`}
+              title={`${room.lamp.label} 눌러 보기`}
+            >
+              <span className="room-lamp-halo" aria-hidden />
+              <span className="room-lamp-tag">{nightMode ? '🌙 무드등 켜짐' : '💡 조명 터치'}</span>
+            </button>
+          )}
 
-        {current.map((p) => {
-          const style: CSSProperties = {
-            left: `${p.left * 100}%`,
-            bottom: `${p.bottom * 100}%`,
-            width: `${BOOK.w * 100}%`,
-            '--tilt': `${p.tilt * 1.5}deg`,
-          } as CSSProperties;
-          if (!p.book) {
+          {current.map((p) => {
+            const style: CSSProperties = {
+              left: `${p.left * 100}%`,
+              bottom: `${p.bottom * 100}%`,
+              width: `${BOOK.w * 100}%`,
+              '--tilt': `${p.tilt * 1.5}deg`,
+            } as CSSProperties;
+            if (!p.book) {
+              return (
+                <button key="new" className="shelf-book shelf-new" style={style} onClick={onNewBook} aria-label="새 책 만들기">
+                  <span className="shelf-plus" aria-hidden>
+                    +
+                  </span>
+                  <span className="shelf-book-label new-label">새 책 만들기</span>
+                </button>
+              );
+            }
+            const tone = COVERS[p.index % COVERS.length];
+            const b = p.book;
+            const isRead = readBookIds.includes(b.id);
             return (
-              <button key="new" className="shelf-book shelf-new" style={style} onClick={onNewBook} aria-label="새 책 만들기">
-                <span className="shelf-plus" aria-hidden>
-                  +
+              <button
+                key={b.id}
+                className={`shelf-book tone-${tone} ${isRead ? 'is-read' : ''} ${flying?.book.id === b.id ? 'is-flying' : ''}`}
+                style={style}
+                onClick={(e) => pick(b, e.currentTarget, tone)}
+                aria-label={`${b.title} 읽기${isRead ? ' (다 읽은 책)' : ''}`}
+                title={b.title}
+              >
+                <span className={`shelf-status-badge ${isRead ? 'read' : 'unread'}`} aria-hidden>
+                  {isRead ? '★' : 'NEW'}
                 </span>
-                <span className="shelf-book-label new-label">새 책 만들기</span>
+                <span className="shelf-cover">
+                  {b.cover_key ? <img src={fileUrl(b.cover_key)} alt="" /> : <ClayEmoji emoji={b.cover_emoji} size={64} />}
+                </span>
+                <span className="shelf-book-label">{b.title}</span>
               </button>
             );
-          }
-          const tone = COVERS[p.index % COVERS.length];
-          const b = p.book;
-          const isRead = readBookIds.includes(b.id);
-          return (
-            <button
-              key={b.id}
-              className={`shelf-book tone-${tone} ${isRead ? 'is-read' : ''} ${flying?.book.id === b.id ? 'is-flying' : ''}`}
-              style={style}
-              onClick={(e) => pick(b, e.currentTarget, tone)}
-              aria-label={`${b.title} 읽기${isRead ? ' (다 읽은 책)' : ''}`}
-              title={b.title}
-            >
-              <span className={`shelf-status-badge ${isRead ? 'read' : 'unread'}`} aria-hidden>
-                {isRead ? '★' : 'NEW'}
-              </span>
-              <span className="shelf-cover">
-                {b.cover_key ? <img src={fileUrl(b.cover_key)} alt="" /> : <ClayEmoji emoji={b.cover_emoji} size={64} />}
-              </span>
-              <span className="shelf-book-label">{b.title}</span>
-            </button>
-          );
-        })}
+          })}
 
-        {/* 책장 위 인터랙티브 3D 피규어 진열대 */}
-        {room.figure && (
-          <button
-            type="button"
-            className={`room-figure-spot tone-${activeFigure.tone} ${figBounce ? 'is-bouncing' : ''}`}
-            style={{ left: `${room.figure.x * 100}%`, bottom: `${(1 - room.figure.y) * 100}%` }}
-            onClick={() => {
-              setFigBounce(false);
-              window.requestAnimationFrame(() => setFigBounce(true));
-              onFigureClick?.();
-            }}
-            aria-label={`진열된 3D 피규어: ${activeFigure.name} (누르면 인사하고 바꿀 수 있어요)`}
-            title={`${activeFigure.name} 3D 피규어 눌러 보기`}
-          >
-            <span className="room-figure-sparkle" aria-hidden>
-              <ClayArt name="sparkles" size={22} />
-            </span>
-            <span className="room-figure-art" aria-hidden>
-              <ClayArt name={activeFigure.art} size={50} />
-            </span>
-            <span className="room-figure-pedestal" aria-hidden />
-            <span className="room-figure-name">{activeFigure.name}</span>
-          </button>
-        )}
+          {/* 책장 위 인터랙티브 3D 피규어 진열대 */}
+          {room.figure && (
+            <button
+              type="button"
+              className={`room-figure-spot tone-${activeFigure.tone} ${figBounce ? 'is-bouncing' : ''}`}
+              style={{ left: `${room.figure.x * 100}%`, bottom: `${(1 - room.figure.y) * 100}%` }}
+              onClick={() => {
+                setFigBounce(false);
+                window.requestAnimationFrame(() => setFigBounce(true));
+                onFigureClick?.();
+              }}
+              aria-label={`진열된 3D 피규어: ${activeFigure.name} (누르면 인사하고 바꿀 수 있어요)`}
+              title={`${activeFigure.name} 3D 피규어 눌러 보기`}
+            >
+              <span className="room-figure-sparkle" aria-hidden>
+                <ClayArt name="sparkles" size={22} />
+              </span>
+              <span className="room-figure-art" aria-hidden>
+                <ClayArt name={activeFigure.art} size={50} />
+              </span>
+              <span className="room-figure-pedestal" aria-hidden />
+              <span className="room-figure-name">{activeFigure.name}</span>
+            </button>
+          )}
+        </div>
       </div>
 
       {pages.length > 1 && (
