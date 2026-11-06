@@ -1,5 +1,5 @@
 import { StrictMode } from 'react';
-import { createRoot } from 'react-dom/client';
+import { createRoot, hydrateRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import App from './App';
 // 한글 웹폰트는 자체 호스팅 (외부 폰트 서버로 접속 정보가 나가지 않게)
@@ -18,13 +18,24 @@ const fontLoads = [
 ];
 const reveal = () => document.documentElement.classList.remove('fonts-loading');
 
-createRoot(document.getElementById('root')!).render(
+const app = (
   <StrictMode>
     <BrowserRouter>
       <App />
     </BrowserRouter>
-  </StrictMode>,
+  </StrictMode>
 );
+
+// 공개 페이지는 빌드 때 미리 그린 HTML(검색·AI 로봇용)을 그대로 이어받고(hydrate),
+// 그 밖의 경로는 같은 HTML 이 내려와도 비우고 새로 그림 (scripts/prerender.mjs)
+const root = document.getElementById('root')!;
+if (root.dataset.prerendered === window.location.pathname) {
+  hydrateRoot(root, app);
+} else {
+  root.textContent = '';
+  delete root.dataset.prerendered;
+  createRoot(root).render(app);
+}
 
 // 첫 화면이 그려진 다음 프레임에 그 화면이 쓰는 폰트까지 기다림
 requestAnimationFrame(() => {

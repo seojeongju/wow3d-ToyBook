@@ -7,3 +7,26 @@
 
 /assets/*
   Cache-Control: public, max-age=31536000, immutable
+
+# 아이·부모·관리자 화면은 검색·AI 수집 제외 (src/seo.ts PRIVATE_PREFIXES, robots.txt 와 같은 목록)
+/profiles
+  X-Robots-Tag: noindex, nofollow
+/shelf/*
+  X-Robots-Tag: noindex, nofollow
+/book/*
+  X-Robots-Tag: noindex, nofollow
+/parent
+  X-Robots-Tag: noindex, nofollow
+/dashboard
+  X-Robots-Tag: noindex, nofollow
+/admin
+  X-Robots-Tag: noindex, nofollow
+/login
+  X-Robots-Tag: noindex, nofollow
+/api/*
+  X-Robots-Tag: noindex, nofollow
+
+/robots.txt
+  Content-Type: text/plain; charset=utf-8
+/llms.txt
+  Content-Type: text/plain; charset=utf-8

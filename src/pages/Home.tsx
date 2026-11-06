@@ -6,6 +6,8 @@ import SiteHeader, { Logo } from '../components/SiteHeader';
 import Tobi from '../components/Tobi';
 import { useAsync } from '../useAsync';
 import ClayArt, { ClayEmoji } from '../components/ClayArt';
+import JsonLd from '../components/JsonLd';
+import { faqLd, howToLd, organizationLd, PAGE_META, webAppLd, websiteLd } from '../seo';
 
 // 성능 목표(PRD 4.1)는 아직 측정 전이라 싣지 않고, 정해진 사양만 보여 줌
 const FACTS: { icon: ClayIconName; value: string; label: string }[] = [
@@ -59,7 +61,12 @@ const PROMISES = [
   { title: '출력 전에 사람이 직접 검수해요', body: 'wow3d 작업자가 얇은 부분, 작은 부품, 마감 상태를 확인한 뒤 출력해요.' },
 ];
 
+// 화면의 자주 묻는 질문과 FAQPage 구조화 데이터가 같은 내용을 씀 (AEO)
 const FAQ = [
+  {
+    q: '토이북은 어떤 서비스인가요?',
+    a: '토이북은 3D프린팅 회사 wow3d가 만든 어린이 그림책 서비스예요. 우리 아이가 주인공인 그림책을 AI로 만들어 읽고, 책 속 캐릭터를 3D 피규어로 받아 볼 수 있어요.',
+  },
   {
     q: '몇 살 아이가 쓸 수 있나요?',
     a: '3~12세 어린이를 위해 만들었어요. 나이에 따라 새싹(3~5세), 꼬마 작가(6~8세), 작가(9~12세) 화면으로 바뀌어서 글을 아직 못 읽는 아이도 그림과 소리로 쓸 수 있어요.',
@@ -91,6 +98,15 @@ export default function Home() {
 
   return (
     <div className="landing">
+      <JsonLd
+        data={[
+          organizationLd(),
+          websiteLd(),
+          webAppLd(PAGE_META['/'].description),
+          howToLd('토이북으로 우리 아이 그림책과 피규어 만들기', STEPS),
+          faqLd(FAQ),
+        ]}
+      />
       <SiteHeader />
 
       <section className="hero">
