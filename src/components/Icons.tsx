@@ -169,7 +169,10 @@ export function ClayIcon({ name, size = 56, tile = true }: { name: ClayIconName;
 }
 
 /** 단순 선 아이콘 (상단바·버튼용) */
-export type LineIconName = 'back' | 'speaker' | 'stop' | 'lock' | 'arrow' | 'prev' | 'next' | 'home';
+export type LineIconName =
+  | 'back' | 'speaker' | 'stop' | 'lock' | 'arrow' | 'prev' | 'next' | 'home'
+  | 'grid' | 'book' | 'smile' | 'cube' | 'box' | 'gear' | 'check' | 'users' | 'flag' | 'bell' | 'search'
+  | 'eye' | 'eyeOff' | 'mail' | 'logout' | 'heart';
 
 export function LineIcon({ name, size = 26 }: { name: LineIconName; size?: number }) {
   const paths: Record<LineIconName, ReactNode> = {
@@ -202,6 +205,101 @@ export function LineIcon({ name, size = 26 }: { name: LineIconName; size?: numbe
         <path d="M6 10 V20 H18 V10" />
       </>
     ),
+    grid: (
+      <>
+        <rect x="4" y="4" width="7" height="7" rx="2" />
+        <rect x="13" y="4" width="7" height="7" rx="2" />
+        <rect x="4" y="13" width="7" height="7" rx="2" />
+        <rect x="13" y="13" width="7" height="7" rx="2" />
+      </>
+    ),
+    book: (
+      <>
+        <path d="M4 6 C7 4.5 10 4.5 12 6.5 V19 C10 17.5 7 17.5 4 19 Z" />
+        <path d="M20 6 C17 4.5 14 4.5 12 6.5 V19 C14 17.5 17 17.5 20 19 Z" />
+      </>
+    ),
+    smile: (
+      <>
+        <circle cx="12" cy="12" r="8" />
+        <path d="M9 14 q3 3 6 0" />
+        <path d="M9.5 10 h0.01 M14.5 10 h0.01" />
+      </>
+    ),
+    cube: (
+      <>
+        <path d="M12 3 L20 7.5 V16.5 L12 21 L4 16.5 V7.5 Z" />
+        <path d="M4 7.5 L12 12 L20 7.5 M12 12 V21" />
+      </>
+    ),
+    box: (
+      <>
+        <rect x="4" y="8" width="16" height="12" rx="2" />
+        <path d="M3 5 h18 v3 H3 z M10 12 h4" />
+      </>
+    ),
+    gear: (
+      <>
+        <circle cx="12" cy="12" r="3" />
+        <path d="M12 3 v3 M12 18 v3 M3 12 h3 M18 12 h3 M5.6 5.6 l2.1 2.1 M16.3 16.3 l2.1 2.1 M5.6 18.4 l2.1 -2.1 M16.3 7.7 l2.1 -2.1" />
+      </>
+    ),
+    check: (
+      <>
+        <rect x="4" y="4" width="16" height="16" rx="4" />
+        <path d="M8 12 l3 3 l5 -6" />
+      </>
+    ),
+    users: (
+      <>
+        <circle cx="9" cy="9" r="3.5" />
+        <path d="M3 20 c0 -4 3 -6 6 -6 s6 2 6 6" />
+        <path d="M16 6 a3 3 0 0 1 0 6 M18 14 c2 1 3 3 3 6" />
+      </>
+    ),
+    flag: (
+      <>
+        <path d="M5 21 V4" />
+        <path d="M5 4 h11 l-2 4 l2 4 H5" />
+      </>
+    ),
+    bell: (
+      <>
+        <path d="M6 16 V11 a6 6 0 0 1 12 0 v5 l2 2 H4 z" />
+        <path d="M10 20 a2 2 0 0 0 4 0" />
+      </>
+    ),
+    search: (
+      <>
+        <circle cx="11" cy="11" r="6.5" />
+        <path d="M16 16 l4 4" />
+      </>
+    ),
+    eye: (
+      <>
+        <path d="M2.5 12 C5 7 8.5 5 12 5 s7 2 9.5 7 c-2.5 5 -6 7 -9.5 7 s-7 -2 -9.5 -7 z" />
+        <circle cx="12" cy="12" r="3" />
+      </>
+    ),
+    eyeOff: (
+      <>
+        <path d="M2.5 12 C5 7 8.5 5 12 5 s7 2 9.5 7 c-2.5 5 -6 7 -9.5 7 s-7 -2 -9.5 -7 z" />
+        <path d="M4 4 L20 20" />
+      </>
+    ),
+    mail: (
+      <>
+        <rect x="3" y="5" width="18" height="14" rx="3" />
+        <path d="M4 7 l8 6 l8 -6" />
+      </>
+    ),
+    logout: (
+      <>
+        <path d="M14 4 H7 a2 2 0 0 0 -2 2 v12 a2 2 0 0 0 2 2 h7" />
+        <path d="M11 12 H21 M17 8 l4 4 l-4 4" />
+      </>
+    ),
+    heart: <path d="M12 20 s-7.5 -4.5 -7.5 -10 a4 4 0 0 1 7.5 -2 a4 4 0 0 1 7.5 2 c0 5.5 -7.5 10 -7.5 10 z" />,
   };
   return (
     <svg

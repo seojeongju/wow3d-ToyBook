@@ -33,6 +33,9 @@ export default function SiteHeader() {
         <NavLink to="/profiles">우리 집 책장</NavLink>
         <NavLink to="/parent">부모 모드</NavLink>
       </nav>
+      <Link to="/login" className="ghost-link login-link">
+        로그인
+      </Link>
       <Link to="/profiles" className="pill-btn small-pill">
         시작하기 <LineIcon name="arrow" size={18} />
       </Link>
