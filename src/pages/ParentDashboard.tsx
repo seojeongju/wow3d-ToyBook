@@ -6,6 +6,7 @@ import DashLayout, { type DashMenuItem } from '../components/DashLayout';
 import { ClayIcon, LineIcon, type ClayIconName } from '../components/Icons';
 import Tobi from '../components/Tobi';
 import { isParentUnlocked, setParentUnlocked } from '../parentLock';
+import { weeklyPages } from '../readingLog';
 import { useAsync } from '../useAsync';
 import { ClayEmoji } from '../components/ClayArt';
 
@@ -18,16 +19,7 @@ const MENU: DashMenuItem[] = [
   { icon: 'gear', label: '설정' },
 ];
 
-// 독서 기록·주제 분류는 아직 저장하지 않으므로 예시 값 (PRD R-02, B-01 연동 후 교체)
-const SAMPLE_READING = [
-  { label: '월', value: 12 },
-  { label: '화', value: 8 },
-  { label: '수', value: 15 },
-  { label: '목', value: 6 },
-  { label: '금', value: 18 },
-  { label: '토', value: 22 },
-  { label: '일', value: 14 },
-];
+// 주제 분류는 아직 저장하지 않으므로 예시 값 (PRD B-01 연동 후 교체)
 const SAMPLE_TOPICS = [
   { label: '생활습관', value: 5 },
   { label: '모험', value: 3 },
@@ -37,6 +29,9 @@ const SAMPLE_TOPICS = [
 export default function ParentDashboard() {
   const navigate = useNavigate();
   const [notice, setNotice] = useState<string | null>(null);
+  // 이 기기에서 읽은 쪽 (모든 아이 합계, 로그인 연동 후 서버 기록으로 교체)
+  const [reading] = useState(() => weeklyPages());
+  const readTotal = reading.reduce((s, d) => s + d.value, 0);
   const children = useAsync(api.children, []);
   const books = useAsync(() => api.books(), []);
 
@@ -102,9 +97,10 @@ export default function ParentDashboard() {
         <article className="dash-card">
           <header>
             <h3>이번 주 읽은 쪽 수</h3>
-            <span className="badge-sample">예시</span>
+            <span className="badge-sample" title="로그인 연동 전이라 이 기기에서 읽은 기록만 보여요">이 기기 기록</span>
           </header>
-          <BarChart data={SAMPLE_READING} unit="쪽" />
+          <BarChart data={reading} unit="쪽" />
+          {readTotal === 0 && <p className="muted dash-empty-note">아직 이번 주에 읽은 쪽이 없어요. 동화 극장에서 책을 펼치면 여기에 쌓여요.</p>}
         </article>
         <article className="dash-card">
           <header>

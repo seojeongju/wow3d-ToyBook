@@ -6,6 +6,7 @@ import { LineIcon } from '../components/Icons';
 import { SubHeader } from '../components/SiteHeader';
 import Tobi from '../components/Tobi';
 import { josa } from '../korean';
+import { logPageRead } from '../readingLog';
 import { markBookAsRead } from '../shelfState';
 import { canSpeak, speak, stopSpeaking as stopTts } from '../speech';
 import { useAsync } from '../useAsync';
@@ -32,6 +33,21 @@ function initialNight(): boolean {
   return h >= 20 || h < 6;
 }
 
+/** 종이 한 장이 넘어가는 시간 (CSS .leaf 애니메이션과 같게) */
+const FLIP_MS = 760;
+const SPREAD_QUERY = '(min-width: 900px) and (orientation: landscape)';
+
+/** 넘기는 중인 종이: from 쪽에서 to 쪽으로, dir 1 = 다음, -1 = 이전 */
+interface Flip {
+  from: number;
+  dir: 1 | -1;
+  n: number;
+}
+
+function reducedMotion(): boolean {
+  return typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+}
+
 /** 글을 낱말로 나누고 글자 위치를 기억 (읽는 만큼 밝히기용) */
 function splitWords(text: string) {
   const words: { word: string; start: number; end: number }[] = [];
@@ -49,7 +65,8 @@ export default function BookViewer() {
 
   const [stage, setStage] = useState<Stage>('cover');
   const [index, setIndex] = useState(0);
-  const [dir, setDir] = useState<1 | -1>(1);
+  const [flip, setFlip] = useState<Flip | null>(null);
+  const [spread, setSpread] = useState(false);
   const [speaking, setSpeaking] = useState(false);
   const [progress, setProgress] = useState(0);
   const [auto, setAuto] = useState(false);
@@ -85,6 +102,35 @@ export default function BookViewer() {
 
   useEffect(() => () => stopReading(), [stopReading]);
 
+  // 태블릿 가로·PC는 펼친 책(왼쪽 그림·오른쪽 글), 휴대폰은 한 쪽씩
+  useEffect(() => {
+    const mq = window.matchMedia(SPREAD_QUERY);
+    const update = () => setSpread(mq.matches);
+    update();
+    mq.addEventListener('change', update);
+    return () => mq.removeEventListener('change', update);
+  }, []);
+
+  /** from 쪽에서 to 쪽으로 종이를 넘김 (움직임 줄이기 설정이면 바로 바꿈) */
+  const turn = useCallback((from: number, to: number) => {
+    setIndex(to);
+    if (from === to || reducedMotion()) return setFlip(null);
+    setFlip((f) => ({ from, dir: to > from ? 1 : -1, n: (f?.n ?? 0) + 1 }));
+  }, []);
+
+  // 애니메이션 끝 이벤트를 놓쳐도 종이가 남지 않게
+  useEffect(() => {
+    if (!flip) return;
+    const t = window.setTimeout(() => setFlip(null), FLIP_MS + 200);
+    return () => window.clearTimeout(t);
+  }, [flip]);
+
+  // 펼쳐 본 쪽은 이 기기의 읽은 기록에 남김 (부모 대시보드 "이번 주 읽은 쪽 수")
+  const pageId = stage === 'reading' ? page?.id : undefined;
+  useEffect(() => {
+    if (pageId && book) logPageRead(book.child_id, book.id, pageId);
+  }, [pageId, book]);
+
   // 다 읽으면 아이 책장에 '다 읽었어요 ★' 스티커 기록
   useEffect(() => {
     if (stage !== 'end' || !book) return;
@@ -112,9 +158,9 @@ export default function BookViewer() {
           timer.current = window.setTimeout(() => {
             if (!autoRef.current) return;
             if (i < pages.length - 1) {
-              setDir(1);
-              setIndex(i + 1);
-              readPage(i + 1);
+              turn(i, i + 1);
+              // 종이가 다 넘어간 뒤 이어서 읽기
+              timer.current = window.setTimeout(() => autoRef.current && readPage(i + 1), reducedMotion() ? 0 : FLIP_MS);
             } else {
               setAutoMode(false);
               setStage('end');
@@ -124,7 +170,7 @@ export default function BookViewer() {
       });
       setSpeaking(started);
     },
-    [pages],
+    [pages, turn],
   );
 
   const goTo = useCallback(
@@ -134,11 +180,15 @@ export default function BookViewer() {
       setProgress(0);
       if (next > last) return setStage('end');
       if (next < 0) return setStage('cover');
-      setDir(next >= index ? 1 : -1);
-      setIndex(next);
+      // 표지·끝 화면에서 들어올 때는 넘김 없이 바로 펼침
+      if (stage === 'reading') turn(index, next);
+      else {
+        setFlip(null);
+        setIndex(next);
+      }
       setStage('reading');
     },
-    [index, last, stopReading],
+    [index, last, stage, stopReading, turn],
   );
 
   const toggleRead = () => {
@@ -153,7 +203,7 @@ export default function BookViewer() {
   const startAuto = (from = 0) => {
     stopReading();
     setAutoMode(true);
-    setDir(1);
+    setFlip(null);
     setIndex(from);
     setStage('reading');
     readPage(from);
@@ -216,6 +266,12 @@ export default function BookViewer() {
 
   const charPos = progress * (page?.text.length ?? 0);
   const backToShelf = () => navigate(book.child_id ? `/shelf/${book.child_id}` : '/profiles');
+  const illust = (p: Page) => (
+    <div className="illust" style={{ background: p.layout.bg ?? 'var(--soft-blue)' }}>
+      {p.image_key ? <img src={fileUrl(p.image_key)} alt="" /> : <ClayEmoji emoji={p.layout.emoji ?? book.cover_emoji} size={220} />}
+    </div>
+  );
+  const plainText = (p: Page) => <p className="page-text">{p.text}</p>;
 
   return (
     <main
@@ -280,21 +336,44 @@ export default function BookViewer() {
       {/* ───── 읽기 ───── */}
       {stage === 'reading' && page && (
         <>
-          <article className={`page turn-${dir > 0 ? 'next' : 'prev'}`} key={page.id}>
-            <div className="illust" style={{ background: page.layout.bg ?? 'var(--soft-blue)' }}>
-              {page.image_key ? <img src={fileUrl(page.image_key)} alt="" /> : <ClayEmoji emoji={page.layout.emoji ?? book.cover_emoji} size={220} />}
+          <article className={`page book-page ${flip ? 'flipping' : ''}`}>
+            {/* 펼친 책에서 넘기는 동안: 다음 쪽이면 왼쪽은 아직 지금 그림, 이전 쪽이면 오른쪽은 아직 지금 글 */}
+            <div className="half half-illust">{illust(flip && spread && flip.dir > 0 ? pages[flip.from] : page)}</div>
+            <div className="half half-text">
+              {flip && spread && flip.dir < 0 ? (
+                plainText(pages[flip.from])
+              ) : (
+                <p className={`page-text ${speaking ? 'reading' : ''}`} onClick={toggleRead} title={canSpeak ? '누르면 읽어 줘요' : undefined}>
+                  {words.map((w, i) => (
+                    <span key={i} className={`w ${speaking || progress >= 1 ? (w.end <= charPos ? 'done' : w.start <= charPos ? 'now' : '') : ''}`}>
+                      {w.word}{' '}
+                    </span>
+                  ))}
+                </p>
+              )}
             </div>
-            <p
-              className={`page-text ${speaking ? 'reading' : ''}`}
-              onClick={toggleRead}
-              title={canSpeak ? '누르면 읽어 줘요' : undefined}
-            >
-              {words.map((w, i) => (
-                <span key={i} className={`w ${speaking || progress >= 1 ? (w.end <= charPos ? 'done' : w.start <= charPos ? 'now' : '') : ''}`}>
-                  {w.word}{' '}
-                </span>
-              ))}
-            </p>
+
+            {/* 넘어가는 종이 한 장 (앞면 = 지금 쪽, 뒷면 = 새 쪽) */}
+            {flip && pages[flip.from] && (
+              <div
+                key={flip.n}
+                className={`leaf ${spread ? 'spread' : 'single'} ${flip.dir > 0 ? 'to-next' : 'to-prev'}`}
+                aria-hidden
+                onAnimationEnd={(e) => e.target === e.currentTarget && setFlip(null)}
+              >
+                {spread ? (
+                  <>
+                    <div className="face front">{flip.dir > 0 ? plainText(pages[flip.from]) : illust(pages[flip.from])}</div>
+                    <div className="face back">{flip.dir > 0 ? illust(page) : plainText(page)}</div>
+                  </>
+                ) : (
+                  <div className="face front">
+                    {illust(pages[flip.from])}
+                    {plainText(pages[flip.from])}
+                  </div>
+                )}
+              </div>
+            )}
           </article>
 
           {auto && (
