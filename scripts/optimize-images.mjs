@@ -16,6 +16,8 @@ const kb = (f) => `${(fs.statSync(p(f)).size / 1024).toFixed(0)}KB`;
 await sharp(src('hero-art.jpg')).resize({ width: 1200 }).webp({ quality: 80 }).toFile(p('hero-art.webp'));
 await sharp(src('hero-art.jpg')).resize({ width: 800 }).webp({ quality: 78 }).toFile(p('hero-art-800.webp'));
 await sharp(src('logo.jpg')).resize({ width: 440 }).webp({ quality: 82 }).toFile(p('logo-440.webp'));
+// JPG 경로(/hero-art.jpg)를 쓰는 코드를 위한 가벼운 호환 파일
+await sharp(src('hero-art.jpg')).resize({ width: 1200 }).jpeg({ quality: 80, mozjpeg: true }).toFile(p('hero-art.jpg'));
 
 // 공유 이미지: 왼쪽 로고, 오른쪽 한 줄 소개 (한글은 시스템 글꼴로 그림 — 한 번 만들어 저장소에 보관)
 const W = 1200;
