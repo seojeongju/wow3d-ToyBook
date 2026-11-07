@@ -7445,3 +7445,18 @@ a.login-btn {
   margin-top: 6px;
 }
 
+
+/* 운영자 문지기: 링크로 된 기본 버튼 모양 맞추기 */
+a.primary-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 28px;
+  text-decoration: none;
+}
+
+.admin-gate p {
+  margin: 0;
+  line-height: 1.6;
+  text-align: center;
+}
