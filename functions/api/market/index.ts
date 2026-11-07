@@ -33,7 +33,7 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
     .all<Record<string, unknown>>();
 
   const filtered = listings
-    .map((item) => ({
+    .map((item): Record<string, unknown> => ({
       ...item,
       is_purchased: Boolean(item.is_purchased),
       is_mine: item.seller_parent_id === parentId,
