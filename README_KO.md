@@ -57,7 +57,7 @@ npm run preview              # 빌드 후 http://localhost:8788 에서 화면+AP
 | 네이버 | developers.naver.com > 애플리케이션 등록 > 네이버 로그인, 제공 정보: 별명·이메일 | `https://wow3d-toybook.pages.dev/api/auth/naver/callback` | `NAVER_CLIENT_ID`, `NAVER_CLIENT_SECRET` |
 | 구글 | console.cloud.google.com > API 및 서비스 > OAuth 동의 화면 + 사용자 인증 정보(웹 애플리케이션) | `https://wow3d-toybook.pages.dev/api/auth/google/callback` | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` |
 
-- **나이 확인(만 14세 미만 가입 막기)**: 카카오는 동의 항목에서 "출생 연도" 또는 "연령대"를, 네이버는 제공 정보에서 "출생연도"를 켜 두면 가입 때 확인합니다(저장하지 않음). 정보가 없으면(구글 등) 가입 화면의 "만 14세 이상" 확인으로 받습니다.
+- **나이 확인(만 14세 미만 가입 막기)**: 개발 중에는 꺼져 있어 누구나 로그인할 수 있습니다. **정식 출시 전에 Cloudflare 환경 변수 `AGE_CHECK=on` 을 넣어 켜세요.** 켜면 카카오는 동의 항목에서 "출생 연도" 또는 "연령대"를, 네이버는 제공 정보에서 "출생연도"를 켜 두면 가입 때 확인합니다(저장하지 않음). 정보가 없으면(구글 등) 가입 화면의 "만 14세 이상" 확인으로 받습니다.
 - 로컬에서 시험할 때는 같은 앱에 `http://localhost:8788/api/auth/{kakao|naver|google}/callback` 도 등록하고 `.dev.vars` 에 키를 넣으세요.
 - 키 없이 가입 흐름만 볼 때는 `.dev.vars` 의 `ALLOW_DEV_LOGIN=true` 로 "시험용 로그인"이 나타납니다. **운영에는 절대 넣지 마세요.**
 - 가입 흐름: 간편 로그인 → `/signup` 약관 동의(필수: 만 14세 이상 보호자·이용약관·개인정보 수집·이용·아이 정보 법정대리인 동의 / 선택: 소식 받기) → 가입 완료. 동의 전에 그만두면 받은 정보를 바로 지웁니다.

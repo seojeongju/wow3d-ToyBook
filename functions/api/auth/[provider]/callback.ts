@@ -48,8 +48,9 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env, params })
     await env.DB.prepare('UPDATE parents SET last_login_at = ? WHERE id = ?').bind(now, parentId).run();
   } else {
     // 카카오·네이버가 출생 연도·연령대를 주면 만 14세 미만은 계정을 만들지 않음 (받은 정보도 남기지 않음)
+    // 개발 중에는 꺼 둠: 운영 환경 변수 AGE_CHECK=on 일 때만 막음 (정식 출시 전 반드시 켤 것)
     const age = ageCheck(profile);
-    if (age === 'under14') return fail('under14');
+    if (age === 'under14' && env.AGE_CHECK === 'on') return fail('under14');
     parentId = newId();
     status = 'pending';
     await env.DB.batch([
