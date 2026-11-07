@@ -94,6 +94,13 @@ export interface StoryInput {
   mood: string | null;
   ending: string | null;
   learning: string | null;
+  /** 토비의 질문에 아이가 답한 것 (2단계: 함께 짓기) */
+  answers: { q: string; a: string }[];
+}
+
+export interface Question {
+  question: string;
+  options: { text: string; art: string }[];
 }
 
 export interface Outline {
@@ -127,6 +134,37 @@ const ONE_OUTLINE = {
     lesson: { type: 'string', description: '이야기가 자연스럽게 전하는 마음 (한 문장)' },
   },
   required: ['title', 'summary', 'beats', 'lesson'],
+  additionalProperties: false,
+};
+
+/** 토비가 아이에게 묻는 질문 3개 (각각 고를 수 있는 답 3개) */
+const QUESTIONS_SCHEMA = {
+  type: 'object',
+  properties: {
+    questions: {
+      type: 'array',
+      description: '이야기를 함께 짓기 위한 질문 3개 (처음 → 가운데 → 끝 순서)',
+      items: {
+        type: 'object',
+        properties: {
+          question: { type: 'string', description: '토비가 아이에게 묻는 짧은 질문 (30자 이내, ~할까? 말투)' },
+          options: {
+            type: 'array',
+            description: '아이가 고를 수 있는 서로 다른 답 3개 (각 20자 이내)',
+            items: {
+              type: 'object',
+              properties: { text: { type: 'string' }, art: { type: 'string', enum: [...ART] } },
+              required: ['text', 'art'],
+              additionalProperties: false,
+            },
+          },
+        },
+        required: ['question', 'options'],
+        additionalProperties: false,
+      },
+    },
+  },
+  required: ['questions'],
   additionalProperties: false,
 };
 
@@ -175,6 +213,7 @@ function brief(s: StoryInput): string {
     s.mood && MOODS[s.mood] ? `분위기: ${MOODS[s.mood]}` : null,
     s.ending && ENDINGS[s.ending] ? `결말: ${ENDINGS[s.ending]}` : null,
     s.learning && LEARNINGS[s.learning] ? `자연스럽게 담을 배움: ${LEARNINGS[s.learning]}` : null,
+    ...s.answers.map((x) => `아이가 정한 내용 (꼭 반영): ${x.q} → ${x.a}`),
     `쪽수: ${s.pageCount}쪽`,
   ]
     .filter(Boolean)
@@ -216,6 +255,33 @@ async function ask<T>(env: Env, prompt: string, schema: Record<string, unknown>)
     console.error('이야기 생성 실패', e instanceof Error ? e.message : e);
     return { ok: false, message: '이야기를 만들지 못했어요. 다시 해 주세요', status: 502 };
   }
+}
+
+/** 토비와 함께 짓기: 아이가 답할 질문 3개 (아이가 이야기의 공동 작가가 되게) */
+export async function makeQuestions(env: Env, s: StoryInput): Promise<StoryResult<Question[]>> {
+  const mode = storyMode(env);
+  if (mode === 'off') return { ok: false, message: '이야기 공방은 곧 열려요', status: 503 };
+  if (mode === 'dev') return { ok: true, data: devQuestions(s) };
+  const r = await ask<{ questions: Question[] }>(
+    env,
+    `아래 재료로 아이와 함께 이야기를 지으려고 해요. 마스코트 "토비"가 아이에게 물어볼 질문 3개를 만들어 주세요.
+- 처음(누가·무슨 일), 가운데(어떤 어려움·누가 도와줌), 끝(어떻게 해결·기분) 순서로 하나씩.
+- ${MODE_RULES[s.mode].label} 아이가 바로 알아듣는 쉬운 말. 답은 서로 확실히 다르고 재미있게.
+- 이미 정해진 재료와 겹치지 않게, 이야기를 더 풍성하게 만드는 질문으로.
+
+${brief(s)}`,
+    QUESTIONS_SCHEMA,
+  );
+  if (!r.ok) return r;
+  const questions = (r.data.questions ?? [])
+    .filter((q) => q?.question && q.options?.length)
+    .slice(0, 3)
+    .map((q) => ({
+      question: q.question.slice(0, 60),
+      options: q.options.slice(0, 3).map((o) => ({ text: o.text.slice(0, 40), art: (ART as readonly string[]).includes(o.art) ? o.art : '✨' })),
+    }));
+  if (!questions.length) return { ok: false, message: '토비가 질문을 떠올리지 못했어요. 다시 해 주세요', status: 502 };
+  return { ok: true, data: questions };
 }
 
 /** 서로 다른 줄거리 후보 3개 (아이가 고르고 어른이 고침) */
@@ -279,13 +345,44 @@ function devOutline(input: StoryInput, n = 0): Outline {
   return {
     title: `[후보 ${n + 1}] ${j(s.childName, '과', '와')} ${s.hero}의 ${s.place} 이야기`,
     summary: `${j(s.childName, '과', '와')} ${j(s.hero, '이', '가')} ${s.place}에서 '${s.topic}'에 대해 알아 가는 시험용 줄거리예요.`,
+    // 아이가 토비 질문에 답했으면 그 답이 줄거리에 들어갔는지 시험에서 보이게
     beats: [
-      { label: '처음', text: `${j(s.childName, '이', '가')} ${j(s.hero, '을', '를')} 만나 ${s.place}(으)로 떠나요.` },
-      { label: '가운데', text: `${s.place}에서 작은 문제가 생겨 둘이 함께 방법을 찾아요.` },
-      { label: '끝', text: `문제를 풀고 ${s.topic}의 소중함을 알게 돼요.` },
+      { label: '처음', text: `${j(s.childName, '이', '가')} ${j(s.hero, '을', '를')} 만나 ${s.place}(으)로 떠나요.${s.answers[0] ? ` (${s.answers[0].a})` : ''}` },
+      { label: '가운데', text: `${s.place}에서 작은 문제가 생겨 둘이 함께 방법을 찾아요.${s.answers[1] ? ` (${s.answers[1].a})` : ''}` },
+      { label: '끝', text: `문제를 풀고 ${s.topic}의 소중함을 알게 돼요.${s.answers[2] ? ` (${s.answers[2].a})` : ''}` },
     ],
     lesson: `${j(s.topic, '은', '는')} 함께하면 더 즐거워요.`,
   };
+}
+
+function devQuestions(s: StoryInput): Question[] {
+  const who = s.hero || s.characters[0]?.name || s.childName;
+  return [
+    {
+      question: `[시험] ${j(who, '이', '가')} 처음 만난 건 누구일까?`,
+      options: [
+        { text: '길 잃은 아기 별', art: '⭐' },
+        { text: '말하는 나무', art: '🌳' },
+        { text: '노래하는 병아리', art: '🐣' },
+      ],
+    },
+    {
+      question: '[시험] 가다가 어떤 일이 생겼을까?',
+      options: [
+        { text: '다리가 무너졌어요', art: '🧱' },
+        { text: '비가 쏟아졌어요', art: '🌙' },
+        { text: '길이 두 갈래예요', art: '🌱' },
+      ],
+    },
+    {
+      question: '[시험] 마지막엔 어떤 기분이었을까?',
+      options: [
+        { text: '뿌듯하고 신났어요', art: '✨' },
+        { text: '포근하고 졸렸어요', art: '🌙' },
+        { text: '친구가 생겨 기뻤어요', art: '💜' },
+      ],
+    },
+  ];
 }
 
 function devBook(s: StoryInput, o: Outline): WrittenBook {

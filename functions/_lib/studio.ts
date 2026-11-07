@@ -55,9 +55,14 @@ export async function readStudioRequest(
     .slice(0, 3)
     .map((c: { name?: unknown; role?: unknown; look?: unknown }) => ({ name: short(c?.name, 10), role: short(c?.role, 12), look: short(c?.look, 60) }))
     .filter((c) => c.name);
+  // 토비 질문에 아이가 답한 것 (함께 짓기, 3개까지)
+  const answers = (Array.isArray(body.answers) ? body.answers : [])
+    .slice(0, 3)
+    .map((x: { q?: unknown; a?: unknown }) => ({ q: short(x?.q, 80), a: short(x?.a, 80) }))
+    .filter((x) => x.q && x.a);
   if (!seed && !topic) return error('하고 싶은 이야기를 쓰거나 주제를 골라 주세요');
   // 직접 쓴 글에 연락처가 들어가지 않게 (아이 개인정보 최소화)
-  const typed = [seed, topic, place, ...characters.flatMap((c) => [c.name, c.role, c.look])].join(' ');
+  const typed = [seed, topic, place, ...characters.flatMap((c) => [c.name, c.role, c.look]), ...answers.map((x) => x.a)].join(' ');
   if (/01[016789][\s-]?\d{3,4}[\s-]?\d{4}|[\w.+-]+@[\w-]+\.[\w.]+|\d{2,3}-\d{3,4}-\d{4}/.test(typed)) {
     return error('전화번호·이메일 같은 연락처는 넣지 말아 주세요');
   }
@@ -85,6 +90,7 @@ export async function readStudioRequest(
       mood: pick(body.mood, MOODS),
       ending: pick(body.ending, ENDINGS),
       learning: pick(body.learning, LEARNINGS),
+      answers,
     },
   };
 }

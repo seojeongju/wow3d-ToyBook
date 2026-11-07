@@ -6391,3 +6391,197 @@ a.login-btn {
   background: var(--primary-deep);
   color: #fff;
 }
+
+/* 이야기 공방 2단계: 토비와 함께 짓기 · 말로 쓰기 */
+.studio-mic {
+  display: inline-flex;
+  align-self: flex-start;
+  align-items: center;
+  gap: 6px;
+  min-height: 40px;
+  padding: 0 14px;
+  border: 2px solid var(--tint-strong);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--primary-deep);
+  font-weight: 800;
+}
+
+.studio-mic.on {
+  border-color: #e8673f;
+  background: #fff1ec;
+  color: #b4402a;
+  animation: studio-mic-pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes studio-mic-pulse {
+  50% {
+    box-shadow: 0 0 0 6px rgba(232, 103, 63, 0.18);
+  }
+}
+
+.studio-start {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.studio-start .studio-go {
+  align-self: auto;
+}
+
+.studio-qa {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.studio-qa-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.studio-qa-bubble {
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 14px 48px 14px 18px;
+  border-radius: 24px;
+  background: var(--tint);
+}
+
+.studio-qa-bubble::before {
+  content: '';
+  position: absolute;
+  left: -10px;
+  top: 50%;
+  border: 10px solid transparent;
+  border-right-color: var(--tint);
+  border-left: 0;
+  transform: translateY(-50%);
+}
+
+.studio-qa-bubble strong {
+  font-family: var(--font-display);
+  font-size: clamp(20px, 2.6vw, 26px);
+  font-weight: 400;
+  color: var(--primary-deep);
+}
+
+.studio-qa-count {
+  color: var(--ink-soft);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.studio-qa-listen {
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 50%;
+  background: var(--surface);
+  color: var(--primary-deep);
+  transform: translateY(-50%);
+}
+
+.studio-qa-options {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+@media (max-width: 560px) {
+  .studio-qa-options {
+    grid-template-columns: 1fr;
+  }
+}
+
+.studio-qa-option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  min-height: 130px;
+  padding: 14px 10px;
+  border: 3px solid transparent;
+  border-radius: 24px;
+  background: var(--surface);
+  box-shadow: var(--clay-soft);
+  color: var(--ink);
+  font-size: 17px;
+  font-weight: 800;
+  text-align: center;
+  transition: transform 0.15s, border-color 0.15s;
+}
+
+.studio-qa-option:hover,
+.studio-qa-option:focus-visible {
+  border-color: var(--primary);
+  transform: translateY(-3px);
+}
+
+@media (max-width: 560px) {
+  .studio-qa-option {
+    flex-direction: row;
+    min-height: 0;
+    justify-content: flex-start;
+    text-align: left;
+  }
+}
+
+.studio-qa-own {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.studio-qa-own input {
+  flex: 1;
+  min-width: 200px;
+  min-height: 44px;
+  padding: 0 14px;
+  border: 2px solid var(--tint-strong);
+  border-radius: 14px;
+  background: #fff;
+  font: inherit;
+}
+
+.studio-qa-own .studio-mic {
+  align-self: auto;
+}
+
+.studio-qa-done {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0;
+  padding: 10px 14px 10px 32px;
+  border-radius: 18px;
+  background: var(--tint);
+  font-size: 14px;
+}
+
+.studio-qa-done span {
+  color: var(--ink-soft);
+}
+
+.studio-qa-done strong {
+  color: var(--primary-deep);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .studio-mic.on {
+    animation: none;
+  }
+}

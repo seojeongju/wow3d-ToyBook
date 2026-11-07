@@ -5,9 +5,10 @@ import { send, useMe } from '../auth';
 import { josa } from '../korean';
 import { SHELF_FIGURES, findShelfFigure, type ShelfFigureId } from '../shelfState';
 import { speak, stopSpeaking } from '../speech';
-import ClayArt, { type ClayArtName } from './ClayArt';
+import ClayArt, { ClayEmoji, type ClayArtName } from './ClayArt';
 import { ClayIcon, LineIcon } from './Icons';
 import Tobi from './Tobi';
+import { useVoiceInput } from '../voiceInput';
 
 /**
  * 이야기 공방 (PRD 7.1·B-01) — 1단계 고도화: 직접 입력 + 자세히 만들기.
@@ -71,7 +72,14 @@ interface Person {
   look: string;
 }
 
-type Step = 'pick' | 'thinking' | 'outline' | 'writing';
+interface Question {
+  question: string;
+  options: { text: string; art: string }[];
+}
+
+type Answer = { q: string; a: string };
+
+type Step = 'pick' | 'asking' | 'qa' | 'thinking' | 'outline' | 'writing';
 
 const WAIT_LINES = ['토비가 연필을 깎고 있어요…', '주인공 친구를 깨우는 중이에요…', '장면마다 어울리는 그림을 고르고 있어요…', '마지막 쪽을 따뜻하게 마무리하는 중이에요…'];
 const NO_FRIEND = 'none';
@@ -137,11 +145,18 @@ export default function StoryStudio({
   const [waitIdx, setWaitIdx] = useState(0);
   const alive = useRef(true);
 
+  // 2단계: 토비와 함께 짓기 (질문 3개에 아이가 답함)
+  const [questions, setQuestions] = useState<Question[]>([]);
+  const [answers, setAnswers] = useState<Answer[]>([]);
+  const [ownAnswer, setOwnAnswer] = useState('');
+  const seedVoice = useVoiceInput((t) => setSeed((s) => (s ? `${s} ${t}` : t).slice(0, 300)));
+  const answerVoice = useVoiceInput((t) => setOwnAnswer(t.slice(0, 80)));
+
   const hero = heroId === NO_FRIEND ? null : findShelfFigure(heroId as ShelfFigureId);
   const place = placeId === OWN ? ownPlace.trim() : (PLACES.find((p) => p.id === placeId)?.label ?? '');
   const topic = topicId === OWN ? ownTopic.trim() : (TOPICS.find((t) => t.id === topicId)?.label ?? '');
   const ready = Boolean(seed.trim() || topic);
-  const busy = step === 'thinking' || step === 'writing';
+  const busy = step === 'thinking' || step === 'writing' || step === 'asking';
   const outline = options[chosen];
 
   useEffect(() => {
@@ -163,8 +178,9 @@ export default function StoryStudio({
     return () => window.clearInterval(t);
   }, [busy]);
 
-  const payload = () => ({
+  const payload = (withAnswers: Answer[] = answers) => ({
     childId: child?.id,
+    answers: withAnswers,
     seed: seed.trim(),
     childIsHero,
     hero: hero?.name ?? '',
@@ -177,12 +193,46 @@ export default function StoryStudio({
     pageCount,
   });
 
-  const makeOutlines = async () => {
+  /** 토비와 함께 짓기 시작: 질문 3개 받아 오기 */
+  const startTogether = async () => {
+    setError(null);
+    setAnswers([]);
+    setOwnAnswer('');
+    setStep('asking');
+    try {
+      const r = await send<{ questions: Question[] }>('/api/studio/questions', 'POST', payload([]));
+      if (!alive.current) return;
+      setQuestions(r.questions);
+      setStep('qa');
+      speak(r.questions[0].question, { force: true, style: 'mascot' });
+    } catch (e) {
+      if (!alive.current) return;
+      setError(e instanceof Error ? e.message : '토비가 질문을 떠올리지 못했어요');
+      setStep('pick');
+    }
+  };
+
+  /** 질문 하나에 답함 → 다음 질문, 다 답하면 그 답으로 줄거리 만들기 */
+  const answer = (a: string) => {
+    const text = a.trim();
+    if (!text) return;
+    const q = questions[answers.length];
+    const next = [...answers, { q: q.question, a: text }];
+    setAnswers(next);
+    setOwnAnswer('');
+    if (next.length < questions.length) {
+      speak(questions[next.length].question, { force: true, style: 'mascot' });
+    } else {
+      makeOutlines(next);
+    }
+  };
+
+  const makeOutlines = async (withAnswers: Answer[] = answers) => {
     setError(null);
     setStep('thinking');
-    speak('어떤 이야기가 될까? 토비가 줄거리 세 가지를 생각해 볼게요!', { style: 'mascot' });
+    speak(withAnswers.length ? '좋아요! 네가 정한 대로 줄거리 세 가지를 만들어 볼게요!' : '어떤 이야기가 될까? 토비가 줄거리 세 가지를 생각해 볼게요!', { style: 'mascot' });
     try {
-      const r = await send<{ options: Outline[]; pageCount: number }>('/api/studio/outline', 'POST', payload());
+      const r = await send<{ options: Outline[]; pageCount: number }>('/api/studio/outline', 'POST', payload(withAnswers));
       if (!alive.current) return;
       setOptions(r.options);
       setChosen(0);
@@ -263,6 +313,17 @@ export default function StoryStudio({
                 </span>
                 <small>{seed.length}/300 · 비워 두면 아래에서 골라 만들어요</small>
               </div>
+              {seedVoice.supported && (
+                <button
+                  type="button"
+                  className={`studio-mic ${seedVoice.listening ? 'on' : ''}`}
+                  onClick={seedVoice.listening ? seedVoice.stop : seedVoice.start}
+                  aria-pressed={seedVoice.listening}
+                >
+                  <LineIcon name="mic" size={18} /> {seedVoice.listening ? '듣고 있어요… (다 말하면 눌러요)' : '말로 쓰기'}
+                </button>
+              )}
+              {seedVoice.error && <small className="studio-hint">{seedVoice.error}</small>}
             </div>
 
             <div className="modal-step-block">
@@ -382,9 +443,15 @@ export default function StoryStudio({
 
             {loading ? null : member && child ? (
               <>
-                <button type="button" className="pill-btn studio-go" onClick={makeOutlines} disabled={!ready}>
-                  <ClayArt name="sparkles" size={26} /> 줄거리 3가지 만들기
-                </button>
+                <div className="studio-start">
+                  <button type="button" className="pill-btn studio-go" onClick={startTogether} disabled={!ready}>
+                    <Tobi pose="wave" size={34} /> 토비와 함께 짓기
+                  </button>
+                  <button type="button" className="pill-btn small-pill alt" onClick={() => makeOutlines([])} disabled={!ready}>
+                    <ClayArt name="sparkles" size={22} /> 바로 줄거리 3가지
+                  </button>
+                </div>
+                <small className="studio-hint center">토비와 함께 짓기: 토비가 세 가지를 물어보면 아이가 골라서 이야기를 정해요.</small>
                 {!ready && <small className="studio-hint center">하고 싶은 이야기를 쓰거나 주제를 하나 골라 주세요.</small>}
               </>
             ) : (
@@ -404,13 +471,68 @@ export default function StoryStudio({
             <div className="studio-wait-tobi">
               <Tobi pose="wave" size={130} />
             </div>
-            <strong>{step === 'thinking' ? '토비가 줄거리 세 가지를 생각하고 있어요' : `${pageCount}쪽 그림책을 쓰고 있어요`}</strong>
+            <strong>
+              {step === 'asking' ? '토비가 물어볼 것을 생각하고 있어요' : step === 'thinking' ? '토비가 줄거리 세 가지를 생각하고 있어요' : `${pageCount}쪽 그림책을 쓰고 있어요`}
+            </strong>
             <span>{WAIT_LINES[waitIdx]}</span>
             <span className="studio-dots" aria-hidden>
               <i />
               <i />
               <i />
             </span>
+          </div>
+        )}
+
+        {/* ───── 토비와 함께 짓기: 질문 하나씩, 골라서 또는 말로 답하기 ───── */}
+        {step === 'qa' && questions[answers.length] && (
+          <div className="studio-qa">
+            <div className="studio-qa-head">
+              <Tobi pose="wave" size={96} />
+              <div className="studio-qa-bubble">
+                <span className="studio-qa-count">
+                  {answers.length + 1} / {questions.length}
+                </span>
+                <strong>{questions[answers.length].question}</strong>
+                <button type="button" className="studio-qa-listen" onClick={() => speak(questions[answers.length].question, { force: true, style: 'mascot' })} aria-label="질문 다시 듣기">
+                  <LineIcon name="speaker" size={18} />
+                </button>
+              </div>
+            </div>
+
+            <div className="studio-qa-options">
+              {questions[answers.length].options.map((o) => (
+                <button key={o.text} type="button" className="studio-qa-option" onClick={() => answer(o.text)}>
+                  <ClayEmoji emoji={o.art} size={64} />
+                  <span>{o.text}</span>
+                </button>
+              ))}
+            </div>
+
+            <div className="studio-qa-own">
+              <input value={ownAnswer} onChange={(e) => setOwnAnswer(e.target.value)} maxLength={80} placeholder="내 생각은… (직접 쓰기)" aria-label="직접 답하기" onKeyDown={(e) => e.key === 'Enter' && answer(ownAnswer)} />
+              {answerVoice.supported && (
+                <button type="button" className={`studio-mic ${answerVoice.listening ? 'on' : ''}`} onClick={answerVoice.listening ? answerVoice.stop : answerVoice.start} aria-pressed={answerVoice.listening}>
+                  <LineIcon name="mic" size={18} /> {answerVoice.listening ? '듣는 중…' : '말로 하기'}
+                </button>
+              )}
+              <button type="button" className="pill-btn small-pill" onClick={() => answer(ownAnswer)} disabled={!ownAnswer.trim()}>
+                이걸로 할래요
+              </button>
+            </div>
+            {answerVoice.error && <small className="studio-hint">{answerVoice.error}</small>}
+
+            {answers.length > 0 && (
+              <ol className="studio-qa-done">
+                {answers.map((x, i) => (
+                  <li key={i}>
+                    <span>{x.q}</span> <strong>{x.a}</strong>
+                  </li>
+                ))}
+              </ol>
+            )}
+            <button type="button" className="ghost-pill-btn" onClick={() => setStep('pick')}>
+              ← 재료로 돌아가기
+            </button>
           </div>
         )}
 
@@ -472,7 +594,7 @@ export default function StoryStudio({
                 <button type="button" className="pill-btn small-pill alt" onClick={() => setEditing((v) => !v)}>
                   {editing ? '고치기 끝' : '어른이 고치기'}
                 </button>
-                <button type="button" className="pill-btn small-pill alt" onClick={makeOutlines}>
+                <button type="button" className="pill-btn small-pill alt" onClick={() => makeOutlines()}>
                   다른 줄거리 3개
                 </button>
                 <button type="button" className="ghost-pill-btn" onClick={() => setStep('pick')}>
