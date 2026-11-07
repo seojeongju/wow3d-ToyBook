@@ -1,4 +1,4 @@
-import { send } from './auth';
+import { ApiError, send } from './auth';
 export interface Child {
   id: string;
   nickname: string;
@@ -110,10 +110,10 @@ export interface BookDetail {
 }
 
 async function get<T>(path: string): Promise<T> {
-  const res = await fetch(path, { headers: { accept: 'application/json' } });
+  const res = await fetch(path, { headers: { accept: 'application/json' }, cache: 'no-store' });
   if (!res.ok) {
     const body = await res.json().catch(() => null);
-    throw new Error(body?.error ?? `요청 실패 (${res.status})`);
+    throw new ApiError(body?.error ?? `요청 실패 (${res.status})`, res.status);
   }
   return res.json();
 }
@@ -145,6 +145,8 @@ export interface PublishBookPayload {
   status?: 'published' | 'hidden';
 }
 
+export type ReportReason = 'unsafe' | 'pii' | 'copyright' | 'other';
+
 export const marketApi = {
   publish: (payload: PublishBookPayload) =>
     send<{ ok: boolean; listingId: string; bonusEarned: number; wallet: MarketWallet }>('/api/market', 'POST', payload),
@@ -166,6 +168,210 @@ export const marketApi = {
       'POST',
       { sticker },
     ),
+  report: (listingId: string, reason: ReportReason, detail: string) =>
+    send<{ ok: boolean; autoHidden: boolean; openCount: number }>(
+      `/api/market/${encodeURIComponent(listingId)}/report`,
+      'POST',
+      { reason, detail },
+    ),
+};
+
+/* ───────── 별 코인 지갑 & 충전소 ───────── */
+export interface WalletTx {
+  id: string;
+  delta: number;
+  balance_after: number;
+  kind: string;
+  title: string;
+  ref_id: string | null;
+  created_at: string;
+}
+
+export interface CoinPackage {
+  id: string;
+  coins: number;
+  bonus: number;
+  priceKrw: number;
+  label: string;
+  badge?: string;
+}
+
+export interface WalletOverview {
+  wallet: MarketWallet;
+  transactions: WalletTx[];
+  packages: CoinPackage[];
+  portoneStoreId: string | null;
+}
+
+export const walletApi = {
+  get: () => get<WalletOverview>('/api/wallet'),
+  topup: (packageId: string, paymentId?: string) =>
+    send<{ ok: boolean; added: number; wallet: MarketWallet }>('/api/wallet', 'POST', { packageId, paymentId }),
+};
+
+/* ───────── 3D 모델 & 아이 '갖고 싶어요' 요청 ───────── */
+export interface Model3DMeta {
+  figureId: string;
+  figureName: string;
+  role: string;
+  sizeCm: number;
+  printable: boolean;
+  minWallMm: number;
+  overhangOk: boolean;
+  supportNote: string;
+}
+
+export interface Model3DItem {
+  id: string;
+  book_id: string | null;
+  character_id: string | null;
+  source_image_key: string;
+  glb_key: string | null;
+  print_file_key: string | null;
+  provider: string | null;
+  status: 'queued' | 'processing' | 'ready' | 'failed';
+  created_at: string;
+  meta: Model3DMeta;
+}
+
+export interface WishRecord {
+  id: string;
+  child_id: string;
+  model_id: string;
+  status: 'pending' | 'approved' | 'rejected';
+  created_at: string;
+  decided_at: string | null;
+  child_nickname: string;
+  child_avatar: string;
+  source_image_key: string;
+  meta: Model3DMeta;
+}
+
+export const wishApi = {
+  list: () => get<{ models: Model3DItem[]; wishes: WishRecord[] }>('/api/wishes'),
+  create: (payload: {
+    childId?: string | null;
+    figureId: string;
+    figureName: string;
+    figureImage: string;
+    role?: string;
+    sizeCm: 5 | 8 | 12;
+    createWish?: boolean;
+  }) => send<{ ok: boolean; modelId: string; wishId: string | null }>('/api/wishes', 'POST', payload),
+  decide: (wishId: string, status: 'approved' | 'rejected') =>
+    send<{ ok: boolean }>('/api/wishes', 'PATCH', { wishId, status }),
+};
+
+/* ───────── 실물 3D 피규어 주문·배송 ───────── */
+export type FigureMaterial = 'fdm' | 'resin' | 'fullcolor';
+
+export interface FigureOrderItem {
+  id: string;
+  model_id: string;
+  wish_id: string | null;
+  amount: number;
+  status: string;
+  wow3dpro_order_no: string | null;
+  created_at: string;
+  updated_at: string;
+  source_image_key: string;
+  options: {
+    sizeCm: 5 | 8 | 12;
+    material: FigureMaterial;
+    materialLabel: string;
+    payMethod: 'coins' | 'card';
+    coinUsed: number;
+  };
+  shipping: {
+    recipient: string;
+    phone: string;
+    address: string;
+    memo?: string;
+  };
+  modelMeta: {
+    figureName: string;
+    role?: string;
+  };
+  events: { status: string; note: string | null; created_at: string }[];
+}
+
+export const orderApi = {
+  list: () => get<{ wallet: MarketWallet; orders: FigureOrderItem[] }>('/api/orders'),
+  create: (payload: {
+    modelId: string;
+    wishId?: string | null;
+    sizeCm: 5 | 8 | 12;
+    material: FigureMaterial;
+    payMethod: 'coins' | 'card';
+    recipient: string;
+    phone: string;
+    address: string;
+    memo?: string;
+  }) =>
+    send<{ ok: boolean; orderId: string; orderNo: string; amountKrw: number; coinUsed: number; wallet: MarketWallet }>(
+      '/api/orders',
+      'POST',
+      payload,
+    ),
+};
+
+/* ───────── 운영자 대시보드 실시간 관리 ───────── */
+export interface AdminReportRow {
+  id: string;
+  listing_id: string;
+  reason: string;
+  detail: string;
+  status: 'open' | 'actioned' | 'dismissed';
+  created_at: string;
+  resolved_at: string | null;
+  book_id: string;
+  author_name: string;
+  listing_status: string;
+  book_title: string;
+  cover_emoji: string;
+}
+
+export interface AdminOrderRow {
+  id: string;
+  amount: number;
+  status: string;
+  wow3dpro_order_no: string | null;
+  created_at: string;
+  updated_at: string;
+  parent_name: string;
+  source_image_key: string;
+  options: { sizeCm: number; material: string; materialLabel: string };
+  shipping: { recipient: string; phone: string; address: string };
+  modelMeta: { figureName: string; supportNote?: string };
+}
+
+export interface AdminOverview {
+  stats: {
+    total_parents: number;
+    total_books: number;
+    published_listings: number;
+    open_reports: number;
+    active_orders: number;
+  };
+  reports: AdminReportRow[];
+  orders: AdminOrderRow[];
+}
+
+export const adminApi = {
+  overview: () => get<AdminOverview>('/api/admin/overview'),
+  resolveReport: (reportId: string, decision: 'blind' | 'dismiss') =>
+    send<{ ok: boolean; listingStatus: string }>('/api/admin/overview', 'POST', {
+      action: 'resolve_report',
+      reportId,
+      decision,
+    }),
+  advanceOrder: (orderId: string, nextStatus: string, note?: string) =>
+    send<{ ok: boolean; nextStatus: string }>('/api/admin/overview', 'POST', {
+      action: 'advance_order',
+      orderId,
+      nextStatus,
+      note,
+    }),
 };
 
 /** 아이 프로필 만들기·고치기에 쓰는 값 */

@@ -1,6 +1,13 @@
 import type { Env } from '../../_lib/env';
 import { error, json, newId, requireParent } from '../../_lib/http';
-import { ensureMarketSchema, getOrInitWallet, type MarketKind } from '../../_lib/market';
+import {
+  checkParentPinForAction,
+  ensureMarketSchema,
+  getOrInitWallet,
+  recordWalletTx,
+  type MarketKind,
+} from '../../_lib/market';
+import { checkChildSafeText } from '../../_lib/safety';
 
 export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
   const parentId = await requireParent(request, env);
@@ -30,10 +37,20 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
       ORDER BY (m.loan_count + m.sales_count * 2 + m.likes_count) DESC, m.created_at DESC`,
   )
     .bind(parentId, now, parentId, parentId, parentId)
-    .all<Record<string, unknown>>();
+    .all<{
+      id: string;
+      book_id: string;
+      seller_parent_id: string;
+      author_name: string;
+      summary: string;
+      category: string;
+      title: string;
+      is_purchased: number;
+      [key: string]: unknown;
+    }>();
 
   const filtered = listings
-    .map((item): Record<string, unknown> => ({
+    .map((item) => ({
       ...item,
       is_purchased: Boolean(item.is_purchased),
       is_mine: item.seller_parent_id === parentId,
@@ -84,6 +101,9 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
   const parentId = await requireParent(request, env);
   if (parentId instanceof Response) return parentId;
 
+  const pinBlock = await checkParentPinForAction(request, env);
+  if (pinBlock) return pinBlock;
+
   await ensureMarketSchema(env);
   await getOrInitWallet(env, parentId);
 
@@ -110,8 +130,17 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
   const category = (body.category ?? '').trim().slice(0, 20) || '모험';
   const authorName = (body.authorName ?? '').trim().slice(0, 30) || '꼬마 작가';
   const status = body.status === 'hidden' ? 'hidden' : 'published';
-  const now = new Date().toISOString();
 
+  // 공개 상태로 등록할 때는 제목·필명·소개글·본문 전체에 대해 어린이 안전/개인정보 필터 작동
+  if (status === 'published') {
+    const { results: pages } = await env.DB.prepare(`SELECT text FROM book_pages WHERE book_id = ?`)
+      .bind(bookId)
+      .all<{ text: string }>();
+    const safeCheck = checkChildSafeText(book.title, authorName, summary, ...pages.map((p) => p.text));
+    if (!safeCheck.ok) return error(safeCheck.reason, 400);
+  }
+
+  const now = new Date().toISOString();
   const existing = await env.DB.prepare(`SELECT id FROM market_listings WHERE book_id = ?`)
     .bind(bookId)
     .first<{ id: string }>();
@@ -130,19 +159,23 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
   } else {
     listingId = newId();
     bonusEarned = 200;
-    await env.DB.batch([
-      env.DB.prepare(
-        `INSERT INTO market_listings
-         (id, book_id, seller_parent_id, author_name, kind, price, rent_days, summary, category, status, created_at, updated_at)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      ).bind(listingId, bookId, parentId, authorName, kind, price, rentDays, summary, category, status, now, now),
-      env.DB.prepare(
-        `UPDATE market_wallets SET balance = balance + 200, total_earned = total_earned + 200, updated_at = ? WHERE parent_id = ?`,
-      ).bind(now, parentId),
-    ]);
+    await env.DB.prepare(
+      `INSERT INTO market_listings
+       (id, book_id, seller_parent_id, author_name, kind, price, rent_days, summary, category, status, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    )
+      .bind(listingId, bookId, parentId, authorName, kind, price, rentDays, summary, category, status, now, now)
+      .run();
+
+    await recordWalletTx(env, {
+      parentId,
+      delta: 200,
+      kind: 'publish_bonus',
+      title: `'${book.title}' 첫 도서관·서점 출품 보너스`,
+      refId: listingId,
+    });
   }
 
   const wallet = await getOrInitWallet(env, parentId);
   return json({ ok: true, listingId, bonusEarned, wallet });
 };
-

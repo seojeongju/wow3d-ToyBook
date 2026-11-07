@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { wishApi } from '../api';
 import {
   SHELF_FIGURES,
   addWishItem,
@@ -154,14 +155,28 @@ export function FactorySheet({
 
   const currentSize = SIZES.find((s) => s.cm === sizeCm) ?? SIZES[1];
 
-  const handleSaveWish = () => {
+  const handleSaveWish = async () => {
     setPrinting(true);
-    window.setTimeout(() => {
-      const next = addWishItem(childId, selectedId, sizeCm);
-      setWishes(next);
-      setPrinting(false);
-      onWishSaved(`${fig.name} ${sizeCm}cm 피규어를 찜 상자에 담았어요!`);
-    }, 650);
+    try {
+      await wishApi
+        .create({
+          childId,
+          figureId: selectedId,
+          figureName: fig.name,
+          figureImage: fig.image,
+          role: fig.role,
+          sizeCm,
+          createWish: true,
+        })
+        .catch(() => null);
+    } finally {
+      window.setTimeout(() => {
+        const next = addWishItem(childId, selectedId, sizeCm);
+        setWishes(next);
+        setPrinting(false);
+        onWishSaved(`💜 ${fig.name} ${sizeCm}cm 피규어를 부모님께 찜 요청으로 보냈어요!`);
+      }, 500);
+    }
   };
 
   return (

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import {
   api,
@@ -6,16 +6,27 @@ import {
   marketApi,
   type MarketListing,
   type MarketWallet,
+  type ReportReason,
   type StickerType,
 } from '../api';
+import { ApiError, useMe } from '../auth';
 import ClayArt, { ClayEmoji } from '../components/ClayArt';
 import { ClayIcon, LineIcon } from '../components/Icons';
+import ParentApproveModal, { isParentActionReady, shareBookLink } from '../components/ParentApproveModal';
 import PublishModal from '../components/PublishModal';
 import { SubHeader } from '../components/SiteHeader';
+import WalletModal from '../components/WalletModal';
 import { speak } from '../speech';
 import { useAsync } from '../useAsync';
 
 type MarketTab = 'library' | 'bookstore' | 'mine';
+
+const REPORT_REASONS: { key: ReportReason; label: string }[] = [
+  { key: 'unsafe', label: '어린이에게 부적절하거나 무서운 표현이 있어요' },
+  { key: 'pii', label: '전화번호·주소·실명 등 개인정보가 들어 있어요' },
+  { key: 'copyright', label: '다른 사람의 책·캐릭터를 그대로 베꼈어요' },
+  { key: 'other', label: '기타 확인이 필요한 내용이에요' },
+];
 
 const CATEGORIES = ['전체', '모험', '생활습관', '우주·과학', '잠자리', '감정'] as const;
 
@@ -37,6 +48,7 @@ function daysLeft(dueAt: string | null | undefined): number {
 export default function BookMarket() {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
+  const { user } = useMe();
 
   const initialTab = (searchParams.get('tab') as MarketTab) || 'library';
   const [tab, setTab] = useState<MarketTab>(
@@ -47,6 +59,12 @@ export default function BookMarket() {
   const [selectedChildId, setSelectedChildId] = useState<string>('');
   const [publishBookId, setPublishBookId] = useState<string | null>(searchParams.get('publish'));
   const [showPublishModal, setShowPublishModal] = useState<boolean>(Boolean(searchParams.get('publish')));
+  const [showWalletModal, setShowWalletModal] = useState<boolean>(Boolean(searchParams.get('wallet')));
+  const [pendingBuyItem, setPendingBuyItem] = useState<MarketListing | null>(null);
+  const [reportTarget, setReportTarget] = useState<MarketListing | null>(null);
+  const [reportReason, setReportReason] = useState<ReportReason>('unsafe');
+  const [reportDetail, setReportDetail] = useState<string>('');
+  const [reportBusy, setReportBusy] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [reloadTick, setReloadTick] = useState(0);
@@ -68,6 +86,7 @@ export default function BookMarket() {
   }, [notice]);
 
   const tell = (msg: string) => {
+    if (!msg) return;
     setNotice(msg);
     speak(msg);
   };
@@ -120,7 +139,7 @@ export default function BookMarket() {
     }
   };
 
-  const handleBuy = async (item: MarketListing) => {
+  const executeBuy = async (item: MarketListing) => {
     setBusyId(item.id);
     try {
       const res = await marketApi.buy(item.id, selectedChildId || null);
@@ -133,9 +152,47 @@ export default function BookMarket() {
           : `🏪 '${item.title}' 책을 소장 구매해 ${targetLabel}에 영구 보관했어요!`,
       );
     } catch (e) {
-      tell(e instanceof Error ? e.message : '구매에 실패했어요');
+      if (e instanceof ApiError && e.status === 423) {
+        setPendingBuyItem(item);
+      } else {
+        tell(e instanceof Error ? e.message : '구매에 실패했어요');
+      }
     } finally {
       setBusyId(null);
+    }
+  };
+
+  const handleBuy = (item: MarketListing) => {
+    if (!isParentActionReady(user)) {
+      setPendingBuyItem(item);
+      return;
+    }
+    void executeBuy(item);
+  };
+
+  const handleShare = async (bookId: string, title: string) => {
+    const msg = await shareBookLink(bookId, title);
+    if (msg) tell(msg);
+  };
+
+  const handleReportSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!reportTarget) return;
+    setReportBusy(true);
+    try {
+      const res = await marketApi.report(reportTarget.id, reportReason, reportDetail);
+      setReportTarget(null);
+      setReportDetail('');
+      if (res.autoHidden) {
+        setReloadTick((v) => v + 1);
+        tell('🚨 누적 신고가 접수되어 운영자 확인 전까지 해당 도서가 자동 블라인드 처리되었어요.');
+      } else {
+        tell('🚨 신고가 접수되었어요. 어린이 안전 운영팀이 빠르게 확인할게요!');
+      }
+    } catch (errObj) {
+      tell(errObj instanceof Error ? errObj.message : '신고 접수에 실패했어요');
+    } finally {
+      setReportBusy(false);
     }
   };
 
@@ -156,12 +213,17 @@ export default function BookMarket() {
         title="토이북 도서관 · 서점"
         right={
           <div className="market-header-actions">
-            <div className="market-wallet-pill" title="책을 공유하거나 판매하면 별 코인이 쌓여요">
+            <button
+              type="button"
+              className="market-wallet-pill clickable"
+              onClick={() => setShowWalletModal(true)}
+              title="클릭해서 별 코인 거래 내역 및 충전소 열기"
+            >
               <ClayArt name="star" size={20} />
               <span>
-                내 별 코인 <strong>{wallet.balance.toLocaleString()}</strong>
+                내 별 코인 <strong>{wallet.balance.toLocaleString()}</strong> · 충전소
               </span>
-            </div>
+            </button>
             <button
               type="button"
               className="pill-btn small-pill market-publish-top-btn"
@@ -214,9 +276,16 @@ export default function BookMarket() {
               </div>
             </div>
 
-            <div className="market-wallet-summary">
+            <div
+              className="market-wallet-summary clickable"
+              role="button"
+              tabIndex={0}
+              onClick={() => setShowWalletModal(true)}
+              onKeyDown={(e) => e.key === 'Enter' && setShowWalletModal(true)}
+              title="별 코인 원장 및 충전소 열기"
+            >
               <div>
-                <span>보유 별 코인</span>
+                <span>보유 별 코인 (클릭 시 충전·내역)</span>
                 <strong>⭐ {wallet.balance.toLocaleString()} 코인</strong>
               </div>
               <div>
@@ -377,6 +446,30 @@ export default function BookMarket() {
                         <span>🏛️ 대출 {item.loan_count}회</span>
                         {(item.kind === 'bookstore' || item.kind === 'both') && <span>🏪 소장 {item.sales_count}명</span>}
                         <span>💖 응원 {item.likes_count}개</span>
+                        <div className="market-mini-tools">
+                          <button
+                            type="button"
+                            className="market-mini-btn"
+                            onClick={() => handleShare(item.book_id, item.title)}
+                            title="이 동화책 링크 복사·공유하기"
+                          >
+                            🔗 공유
+                          </button>
+                          {!item.is_mine && (
+                            <button
+                              type="button"
+                              className="market-mini-btn report"
+                              onClick={() => {
+                                setReportTarget(item);
+                                setReportReason('unsafe');
+                                setReportDetail('');
+                              }}
+                              title="부적절한 내용 신고하기"
+                            >
+                              🚨 신고
+                            </button>
+                          )}
+                        </div>
                       </div>
 
                       {/* 어린이 안전 칭찬 스티커 반응 버튼 */}
@@ -525,6 +618,13 @@ export default function BookMarket() {
                     <div className="market-mine-actions">
                       <button
                         type="button"
+                        className="market-btn outline"
+                        onClick={() => handleShare(b.id, b.title)}
+                      >
+                        🔗 자랑하기(공유)
+                      </button>
+                      <button
+                        type="button"
                         className="market-btn secondary"
                         onClick={() => navigate(`/book/${b.id}`)}
                       >
@@ -562,6 +662,87 @@ export default function BookMarket() {
             tell(msg);
           }}
         />
+      )}
+
+      {showWalletModal && (
+        <WalletModal
+          onClose={() => setShowWalletModal(false)}
+          onWalletUpdated={(nextWallet, msg) => {
+            setWalletOverride(nextWallet);
+            tell(msg);
+          }}
+        />
+      )}
+
+      {pendingBuyItem && (
+        <ParentApproveModal
+          actionLabel={`'${pendingBuyItem.title}' 동화책을 ⭐ ${pendingBuyItem.price.toLocaleString()} 별 코인으로 소장 구매할까요?`}
+          onClose={() => setPendingBuyItem(null)}
+          onApproved={() => {
+            const target = pendingBuyItem;
+            setPendingBuyItem(null);
+            void executeBuy(target);
+          }}
+        />
+      )}
+
+      {reportTarget && (
+        <div
+          className="modal-backdrop"
+          role="dialog"
+          aria-modal="true"
+          aria-label="어린이 안전 콘텐츠 신고"
+          onClick={() => setReportTarget(null)}
+        >
+          <div className="modal-card report-modal-card" onClick={(e) => e.stopPropagation()}>
+            <header className="publish-modal-header">
+              <div>
+                <h2>🚨 어린이 안전 콘텐츠 신고</h2>
+                <p>'{reportTarget.title}' 동화책에서 확인이 필요한 점을 알려 주세요</p>
+              </div>
+              <button type="button" className="icon-btn" onClick={() => setReportTarget(null)} aria-label="닫기">
+                ✕
+              </button>
+            </header>
+            <form className="publish-form" onSubmit={handleReportSubmit}>
+              <div className="report-reason-list">
+                {REPORT_REASONS.map((r) => (
+                  <label key={r.key} className={`report-reason-item ${reportReason === r.key ? 'active' : ''}`}>
+                    <input
+                      type="radio"
+                      name="report-reason"
+                      checked={reportReason === r.key}
+                      onChange={() => setReportReason(r.key)}
+                    />
+                    <span>{r.label}</span>
+                  </label>
+                ))}
+              </div>
+              <label className="publish-field">
+                <span className="publish-label">자세한 설명 (선택)</span>
+                <textarea
+                  className="publish-textarea"
+                  rows={2}
+                  maxLength={200}
+                  value={reportDetail}
+                  onChange={(e) => setReportDetail(e.target.value)}
+                  placeholder="몇 쪽에 어떤 표현이 있었는지 적어 주시면 운영팀이 더 빠르게 확인해요."
+                />
+              </label>
+              <p className="publish-safety-note">
+                ※ 3건 이상 신고가 누적된 도서는 어린이 보호를 위해 운영자 확인 전까지 즉시 자동 블라인드 처리됩니다.
+              </p>
+              <div className="publish-actions">
+                <button type="button" className="pill-btn alt small-pill" onClick={() => setReportTarget(null)}>
+                  취소
+                </button>
+                <button type="submit" className="pill-btn small-pill" disabled={reportBusy}>
+                  {reportBusy ? '신고 접수 중…' : '🚨 신고 접수하기'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
       )}
 
       {notice && (

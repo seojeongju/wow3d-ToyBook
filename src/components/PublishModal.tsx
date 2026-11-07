@@ -1,7 +1,9 @@
 import { useState, type FormEvent } from 'react';
+import { ApiError, useMe } from '../auth';
 import { marketApi, type MarketKind, type MarketWallet, type MyMarketBook } from '../api';
 import ClayArt, { ClayEmoji } from './ClayArt';
 import { LineIcon } from './Icons';
+import ParentApproveModal, { isParentActionReady } from './ParentApproveModal';
 
 const CATEGORIES = ['모험', '생활습관', '우주·과학', '잠자리', '감정'] as const;
 const PRICE_PRESETS = [300, 500, 700, 1000] as const;
@@ -22,6 +24,7 @@ export default function PublishModal({
   onClose,
   onSuccess,
 }: Props) {
+  const { user } = useMe();
   const initialBook = books.find((b) => b.id === initialBookId) ?? books[0];
   const [selectedBookId, setSelectedBookId] = useState<string>(initialBook?.id ?? '');
   const currentBook = books.find((b) => b.id === selectedBookId) ?? initialBook;
@@ -37,6 +40,7 @@ export default function PublishModal({
   const [status, setStatus] = useState<'published' | 'hidden'>(currentBook?.market_status ?? 'published');
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
+  const [needApprove, setNeedApprove] = useState(false);
 
   const handleBookChange = (nextId: string) => {
     setSelectedBookId(nextId);
@@ -51,8 +55,7 @@ export default function PublishModal({
     setStatus(found.market_status ?? 'published');
   };
 
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
+  const executePublish = async () => {
     if (!currentBook) return;
     setBusy(true);
     setErr(null);
@@ -78,10 +81,24 @@ export default function PublishModal({
       const bonusMsg = res.bonusEarned > 0 ? ` (창작 보너스 +${res.bonusEarned} 별 코인 적립!)` : '';
       onSuccess(`🎉 '${currentBook.title}' 책을 ${modeLabel}${bonusMsg}`, res.wallet);
     } catch (errorObj) {
-      setErr(errorObj instanceof Error ? errorObj.message : '등록 중 오류가 발생했어요');
+      if (errorObj instanceof ApiError && errorObj.status === 423) {
+        setNeedApprove(true);
+      } else {
+        setErr(errorObj instanceof Error ? errorObj.message : '등록 중 오류가 발생했어요');
+      }
     } finally {
       setBusy(false);
     }
+  };
+
+  const handleSubmit = (e: FormEvent) => {
+    e.preventDefault();
+    if (!currentBook) return;
+    if (status === 'published' && !isParentActionReady(user)) {
+      setNeedApprove(true);
+      return;
+    }
+    void executePublish();
   };
 
   return (
@@ -263,6 +280,10 @@ export default function PublishModal({
               </div>
             )}
 
+            <p className="publish-safety-note">
+              🛡️ 어린이 안전 자동 필터 적용 중: 전화번호·이메일·외부 링크·실명 등 개인정보나 부적절한 표현은 출품 시 자동 차단됩니다.
+            </p>
+
             {err && <p className="error">{err}</p>}
 
             <div className="publish-actions">
@@ -275,6 +296,17 @@ export default function PublishModal({
               </button>
             </div>
           </form>
+        )}
+
+        {needApprove && (
+          <ParentApproveModal
+            actionLabel={`'${currentBook?.title ?? '동화책'}' 도서관·서점 외부 공개를 승인할까요?`}
+            onClose={() => setNeedApprove(false)}
+            onApproved={() => {
+              setNeedApprove(false);
+              void executePublish();
+            }}
+          />
         )}
       </div>
     </div>

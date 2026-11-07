@@ -1,6 +1,6 @@
 import type { Env } from '../../../_lib/env';
 import { error, json, newId, requireParent } from '../../../_lib/http';
-import { ensureMarketSchema, getOrInitWallet } from '../../../_lib/market';
+import { checkParentPinForAction, ensureMarketSchema, getOrInitWallet, recordWalletTx } from '../../../_lib/market';
 
 interface BuyBody {
   childId?: string | null;
@@ -9,6 +9,9 @@ interface BuyBody {
 export const onRequestPost: PagesFunction<Env, 'id'> = async ({ request, env, params }) => {
   const parentId = await requireParent(request, env);
   if (parentId instanceof Response) return parentId;
+
+  const pinBlock = await checkParentPinForAction(request, env);
+  if (pinBlock) return pinBlock;
 
   await ensureMarketSchema(env);
   const wallet = await getOrInitWallet(env, parentId);
@@ -22,7 +25,8 @@ export const onRequestPost: PagesFunction<Env, 'id'> = async ({ request, env, pa
   }
 
   const listing = await env.DB.prepare(
-    `SELECT id, book_id, seller_parent_id, kind, price, status FROM market_listings WHERE id = ?`,
+    `SELECT m.id, m.book_id, m.seller_parent_id, m.kind, m.price, m.status, b.title
+       FROM market_listings m JOIN books b ON b.id = m.book_id WHERE m.id = ?`,
   )
     .bind(listingId)
     .first<{
@@ -32,6 +36,7 @@ export const onRequestPost: PagesFunction<Env, 'id'> = async ({ request, env, pa
       kind: 'library' | 'bookstore' | 'both';
       price: number;
       status: string;
+      title: string;
     }>();
 
   if (!listing || listing.status !== 'published') return error('구매할 수 있는 책을 찾지 못했어요', 404);
@@ -56,12 +61,11 @@ export const onRequestPost: PagesFunction<Env, 'id'> = async ({ request, env, pa
 
   const price = Math.max(0, listing.price);
   if (wallet.balance < price) {
-    return error(`별 코인이 부족해요 (보유: ${wallet.balance}코인 / 필요: ${price}코인). 내 책을 도서관에 공유하면 +200코인을 받을 수 있어요!`);
+    return error(`별 코인이 부족해요 (보유: ${wallet.balance}코인 / 필요: ${price}코인). 상단 [별 코인 충전]에서 충전하거나 내 책을 공유해 보세요!`);
   }
 
   const now = new Date().toISOString();
   const purchaseId = newId();
-  await getOrInitWallet(env, listing.seller_parent_id);
 
   await env.DB.batch([
     env.DB.prepare(
@@ -69,17 +73,27 @@ export const onRequestPost: PagesFunction<Env, 'id'> = async ({ request, env, pa
        VALUES (?, ?, ?, ?, ?, ?, 'points', ?)`,
     ).bind(purchaseId, listing.id, listing.book_id, parentId, body.childId ?? null, price, now),
     env.DB.prepare(`UPDATE market_listings SET sales_count = sales_count + 1 WHERE id = ?`).bind(listing.id),
-    env.DB.prepare(`UPDATE market_wallets SET balance = balance - ?, updated_at = ? WHERE parent_id = ?`).bind(
-      price,
-      now,
-      parentId,
-    ),
-    env.DB.prepare(
-      `UPDATE market_wallets SET balance = balance + ?, total_earned = total_earned + ?, updated_at = ? WHERE parent_id = ?`,
-    ).bind(price, price, now, listing.seller_parent_id),
   ]);
 
-  const updatedWallet = await getOrInitWallet(env, parentId);
+  const updatedWallet = await recordWalletTx(env, {
+    parentId,
+    delta: -price,
+    earnedDelta: 0,
+    kind: 'book_purchase',
+    title: `'${listing.title}' 영구 소장 구매`,
+    refId: purchaseId,
+  });
+
+  if (listing.seller_parent_id !== parentId) {
+    await recordWalletTx(env, {
+      parentId: listing.seller_parent_id,
+      delta: price,
+      earnedDelta: price,
+      kind: 'sale_income',
+      title: `'${listing.title}' 서점 판매 수익 적립`,
+      refId: purchaseId,
+    });
+  }
+
   return json({ ok: true, purchaseId, bookId: listing.book_id, wallet: updatedWallet });
 };
-

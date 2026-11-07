@@ -7460,3 +7460,711 @@ a.primary-btn {
   line-height: 1.6;
   text-align: center;
 }
+
+
+/* =========================================================================
+   2차 전체 고도화 스타일:
+   - 별 코인 지갑·충전소 모달 (WalletModal)
+   - 보호자 승인·실수 방지 모달 (ParentApproveModal)
+   - 어린이 안전 콘텐츠 신고 모달 & 공유/신고 미니 툴
+   - 부모 3D 모델 보관함 · 360° 검수 뷰어 · 피규어 주문·배송 타임라인
+   - 관리자 실시간 주문·신고 관리 리스트
+   ========================================================================= */
+
+.market-wallet-pill.clickable,
+.market-wallet-summary.clickable {
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.market-wallet-pill.clickable:hover,
+.market-wallet-summary.clickable:hover {
+  transform: translateY(-2px);
+  border-color: var(--primary);
+  box-shadow: 0 8px 18px rgba(111, 81, 200, 0.18);
+}
+
+.market-mini-tools {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.market-mini-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1.5px solid #e2d8f8;
+  background: #fff;
+  color: var(--ink-soft);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 800;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.14s ease;
+}
+
+.market-mini-btn:hover {
+  border-color: var(--primary);
+  color: var(--primary-deep);
+  background: #f5f0ff;
+}
+
+.market-mini-btn.report:hover {
+  border-color: #ef6b6b;
+  color: #c93b3b;
+  background: #fff2f2;
+}
+
+.publish-safety-note {
+  margin: 0;
+  padding: 10px 14px;
+  border-radius: 14px;
+  background: #f4f9f6;
+  border: 1px solid #cce8d6;
+  color: #2f6846;
+  font-size: 12.5px;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+/* ───── 보호자 승인 & 신고 모달 ───── */
+.approve-modal-card,
+.report-modal-card {
+  width: min(480px, 94vw);
+  max-height: 90dvh;
+  overflow-y: auto;
+  padding: 24px;
+}
+
+.approve-modal-body .gate {
+  box-shadow: none;
+  padding: 12px 6px 4px;
+}
+
+.approve-guide {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 14px;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.report-reason-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.report-reason-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 14px;
+  border-radius: 14px;
+  border: 2px solid #ebe4fa;
+  background: #fbf9ff;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.report-reason-item.active {
+  border-color: #e46969;
+  background: #fff5f5;
+}
+
+/* ───── 별 코인 지갑 · 충전소 모달 ───── */
+.wallet-modal-card {
+  width: min(680px, 95vw);
+  max-height: 90dvh;
+  overflow-y: auto;
+  padding: 24px;
+}
+
+.wallet-modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.wallet-balance-banner {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  padding: 18px 20px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, #fff7db, #f2eaff);
+  border: 2px solid #ebdcfb;
+}
+
+.wallet-balance-banner span {
+  display: block;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink-soft);
+}
+
+.wallet-balance-banner strong {
+  display: block;
+  margin-top: 4px;
+  font-size: 24px;
+  font-weight: 900;
+  color: var(--ink);
+}
+
+.wallet-balance-banner strong.earned {
+  color: #2b8a57;
+}
+
+.wallet-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.wallet-section-head h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 900;
+}
+
+.wallet-section-head span {
+  font-size: 12.5px;
+  color: var(--ink-soft);
+}
+
+.wallet-pkg-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+@media (max-width: 620px) {
+  .wallet-pkg-grid,
+  .wallet-balance-banner {
+    grid-template-columns: 1fr;
+  }
+}
+
+.wallet-pkg-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 5px;
+  padding: 16px 14px;
+  border-radius: 18px;
+  border: 2px solid #e4daf9;
+  background: #faf8ff;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.16s ease;
+}
+
+.wallet-pkg-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--primary);
+  background: #f1eaff;
+}
+
+.wallet-pkg-badge {
+  padding: 2px 9px;
+  border-radius: 999px;
+  background: #ffda6b;
+  color: #5b3f00;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.wallet-pkg-card strong {
+  font-size: 17px;
+  font-weight: 900;
+  color: var(--ink);
+}
+
+.wallet-pkg-name {
+  font-size: 12.5px;
+  color: var(--ink-soft);
+}
+
+.wallet-pkg-price {
+  margin-top: 6px;
+  align-self: stretch;
+  text-align: center;
+  padding: 7px 10px;
+  border-radius: 999px;
+  background: var(--primary);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.wallet-tip-box {
+  padding: 12px 15px;
+  border-radius: 14px;
+  background: #f6f2ff;
+  color: var(--ink-soft);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.wallet-tx-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+.wallet-tx-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: 14px;
+  background: #fff;
+  border: 1.5px solid #eee7fb;
+}
+
+.wallet-tx-icon {
+  font-size: 22px;
+}
+
+.wallet-tx-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.wallet-tx-info strong {
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.wallet-tx-info small {
+  font-size: 12px;
+  color: var(--ink-soft);
+}
+
+.wallet-tx-amount {
+  text-align: right;
+  display: flex;
+  flex-direction: column;
+}
+
+.wallet-tx-amount strong.plus {
+  color: #218551;
+  font-size: 15px;
+}
+
+.wallet-tx-amount strong.minus {
+  color: #c84545;
+  font-size: 15px;
+}
+
+.wallet-tx-amount small {
+  font-size: 11.5px;
+  color: var(--ink-soft);
+}
+
+/* ───── 부모 3D 모델 보관함 & 피규어 주문 스튜디오 ───── */
+.dash-hero-btns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.studio3d-top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.studio3d-switch {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.studio3d-wish-section {
+  margin-bottom: 20px;
+}
+
+.studio3d-wish-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+  gap: 12px;
+}
+
+.studio3d-wish-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 18px;
+  background: #faf7ff;
+  border: 2px solid #e7dcfb;
+}
+
+.studio3d-wish-card.status-pending {
+  background: #fff9eb;
+  border-color: #f5d27b;
+}
+
+.studio3d-wish-img {
+  width: 62px;
+  height: 62px;
+  border-radius: 14px;
+  object-fit: cover;
+}
+
+.studio3d-wish-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.studio3d-child-tag {
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--primary-deep);
+}
+
+.studio3d-wish-info small {
+  font-size: 11.5px;
+  color: var(--ink-soft);
+}
+
+.studio3d-wish-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.wish-status-pill {
+  padding: 5px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+  background: #e8f7ef;
+  color: #217a4b;
+}
+
+.wish-status-pill.rejected {
+  background: #f2f2f5;
+  color: #6f6f7d;
+}
+
+.studio3d-viewer-layout,
+.studio3d-orders-layout {
+  display: grid;
+  grid-template-columns: 1.05fr 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+@media (max-width: 960px) {
+  .studio3d-viewer-layout,
+  .studio3d-orders-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.studio3d-turntable {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: 270px;
+  padding: 22px;
+  border-radius: 22px;
+  background: radial-gradient(circle at 50% 35%, #ffffff 0%, #ede4ff 100%);
+  overflow: hidden;
+}
+
+.studio3d-turntable.with-bed .studio3d-bed-plate {
+  position: absolute;
+  bottom: 16px;
+  width: 72%;
+  height: 36px;
+  border-radius: 50%;
+  background: repeating-linear-gradient(
+    90deg,
+    rgba(111, 81, 200, 0.16) 0px,
+    rgba(111, 81, 200, 0.16) 2px,
+    transparent 2px,
+    transparent 16px
+  );
+  border: 2px dashed rgba(111, 81, 200, 0.35);
+}
+
+.studio3d-model-frame {
+  z-index: 1;
+  transition: transform 0.12s ease-out;
+}
+
+.studio3d-model-frame img {
+  width: 200px;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 26px;
+  box-shadow: 0 18px 32px rgba(74, 52, 136, 0.24);
+}
+
+.studio3d-slider-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 14px 0;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.studio3d-slider-row input[type='range'] {
+  flex: 1;
+}
+
+.studio3d-check-box {
+  margin-bottom: 16px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: #eefaf3;
+  border: 1.5px solid #bfe6ce;
+  font-size: 13px;
+}
+
+.studio3d-check-box p {
+  margin: 4px 0 8px;
+  color: #2c6846;
+}
+
+.studio3d-check-box ul {
+  margin: 0;
+  padding-left: 18px;
+  color: var(--ink-soft);
+}
+
+.studio3d-model-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(135px, 1fr));
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.studio3d-model-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 10px;
+  border-radius: 16px;
+  border: 2px solid #ece4fb;
+  background: #fff;
+  cursor: pointer;
+}
+
+.studio3d-model-item.active {
+  border-color: var(--primary);
+  background: #f3ecff;
+}
+
+.studio3d-model-item img {
+  width: 78px;
+  height: 78px;
+  border-radius: 14px;
+  object-fit: cover;
+}
+
+.studio3d-model-item small {
+  font-size: 11.5px;
+  color: var(--ink-soft);
+}
+
+.studio3d-gen-box {
+  padding: 16px;
+  border-radius: 18px;
+  background: #f9f6ff;
+  border: 1.5px dashed #cab7f5;
+}
+
+.studio3d-gen-box h4 {
+  margin: 0 0 4px;
+}
+
+.studio3d-gen-box p {
+  margin: 0 0 12px;
+  font-size: 13px;
+  color: var(--ink-soft);
+}
+
+.studio3d-gen-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.studio3d-gen-controls select {
+  padding: 8px 12px;
+  border-radius: 12px;
+  border: 1.5px solid #dcd0f7;
+  font: inherit;
+  font-size: 13.5px;
+}
+
+.studio3d-order-total {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 16px 18px;
+  border-radius: 18px;
+  background: #f6f1ff;
+}
+
+.studio3d-order-total strong {
+  display: block;
+  font-size: 20px;
+  font-weight: 900;
+}
+
+.studio3d-order-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.studio3d-order-card {
+  padding: 16px;
+  border-radius: 18px;
+  background: #faf8ff;
+  border: 1.5px solid #e6dcf8;
+}
+
+.studio3d-order-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.studio3d-order-head img {
+  width: 60px;
+  height: 60px;
+  border-radius: 14px;
+  object-fit: cover;
+}
+
+.studio3d-order-head h4 {
+  margin: 2px 0;
+}
+
+.studio3d-order-head p {
+  margin: 0;
+  font-size: 12.5px;
+  color: var(--ink-soft);
+}
+
+.studio3d-timeline {
+  list-style: none;
+  margin: 16px 0 12px;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 4px;
+  text-align: center;
+}
+
+.studio3d-timeline li {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  opacity: 0.45;
+}
+
+.studio3d-timeline li .dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #cfc4ea;
+}
+
+.studio3d-timeline li.done,
+.studio3d-timeline li.current {
+  opacity: 1;
+}
+
+.studio3d-timeline li.done .dot {
+  background: #3aa86d;
+}
+
+.studio3d-timeline li.current .dot {
+  background: var(--primary);
+  box-shadow: 0 0 0 4px rgba(124, 92, 224, 0.25);
+}
+
+.studio3d-timeline li small {
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.studio3d-events {
+  list-style: none;
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: #fff;
+  font-size: 12.5px;
+  color: var(--ink-soft);
+}
+
+/* ───── 운영자 대시보드 관리 리스트 ───── */
+.admin-manage-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.admin-manage-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 14px;
+  padding: 14px 16px;
+  border-radius: 18px;
+  background: #faf8ff;
+  border: 1.5px solid #e7def9;
+}
+
+.admin-row-thumb {
+  width: 54px;
+  height: 54px;
+  border-radius: 14px;
+  object-fit: cover;
+}
+
+.admin-row-info {
+  flex: 1;
+  min-width: 220px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.admin-row-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}

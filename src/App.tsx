@@ -8,6 +8,7 @@ import BookViewer from './pages/BookViewer';
 import BookMarket from './pages/BookMarket';
 import ParentGate from './pages/ParentGate';
 import ParentDashboard from './pages/ParentDashboard';
+import ParentFigureStudio from './pages/ParentFigureStudio';
 import KidsManage from './pages/KidsManage';
 import AccountPage from './pages/AccountPage';
 import AdminDashboard from './pages/AdminDashboard';
@@ -42,6 +43,8 @@ export default function App() {
         <Route path="/parent" element={<ParentGate />} />
         <Route path="/dashboard" element={<ParentDashboard />} />
         <Route path="/dashboard/kids" element={<KidsManage />} />
+        <Route path="/dashboard/models" element={<ParentFigureStudio mode="models" />} />
+        <Route path="/dashboard/orders" element={<ParentFigureStudio mode="orders" />} />
         <Route path="/dashboard/account" element={<AccountPage />} />
         <Route path="/admin" element={<AdminDashboard />} />
         <Route path="*" element={<Navigate to="/" replace />} />

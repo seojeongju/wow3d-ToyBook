@@ -1,8 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { api, fileUrl, type Page } from '../api';
+import { api, fileUrl, marketApi, type BookDetail, type Page } from '../api';
+import { ApiError, useMe } from '../auth';
 import ClayArt, { ClayEmoji } from '../components/ClayArt';
 import { LineIcon } from '../components/Icons';
+import ParentApproveModal, { isParentActionReady, shareBookLink } from '../components/ParentApproveModal';
 import { SubHeader } from '../components/SiteHeader';
 import Tobi from '../components/Tobi';
 import { josa } from '../korean';
@@ -60,9 +62,11 @@ function splitWords(text: string) {
 export default function BookViewer() {
   const { bookId = '' } = useParams();
   const navigate = useNavigate();
+  const { user } = useMe();
   const detail = useAsync(() => api.book(bookId), [bookId]);
   const children = useAsync(api.children, []);
 
+  const [liveDetail, setLiveDetail] = useState<BookDetail | null>(null);
   const [stage, setStage] = useState<Stage>('cover');
   const [index, setIndex] = useState(0);
   const [flip, setFlip] = useState<Flip | null>(null);
@@ -71,15 +75,20 @@ export default function BookViewer() {
   const [progress, setProgress] = useState(0);
   const [auto, setAuto] = useState(false);
   const [night, setNight] = useState(initialNight);
+  const [unlockBusy, setUnlockBusy] = useState(false);
+  const [needBuyApprove, setNeedBuyApprove] = useState(false);
+  const [notice, setNotice] = useState<string | null>(null);
   const autoRef = useRef(false);
   const timer = useRef<number>();
   const touchX = useRef<number | null>(null);
 
-  const pages: Page[] = detail.status === 'ok' ? detail.data.pages : [];
+  const activeDetail = liveDetail ?? (detail.status === 'ok' ? detail.data : null);
+  const pages: Page[] = activeDetail ? activeDetail.pages : [];
   const page = pages[index];
   const last = pages.length - 1;
-  const book = detail.status === 'ok' ? detail.data.book : null;
-  const child = children.status === 'ok' && book ? children.data.find((c) => c.id === book.child_id) : undefined;
+  const book = activeDetail ? activeDetail.book : null;
+  const kids = children.status === 'ok' ? children.data : [];
+  const child = book ? kids.find((c) => c.id === book.child_id) : undefined;
   const tone = COVER_TONES[(bookId.length + (book?.title.length ?? 0)) % COVER_TONES.length];
 
   const stopReading = useCallback(() => {
@@ -95,10 +104,17 @@ export default function BookViewer() {
 
   // 다른 책으로 바뀌면 표지부터
   useEffect(() => {
+    setLiveDetail(null);
     setStage('cover');
     setIndex(0);
     setAutoMode(false);
   }, [bookId]);
+
+  useEffect(() => {
+    if (!notice) return;
+    const t = window.setTimeout(() => setNotice(null), 3500);
+    return () => window.clearTimeout(t);
+  }, [notice]);
 
   useEffect(() => () => stopReading(), [stopReading]);
 
@@ -266,6 +282,62 @@ export default function BookViewer() {
 
   const charPos = progress * (page?.text.length ?? 0);
   const backToShelf = () => navigate(book.child_id ? `/shelf/${book.child_id}` : '/profiles');
+  const defaultChildId = book.child_id ?? kids[0]?.id ?? null;
+
+  const handleShareBook = async () => {
+    const msg = await shareBookLink(book.id, book.title);
+    if (msg) setNotice(msg);
+  };
+
+  const resumeFullBook = async (toastMsg: string) => {
+    const refreshed = await api.book(book.id);
+    setLiveDetail(refreshed);
+    setFlip(null);
+    const resumeIdx = refreshed.pages.length > 2 ? 2 : 0;
+    setIndex(resumeIdx);
+    setStage('reading');
+    setNotice(toastMsg);
+    speak(toastMsg);
+  };
+
+  const executeInstantBuy = async () => {
+    if (!book.listing_id) return navigate('/market?tab=bookstore');
+    setUnlockBusy(true);
+    try {
+      await marketApi.buy(book.listing_id, defaultChildId);
+      await resumeFullBook(`🎉 '${book.title}' 책을 소장했어요! 3쪽부터 바로 이어서 읽을게요!`);
+    } catch (e) {
+      if (e instanceof ApiError && e.status === 423) {
+        setNeedBuyApprove(true);
+      } else {
+        setNotice(e instanceof Error ? e.message : '소장 구매에 실패했어요');
+      }
+    } finally {
+      setUnlockBusy(false);
+    }
+  };
+
+  const handleInstantBuy = () => {
+    if (!isParentActionReady(user)) {
+      setNeedBuyApprove(true);
+      return;
+    }
+    void executeInstantBuy();
+  };
+
+  const handleInstantBorrow = async () => {
+    if (!book.listing_id) return;
+    setUnlockBusy(true);
+    try {
+      await marketApi.borrow(book.listing_id, defaultChildId, 'borrow');
+      await resumeFullBook(`🏛️ 도서관에서 '${book.title}' 책을 빌렸어요! 3쪽부터 바로 이어서 읽을게요!`);
+    } catch (e) {
+      setNotice(e instanceof Error ? e.message : '대출에 실패했어요');
+    } finally {
+      setUnlockBusy(false);
+    }
+  };
+
   const illust = (p: Page) => (
     <div className="illust" style={{ background: p.layout.bg ?? 'var(--soft-blue)' }}>
       {p.image_key ? <img src={fileUrl(p.image_key)} alt="" /> : <ClayEmoji emoji={p.layout.emoji ?? book.cover_emoji} size={220} />}
@@ -293,6 +365,15 @@ export default function BookViewer() {
         title={book.title}
         right={
           <div className="theater-tools">
+            <button
+              type="button"
+              className="icon-btn"
+              onClick={handleShareBook}
+              aria-label="이 동화책 자랑하기(링크 공유)"
+              title="동화책 링크 공유하기"
+            >
+              🔗
+            </button>
             <button className={`icon-btn ${night ? 'active' : ''}`} onClick={toggleNight} aria-pressed={night} aria-label={night ? '잠자리 모드 끄기' : '잠자리 모드 켜기'}>
               <ClayArt name="moon" size={34} />
             </button>
@@ -315,8 +396,9 @@ export default function BookViewer() {
             {book.cover_key ? <img src={fileUrl(book.cover_key)} alt="" /> : <ClayEmoji emoji={book.cover_emoji} size={170} />}
             <h2>{book.title}</h2>
             <span className="cover-sub">
-              {child ? `${child.nickname}의 그림책 · ` : ''}
-              {pages.length}쪽
+              {child ? `${child.nickname}의 그림책 · ` : book.author_name ? `${book.author_name} · ` : ''}
+              {book.page_count || pages.length}쪽
+              {book.preview_only ? ' (앞 2쪽 미리보기)' : ''}
             </span>
           </div>
           <div className="cover-actions">
@@ -328,6 +410,9 @@ export default function BookViewer() {
                 <LineIcon name="speaker" size={22} /> 끝까지 읽어 줘
               </button>
             )}
+            <button className="pill-btn alt" onClick={handleShareBook}>
+              🔗 자랑하기
+            </button>
           </div>
           {pages.length === 0 && <p className="muted center-text">아직 빈 책이에요.</p>}
         </section>
@@ -419,14 +504,25 @@ export default function BookViewer() {
             <>
               <h2>앞 2쪽 미리보기를 다 읽었어요!</h2>
               <p>
-                전체 {book.page_count}쪽 뒷이야기가 궁금한가요? 동화 서점에서 소장하면 끝까지 읽고 내 책장에 영구 보관할 수 있어요!
+                전체 {book.page_count}쪽 뒷이야기가 궁금한가요? 지금 바로 극장 안에서 소장하거나 대출하면{' '}
+                <strong>3쪽부터 끊김 없이 이어서</strong> 읽을 수 있어요!
               </p>
               <div className="cover-actions">
-                <button className="pill-btn" onClick={() => navigate('/market?tab=bookstore')}>
-                  🏪 서점에서 소장 구매하기 (⭐ {(book.market_price ?? 500).toLocaleString()} 코인)
+                <button className="pill-btn" disabled={unlockBusy} onClick={handleInstantBuy}>
+                  {unlockBusy
+                    ? '열어 주는 중…'
+                    : `🛒 지금 바로 소장하고 3쪽부터 이어 읽기 (⭐ ${(book.market_price ?? 500).toLocaleString()} 코인)`}
                 </button>
+                {book.market_kind === 'both' && (
+                  <button className="pill-btn alt" disabled={unlockBusy} onClick={handleInstantBorrow}>
+                    🏛️ 도서관 무료 대출하고 3쪽부터 이어 읽기
+                  </button>
+                )}
                 <button className="pill-btn alt" onClick={() => goTo(0)}>
                   처음부터 다시 보기
+                </button>
+                <button className="pill-btn alt" onClick={() => navigate('/market?tab=bookstore')}>
+                  서점 목록으로 가기
                 </button>
               </div>
             </>
@@ -437,6 +533,9 @@ export default function BookViewer() {
               <div className="cover-actions">
                 <button className="pill-btn" onClick={() => goTo(0)}>
                   처음부터 다시 읽기
+                </button>
+                <button className="pill-btn alt" onClick={handleShareBook}>
+                  🔗 내 동화 자랑하기(링크 복사)
                 </button>
                 {book.ownership === 'mine' ? (
                   <button className="pill-btn alt" onClick={() => navigate(`/market?tab=mine&publish=${encodeURIComponent(book.id)}`)}>
@@ -454,6 +553,23 @@ export default function BookViewer() {
             </>
           )}
         </section>
+      )}
+
+      {needBuyApprove && (
+        <ParentApproveModal
+          actionLabel={`'${book.title}' 동화책을 ⭐ ${(book.market_price ?? 500).toLocaleString()} 별 코인으로 즉시 소장하고 이어서 읽을까요?`}
+          onClose={() => setNeedBuyApprove(false)}
+          onApproved={() => {
+            setNeedBuyApprove(false);
+            void executeInstantBuy();
+          }}
+        />
+      )}
+
+      {notice && (
+        <div className="toast" role="status" onClick={() => setNotice(null)}>
+          {notice}
+        </div>
       )}
     </main>
   );

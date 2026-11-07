@@ -11,8 +11,8 @@ export const PARENT_MENU: DashMenuItem[] = [
   { icon: 'smile', label: '우리 아이', to: '/dashboard/kids' },
   { icon: 'book', label: '책장', to: '/profiles' },
   { icon: 'heart', label: '도서관·서점', to: '/market' },
-  { icon: 'cube', label: '3D 모델' },
-  { icon: 'box', label: '주문·배송' },
+  { icon: 'cube', label: '3D 모델', to: '/dashboard/models' },
+  { icon: 'box', label: '주문·배송', to: '/dashboard/orders' },
   { icon: 'gear', label: '설정', to: '/dashboard/account' },
 ];
 

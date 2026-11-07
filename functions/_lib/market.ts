@@ -1,7 +1,18 @@
+import { sessionParent } from './auth';
 import type { Env } from './env';
+import { error, newId } from './http';
+import { isUnlocked } from './parent';
 
 export type MarketKind = 'library' | 'bookstore' | 'both';
 export type StickerType = 'star' | 'art' | 'heart' | 'again';
+export type WalletTxKind =
+  | 'welcome'
+  | 'publish_bonus'
+  | 'loan_reward'
+  | 'sale_income'
+  | 'book_purchase'
+  | 'topup'
+  | 'figure_order';
 
 export const STICKER_META: Record<StickerType, { emoji: string; label: string }> = {
   star: { emoji: '⭐', label: '재미있어요' },
@@ -316,6 +327,31 @@ export async function ensureMarketSchema(env: Env): Promise<void> {
         total_earned INTEGER NOT NULL DEFAULT 0,
         updated_at   TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ', 'now'))
       )`),
+      env.DB.prepare(`CREATE TABLE IF NOT EXISTS market_reports (
+        id                 TEXT PRIMARY KEY,
+        listing_id         TEXT NOT NULL REFERENCES market_listings(id) ON DELETE CASCADE,
+        reporter_parent_id TEXT NOT NULL REFERENCES parents(id) ON DELETE CASCADE,
+        reason             TEXT NOT NULL,
+        detail             TEXT NOT NULL DEFAULT '',
+        status             TEXT NOT NULL DEFAULT 'open' CHECK (status IN ('open', 'actioned', 'dismissed')),
+        created_at         TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ', 'now')),
+        resolved_at        TEXT,
+        UNIQUE (listing_id, reporter_parent_id)
+      )`),
+      env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_market_reports_status ON market_reports(status, created_at)`),
+      env.DB.prepare(`CREATE TABLE IF NOT EXISTS wallet_transactions (
+        id            TEXT PRIMARY KEY,
+        parent_id     TEXT NOT NULL,
+        delta         INTEGER NOT NULL,
+        balance_after INTEGER NOT NULL,
+        kind          TEXT NOT NULL CHECK (kind IN ('welcome', 'publish_bonus', 'loan_reward', 'sale_income', 'book_purchase', 'topup', 'figure_order')),
+        title         TEXT NOT NULL,
+        ref_id        TEXT,
+        created_at    TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ', 'now'))
+      )`),
+      env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_wallet_tx_parent ON wallet_transactions(parent_id, created_at DESC)`),
+      env.DB.prepare(`INSERT OR IGNORE INTO parents (id, display_name, email, status) VALUES ('demo-parent', '데모 부모님', null, 'active')`),
+      env.DB.prepare(`INSERT OR IGNORE INTO children (id, parent_id, nickname, avatar, age_mode) VALUES ('c-demo', 'demo-parent', '토비 친구', '🐻', 'kid')`),
     ]);
 
     const existing = await env.DB.prepare('SELECT COUNT(*) AS cnt FROM market_listings').first<{ cnt: number }>();
@@ -373,14 +409,82 @@ async function seedInitialMarketCatalog(env: Env): Promise<void> {
 
 export async function getOrInitWallet(env: Env, parentId: string): Promise<{ balance: number; total_earned: number }> {
   await ensureMarketSchema(env);
-  await env.DB.prepare(
-    `INSERT OR IGNORE INTO market_wallets (parent_id, balance, total_earned) VALUES (?, 3000, 0)`,
-  )
-    .bind(parentId)
-    .run();
-  const row = await env.DB.prepare(`SELECT balance, total_earned FROM market_wallets WHERE parent_id = ?`)
+  const existing = await env.DB.prepare(`SELECT balance, total_earned FROM market_wallets WHERE parent_id = ?`)
     .bind(parentId)
     .first<{ balance: number; total_earned: number }>();
-  return row ?? { balance: 3000, total_earned: 0 };
+
+  if (!existing) {
+    const now = new Date().toISOString();
+    await env.DB.batch([
+      env.DB.prepare(`INSERT OR IGNORE INTO market_wallets (parent_id, balance, total_earned, updated_at) VALUES (?, 3000, 0, ?)`).bind(
+        parentId,
+        now,
+      ),
+      env.DB.prepare(
+        `INSERT INTO wallet_transactions (id, parent_id, delta, balance_after, kind, title, created_at)
+         VALUES (?, ?, 3000, 3000, 'welcome', '토이북 시작 축하 별 코인 지급', ?)`,
+      ).bind(newId(), parentId, now),
+    ]);
+    return { balance: 3000, total_earned: 0 };
+  }
+
+  // 기존 지갑에 첫 거래 내역이 없다면 환영 내역 1건 보충
+  const txCount = await env.DB.prepare(`SELECT COUNT(*) AS cnt FROM wallet_transactions WHERE parent_id = ?`)
+    .bind(parentId)
+    .first<{ cnt: number }>();
+  if ((txCount?.cnt ?? 0) === 0) {
+    await env.DB.prepare(
+      `INSERT INTO wallet_transactions (id, parent_id, delta, balance_after, kind, title)
+       VALUES (?, ?, ?, ?, 'welcome', '토이북 기본 별 코인 지갑')`,
+    )
+      .bind(newId(), parentId, existing.balance, existing.balance)
+      .run();
+  }
+
+  return existing;
+}
+
+export async function recordWalletTx(
+  env: Env,
+  opts: {
+    parentId: string;
+    delta: number;
+    earnedDelta?: number;
+    kind: WalletTxKind;
+    title: string;
+    refId?: string | null;
+  },
+): Promise<{ balance: number; total_earned: number }> {
+  const current = await getOrInitWallet(env, opts.parentId);
+  const nextBalance = Math.max(0, current.balance + opts.delta);
+  const nextEarned = current.total_earned + (opts.earnedDelta ?? (opts.delta > 0 && opts.kind !== 'topup' && opts.kind !== 'welcome' ? opts.delta : 0));
+  const now = new Date().toISOString();
+
+  await env.DB.batch([
+    env.DB.prepare(`UPDATE market_wallets SET balance = ?, total_earned = ?, updated_at = ? WHERE parent_id = ?`).bind(
+      nextBalance,
+      nextEarned,
+      now,
+      opts.parentId,
+    ),
+    env.DB.prepare(
+      `INSERT INTO wallet_transactions (id, parent_id, delta, balance_after, kind, title, ref_id, created_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+    ).bind(newId(), opts.parentId, opts.delta, nextBalance, opts.kind, opts.title, opts.refId ?? null, now),
+  ]);
+
+  return { balance: nextBalance, total_earned: nextEarned };
+}
+
+/**
+ * 출품·유료 구매·피규어 주문 시 보호자 PIN 잠금 확인.
+ * 로그인된 active 계정이 부모 PIN 을 설정해 두었고 현재 잠겨 있으면 423 반환 → 프론트엔드가 PIN 모달 표시
+ */
+export async function checkParentPinForAction(request: Request, env: Env): Promise<Response | null> {
+  const me = await sessionParent(request, env);
+  if (me && me.status === 'active' && me.has_pin && !isUnlocked(me)) {
+    return error('보호자 PIN 확인이 필요해요', 423);
+  }
+  return null;
 }
 

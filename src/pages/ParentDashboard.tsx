@@ -1,12 +1,13 @@
 import { useState } from 'react';
-import { Link, Navigate } from 'react-router-dom';
-import { api } from '../api';
+import { Link, Navigate, useNavigate } from 'react-router-dom';
+import { api, wishApi } from '../api';
 import { BarChart, DonutChart } from '../components/Charts';
 import DashLayout from '../components/DashLayout';
 import { PARENT_MENU, parentProfile, useLeaveParent } from '../components/ParentArea';
 import { useMe } from '../auth';
 import { ClayIcon, LineIcon, type ClayIconName } from '../components/Icons';
 import Tobi from '../components/Tobi';
+import WalletModal from '../components/WalletModal';
 import { isParentUnlocked } from '../parentLock';
 import { weeklyPages } from '../readingLog';
 import { useAsync } from '../useAsync';
@@ -22,6 +23,8 @@ const SAMPLE_TOPICS = [
 
 export default function ParentDashboard() {
   const [notice, setNotice] = useState<string | null>(null);
+  const [showWalletModal, setShowWalletModal] = useState(false);
+  const navigate = useNavigate();
   const { loading: meLoading, user } = useMe();
   const leave = useLeaveParent();
   // 이 기기에서 읽은 쪽 (모든 아이 합계, 로그인 연동 후 서버 기록으로 교체)
@@ -29,16 +32,20 @@ export default function ParentDashboard() {
   const readTotal = reading.reduce((s, d) => s + d.value, 0);
   const children = useAsync(api.children, []);
   const books = useAsync(() => api.books(), []);
+  const wishBundle = useAsync(() => wishApi.list(), []);
 
   if (!isParentUnlocked()) return <Navigate to="/parent" replace />;
 
   const kids = children.status === 'ok' ? children.data : [];
   const bookList = books.status === 'ok' ? books.data : [];
+  const wishes = wishBundle.status === 'ok' ? wishBundle.data.wishes : [];
+  const pendingWishes = wishes.filter((w) => w.status === 'pending');
+
   const stats: { icon: ClayIconName; tone: string; label: string; value: string; sub: string }[] = [
     { icon: 'drawing', tone: 'lavender', label: '아이 프로필', value: `${kids.length}명`, sub: '부모 계정에 연결됨' },
     { icon: 'studio', tone: 'peach', label: '만든 책', value: `${bookList.length}권`, sub: `완성 ${bookList.filter((b) => b.status === 'done').length}권` },
     { icon: 'theater', tone: 'yellow', label: '모든 쪽 수', value: `${bookList.reduce((s, b) => s + b.page_count, 0)}쪽`, sub: '책장 전체' },
-    { icon: 'factory', tone: 'mint', label: '갖고 싶어요', value: '0건', sub: '승인 기다리는 요청' },
+    { icon: 'factory', tone: 'mint', label: '갖고 싶어요', value: `${pendingWishes.length}건`, sub: '승인 기다리는 요청' },
   ];
   const kidName = (id: string | null) => kids.find((k) => k.id === id)?.nickname ?? '';
 
@@ -73,9 +80,21 @@ export default function ParentDashboard() {
         <div className="dash-hero-copy">
           <h2>안녕하세요, {user?.status === 'active' ? `${user.name}님` : '부모님'}!</h2>
           <p>오늘은 아이와 어떤 이야기를 만들어 볼까요?</p>
-          <button className="pill-btn small-pill" onClick={() => setNotice('이야기 공방(AI 책 만들기)은 곧 열려요')}>
-            새 책 만들기 <LineIcon name="arrow" size={18} />
-          </button>
+          <div className="dash-hero-btns">
+            <button
+              className="pill-btn small-pill"
+              onClick={() => navigate(kids[0] ? `/shelf/${kids[0].id}` : '/profiles')}
+            >
+              책장에서 새 동화 만들기 <LineIcon name="arrow" size={18} />
+            </button>
+            <button
+              type="button"
+              className="pill-btn alt small-pill"
+              onClick={() => setShowWalletModal(true)}
+            >
+              ⭐ 내 별 코인 지갑 · 충전소
+            </button>
+          </div>
         </div>
         <ClayIcon name="drawing" size={72} tile={false} />
       </section>
@@ -140,16 +159,45 @@ export default function ParentDashboard() {
         </article>
         <article className="dash-card">
           <header>
-            <h3>갖고 싶어요 요청</h3>
+            <h3>갖고 싶어요 요청 ({pendingWishes.length}건 대기)</h3>
+            <Link to="/dashboard/models" className="see-all">
+              3D 보관함 보기
+            </Link>
           </header>
-          <div className="dash-empty">
-            <ClayIcon name="factory" size={64} />
-            <p>
-              아직 요청이 없어요.
-              <br />
-              아이가 3D 캐릭터에서 "갖고 싶어요"를 누르면 여기서 승인할 수 있어요.
-            </p>
-          </div>
+          {wishes.length === 0 ? (
+            <div className="dash-empty">
+              <ClayIcon name="factory" size={64} />
+              <p>
+                아직 요청이 없어요.
+                <br />
+                아이가 책장 [장난감 공장]에서 찜하기를 누르면 여기서 승인·주문할 수 있어요.
+              </p>
+            </div>
+          ) : (
+            <ul className="dash-list">
+              {wishes.slice(0, 4).map((w) => (
+                <li key={w.id}>
+                  <span className="dash-thumb" aria-hidden>
+                    <ClayEmoji emoji={w.child_avatar} size={36} />
+                  </span>
+                  <div>
+                    <strong>
+                      {w.meta.figureName} ({w.meta.sizeCm}cm)
+                    </strong>
+                    <span>
+                      {w.child_nickname}의 요청 · {w.status === 'pending' ? '승인 대기 중' : w.status === 'approved' ? '승인 완료' : '보류'}
+                    </span>
+                  </div>
+                  <Link
+                    to={`/dashboard/orders?modelId=${encodeURIComponent(w.model_id)}&wishId=${encodeURIComponent(w.id)}`}
+                    className="market-mini-btn"
+                  >
+                    {w.status === 'pending' ? '승인·주문 →' : '주문서 보기'}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
         </article>
       </section>
 
@@ -163,6 +211,13 @@ export default function ParentDashboard() {
           도서관·서점 관리 <LineIcon name="arrow" size={18} />
         </Link>
       </section>
+
+      {showWalletModal && (
+        <WalletModal
+          onClose={() => setShowWalletModal(false)}
+          onWalletUpdated={(_w, msg) => setNotice(msg)}
+        />
+      )}
 
       {notice && (
         <div className="toast" role="status" onClick={() => setNotice(null)}>
