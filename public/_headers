@@ -3,7 +3,7 @@
   X-Frame-Options: DENY
   Referrer-Policy: strict-origin-when-cross-origin
   Permissions-Policy: camera=(self), microphone=(self), geolocation=()
-  Content-Security-Policy: default-src 'self'; img-src 'self' data: blob:; media-src 'self' blob:; style-src 'self' 'unsafe-inline'; script-src 'self' https://cdn.portone.io; connect-src 'self' https://*.portone.io; frame-src https://*.portone.io https://*.iamport.kr; frame-ancestors 'none'; base-uri 'self'
+  Content-Security-Policy: default-src 'self'; font-src 'self' data: https://cdn.jsdelivr.net https://fonts.gstatic.com; img-src 'self' data: blob:; media-src 'self' blob:; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com; script-src 'self' https://cdn.portone.io; connect-src 'self' https://*.portone.io; frame-src https://*.portone.io https://*.iamport.kr; frame-ancestors 'none'; base-uri 'self'
 
 /assets/*
   Cache-Control: public, max-age=31536000, immutable

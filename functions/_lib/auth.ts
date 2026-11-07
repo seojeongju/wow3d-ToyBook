@@ -55,8 +55,15 @@ const qs = (o: Record<string, string | undefined>) =>
   new URLSearchParams(Object.entries(o).filter((e): e is [string, string] => Boolean(e[1]))).toString();
 
 async function tokenFrom(res: Response, who: string): Promise<string> {
-  const body = (await res.json().catch(() => null)) as { access_token?: string } | null;
-  if (!res.ok || !body?.access_token) throw new Error(`${who} 토큰 발급 실패 (${res.status})`);
+  const body = (await res.json().catch(() => null)) as {
+    access_token?: string;
+    error?: string;
+    error_code?: string;
+    error_description?: string;
+  } | null;
+  if (!res.ok || !body?.access_token) {
+    throw new Error(`${who} 토큰 발급 실패 (${res.status}: ${body?.error_code ?? body?.error ?? ''} ${body?.error_description ?? ''})`);
+  }
   return body.access_token;
 }
 
@@ -68,20 +75,25 @@ async function getJson<T>(url: string, accessToken: string, who: string): Promis
 
 const CONFIG: Record<Exclude<Provider, 'dev'>, ProviderConfig> = {
   kakao: {
-    clientId: (env) => env.KAKAO_REST_API_KEY,
-    clientSecret: (env) => env.KAKAO_CLIENT_SECRET,
+    clientId: (env) => env.KAKAO_REST_API_KEY?.trim(),
+    clientSecret: (env) => env.KAKAO_CLIENT_SECRET?.trim(),
     secretOptional: true,
     authorizeUrl: ({ clientId, redirectUri, state }) =>
       `https://kauth.kakao.com/oauth/authorize?${qs({ client_id: clientId, redirect_uri: redirectUri, response_type: 'code', state })}`,
-    exchange: async ({ clientId, clientSecret, redirectUri, code }) =>
-      tokenFrom(
-        await fetch('https://kauth.kakao.com/oauth/token', {
+    exchange: async ({ clientId, clientSecret, redirectUri, code }) => {
+      const post = (secret?: string) =>
+        fetch('https://kauth.kakao.com/oauth/token', {
           method: 'POST',
           headers: { 'content-type': 'application/x-www-form-urlencoded;charset=utf-8' },
-          body: qs({ grant_type: 'authorization_code', client_id: clientId, client_secret: clientSecret, redirect_uri: redirectUri, code }),
-        }),
-        '카카오',
-      ),
+          body: qs({ grant_type: 'authorization_code', client_id: clientId, client_secret: secret, redirect_uri: redirectUri, code }),
+        });
+      const res = await post(clientSecret);
+      if (!res.ok && clientSecret) {
+        const resNoSecret = await post(undefined);
+        if (resNoSecret.ok) return tokenFrom(resNoSecret, '카카오');
+      }
+      return tokenFrom(res, '카카오');
+    },
     profile: async (token) => {
       const me = await getJson<{
         id: number;
@@ -98,8 +110,8 @@ const CONFIG: Record<Exclude<Provider, 'dev'>, ProviderConfig> = {
     },
   },
   naver: {
-    clientId: (env) => env.NAVER_CLIENT_ID,
-    clientSecret: (env) => env.NAVER_CLIENT_SECRET,
+    clientId: (env) => env.NAVER_CLIENT_ID?.trim(),
+    clientSecret: (env) => env.NAVER_CLIENT_SECRET?.trim(),
     authorizeUrl: ({ clientId, redirectUri, state }) =>
       `https://nid.naver.com/oauth2.0/authorize?${qs({ response_type: 'code', client_id: clientId, redirect_uri: redirectUri, state })}`,
     exchange: async ({ clientId, clientSecret, code, state }) =>
@@ -123,8 +135,8 @@ const CONFIG: Record<Exclude<Provider, 'dev'>, ProviderConfig> = {
     },
   },
   google: {
-    clientId: (env) => env.GOOGLE_CLIENT_ID,
-    clientSecret: (env) => env.GOOGLE_CLIENT_SECRET,
+    clientId: (env) => env.GOOGLE_CLIENT_ID?.trim(),
+    clientSecret: (env) => env.GOOGLE_CLIENT_SECRET?.trim(),
     authorizeUrl: ({ clientId, redirectUri, state }) =>
       `https://accounts.google.com/o/oauth2/v2/auth?${qs({
         client_id: clientId,
@@ -174,11 +186,11 @@ export function redirectUri(request: Request, provider: Provider): string {
 export function authorizeUrl(env: Env, request: Request, provider: Provider, state: string): string {
   // 시험용: /api/auth/dev/start?as=이름 으로 다른 사람인 척
   if (provider === 'dev') return `${redirectUri(request, provider)}?${qs({
-      code: 'dev',
-      state,
-      as: new URL(request.url).searchParams.get('as') ?? undefined,
-      born: new URL(request.url).searchParams.get('born') ?? undefined,
-    })}`;
+    code: 'dev',
+    state,
+    as: new URL(request.url).searchParams.get('as') ?? undefined,
+    born: new URL(request.url).searchParams.get('born') ?? undefined,
+  })}`;
   const c = CONFIG[provider];
   return c.authorizeUrl({ clientId: c.clientId(env)!, redirectUri: redirectUri(request, provider), state });
 }

@@ -9,8 +9,9 @@ import { ageCheck, cookie, createSession, enabledProviders, fetchProfile, isProv
 export const onRequestGet: PagesFunction<Env> = async ({ request, env, params }) => {
   const url = new URL(request.url);
   const origin = url.origin;
-  const fail = (code: string) => {
-    const headers = new Headers({ location: `${origin}/login?error=${code}`, 'cache-control': 'no-store' });
+  const fail = (code: string, detail?: string) => {
+    const q = detail ? `?error=${code}&detail=${encodeURIComponent(detail)}` : `?error=${code}`;
+    const headers = new Headers({ location: `${origin}/login${q}`, 'cache-control': 'no-store' });
     headers.append('set-cookie', cookie(request, OAUTH_COOKIE, '', 0, '/api/auth/'));
     return new Response(null, { status: 302, headers });
   };
@@ -29,8 +30,9 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env, params })
   try {
     profile = await fetchProfile(env, request, provider, code, state);
   } catch (e) {
-    console.error('간편 로그인 실패', provider, e instanceof Error ? e.message : e);
-    return fail('provider');
+    const msg = e instanceof Error ? e.message : String(e);
+    console.error('간편 로그인 실패', provider, msg);
+    return fail('provider', msg);
   }
 
   const now = new Date().toISOString();
