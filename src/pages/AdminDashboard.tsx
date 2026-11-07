@@ -5,6 +5,8 @@ import DashLayout, { type DashMenuItem } from '../components/DashLayout';
 import { ClayIcon, LineIcon, type ClayIconName } from '../components/Icons';
 import Tobi from '../components/Tobi';
 import ClayArt, { ClayEmoji } from '../components/ClayArt';
+import AdminGate from '../components/AdminGate';
+import { lockParentMode } from '../auth';
 
 const MENU: DashMenuItem[] = [
   { icon: 'grid', label: '대시보드', to: '/admin' },
@@ -12,6 +14,7 @@ const MENU: DashMenuItem[] = [
   { icon: 'check', label: '출력 검수' },
   { icon: 'users', label: '회원' },
   { icon: 'flag', label: '콘텐츠 신고' },
+  { icon: 'gear', label: 'AI 설정' },
   { icon: 'gear', label: '설정' },
 ];
 
@@ -58,18 +61,26 @@ const QUEUE = [
   { id: 'TB-1037', name: '곰돌이 우주인', size: '8cm · 풀컬러', check: '자동 검사 통과', tone: 'ok', emoji: '🐻' },
 ];
 
+/** 운영자 대시보드: 운영자 로그인 + PIN 확인 뒤에만 열림 (AdminGate) */
 export default function AdminDashboard() {
+  return <AdminGate>{(me) => <AdminHome name={me.name} />}</AdminGate>;
+}
+
+function AdminHome({ name }: { name: string }) {
   const navigate = useNavigate();
   const [notice, setNotice] = useState<string | null>(null);
 
   return (
     <DashLayout
       title="관리자 대시보드"
-      profile={{ avatar: <Tobi pose="peek" size={76} />, name: 'wow3d 운영팀', sub: '출력·주문 관리' }}
+      profile={{ avatar: <Tobi pose="peek" size={76} />, name: `${name}님`, sub: 'wow3d 운영자' }}
       menu={MENU}
       active={0}
-      sampleNote="템플릿 화면이에요. 숫자와 주문은 모두 예시 데이터이며, 운영자 로그인과 주문 API 연동 후 실제 값으로 바뀝니다."
-      onLogout={() => navigate('/')}
+      sampleNote="주문·출력 숫자는 아직 예시 데이터예요. 주문 기능을 열 때 실제 값으로 바뀝니다."
+      onLogout={() => {
+        lockParentMode();
+        navigate('/');
+      }}
       promo={
         <>
           <ClayIcon name="factory" size={44} tile={false} />

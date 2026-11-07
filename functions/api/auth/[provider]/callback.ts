@@ -48,6 +48,10 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env, params })
     parentId = found.id;
     status = found.status;
     await env.DB.prepare('UPDATE parents SET last_login_at = ? WHERE id = ?').bind(now, parentId).run();
+    // 이메일은 로그인할 때마다 최신으로 (운영자 확인·안내 메일용, 회사가 확인한 이메일만 들어옴)
+    if (profile.email) {
+      await env.DB.prepare('UPDATE auth_identities SET email = ? WHERE provider = ? AND provider_user_id = ?').bind(profile.email, provider, profile.id).run();
+    }
   } else {
     // 카카오·네이버가 출생 연도·연령대를 주면 만 14세 미만은 계정을 만들지 않음 (받은 정보도 남기지 않음)
     // 개발 중에는 꺼 둠: 운영 환경 변수 AGE_CHECK=on 일 때만 막음 (정식 출시 전 반드시 켤 것)

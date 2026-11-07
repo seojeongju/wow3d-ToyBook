@@ -74,6 +74,11 @@ export default function Login() {
               <button type="button" className="login-btn" onClick={() => navigate(next ?? '/profiles')}>
                 우리 아이 책장으로
               </button>
+              {user.isAdmin && (
+                <Link to="/admin" className="login-sub-btn">
+                  운영자 화면
+                </Link>
+              )}
               <button type="button" className="login-sub-btn" onClick={signOut} disabled={busy}>
                 로그아웃
               </button>

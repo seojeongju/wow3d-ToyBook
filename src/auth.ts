@@ -21,6 +21,8 @@ export interface Me {
   guardianVerified: boolean;
   /** 보호자 본인인증이 켜져 있는데 아직 안 함 */
   verifyRequired: boolean;
+  /** 운영자인지 (ADMIN_EMAILS) */
+  isAdmin: boolean;
 }
 
 /** 보호자 본인인증 설정 (functions/_lib/verify.ts) */

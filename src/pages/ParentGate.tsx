@@ -106,7 +106,7 @@ function MathGate({ onPass }: { onPass: () => void }) {
 }
 
 /** 부모 PIN 숫자판: 4자리를 다 누르면 바로 확인 */
-function PinGate({ onPass }: { onPass: () => void }) {
+export function PinGate({ onPass }: { onPass: () => void }) {
   const [pin, setPin] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);

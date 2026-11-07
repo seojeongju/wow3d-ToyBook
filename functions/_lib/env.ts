@@ -16,6 +16,8 @@ export interface Env {
   NAVER_CLIENT_SECRET?: string;
   GOOGLE_CLIENT_ID?: string;
   GOOGLE_CLIENT_SECRET?: string;
+  /** 운영자 이메일 (쉼표로 여러 개, functions/_lib/admin.ts). 비밀값으로만 넣고 코드에는 적지 않음 */
+  ADMIN_EMAILS?: string;
   /** "on" 이면 카카오·네이버 출생 연도로 만 14세 미만 가입을 막음. 개발 중에는 비워 둠(누구나 로그인), 정식 출시 전 반드시 "on" */
   AGE_CHECK?: string;
   /** "true" 면 로컬 시험용 가짜 로그인을 엶. 운영에는 절대 넣지 말 것 */

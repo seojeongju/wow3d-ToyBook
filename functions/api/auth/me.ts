@@ -3,6 +3,7 @@ import { json } from '../../_lib/http';
 import { enabledProviders, sessionParent } from '../../_lib/auth';
 import { isUnlocked } from '../../_lib/parent';
 import { verifyClientConfig, verifyMode } from '../../_lib/verify';
+import { isAdmin } from '../../_lib/admin';
 
 /** 지금 로그인한 부모(없으면 null)와 쓸 수 있는 간편 로그인 수단 */
 export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
@@ -29,6 +30,8 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
       guardianVerified: Boolean(me.guardian_verified_at),
       /** 본인인증이 켜져 있는데 아직 안 했으면 true (아이 프로필 만들기 전에 필요) */
       verifyRequired: verifyMode(env) !== 'off' && !me.guardian_verified_at,
+      /** 운영자인지 (functions/_lib/admin.ts) */
+      isAdmin: me.status === 'active' && (await isAdmin(env, me.id)),
     },
     available: enabledProviders(env),
     verify: verifyClientConfig(env),
