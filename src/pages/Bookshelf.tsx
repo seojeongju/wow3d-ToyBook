@@ -4,7 +4,8 @@ import { api } from '../api';
 import ClayArt, { ClayEmoji } from '../components/ClayArt';
 import { ClayIcon, LineIcon, type ClayIconName } from '../components/Icons';
 import RoomPicker from '../components/RoomPicker';
-import { FactorySheet, MagicBoxSheet, StudioSheet } from '../components/ShelfModals';
+import { FactorySheet, MagicBoxSheet } from '../components/ShelfModals';
+import StoryStudio from '../components/StoryStudio';
 import ShelfScene from '../components/ShelfScene';
 import { SubHeader } from '../components/SiteHeader';
 import { josa } from '../korean';
@@ -49,7 +50,6 @@ export default function Bookshelf() {
   const [nightMode, setNightMode] = useState<boolean>(() => loadShelfNight(childId));
 
   const child = children.status === 'ok' ? children.data.find((c) => c.id === childId) : undefined;
-  const childName = child?.nickname ?? '우리 아이';
   const title = child ? `${child.nickname}의 책장` : '우리 집 책장';
   const activeFigure = findShelfFigure(figureId);
 
@@ -231,11 +231,10 @@ export default function Bookshelf() {
 
       {/* 하단 탭 인터랙티브 모달 3종 (이야기 공방 · 마법 상자 · 장난감 공장) */}
       {activeModal === 'studio' && (
-        <StudioSheet
-          childName={childName}
+        <StoryStudio
+          child={child}
           initialFigureId={figureId}
-          books={bookList}
-          onOpenBook={(b) => navigate(`/book/${b.id}`)}
+          onCreated={(bookId) => navigate(`/book/${bookId}`)}
           onClose={() => setActiveModal(null)}
         />
       )}

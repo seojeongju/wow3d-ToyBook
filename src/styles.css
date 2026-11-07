@@ -6019,3 +6019,192 @@ a.login-btn {
   border-radius: 28px;
   background: var(--surface);
 }
+
+/* ───────── 이야기 공방: 새 책 만들기 (PRD 7.1·B-01) ───────── */
+.studio-sheet {
+  gap: 16px;
+}
+
+.studio-own-topic,
+.studio-title-input,
+.studio-beats textarea {
+  width: 100%;
+  padding: 10px 14px;
+  border: 2px solid var(--tint-strong);
+  border-radius: 14px;
+  background: #fff;
+  font: inherit;
+}
+
+.studio-own-topic:focus,
+.studio-title-input:focus,
+.studio-beats textarea:focus {
+  border-color: var(--primary);
+  outline: none;
+}
+
+.studio-go {
+  align-self: center;
+  gap: 8px;
+  min-width: 240px;
+  justify-content: center;
+}
+
+.studio-go:disabled {
+  opacity: 0.45;
+}
+
+.studio-login {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 16px;
+  border-radius: 22px;
+  background: var(--tint);
+  text-align: center;
+}
+
+.studio-login p {
+  margin: 0;
+  line-height: 1.6;
+}
+
+/* 기다리는 동안: 토비가 콩콩 뛰며 말해 줌 */
+.studio-wait {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 26px 12px 30px;
+  text-align: center;
+}
+
+.studio-wait strong {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 400;
+  color: var(--primary-deep);
+}
+
+.studio-wait span {
+  color: var(--ink-soft);
+}
+
+.studio-wait-tobi {
+  animation: studio-hop 1.2s ease-in-out infinite;
+}
+
+@keyframes studio-hop {
+  50% {
+    transform: translateY(-10px) rotate(-3deg);
+  }
+}
+
+.studio-dots {
+  display: flex;
+  gap: 6px;
+}
+
+.studio-dots i {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--primary);
+  animation: studio-dot 1s ease-in-out infinite;
+}
+
+.studio-dots i:nth-child(2) {
+  animation-delay: 0.15s;
+}
+
+.studio-dots i:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+@keyframes studio-dot {
+  50% {
+    opacity: 0.3;
+    transform: translateY(-4px);
+  }
+}
+
+/* 줄거리 카드 */
+.studio-outline {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 18px;
+  border: 2px solid var(--tint-strong);
+  border-radius: 26px;
+  background: var(--surface);
+  box-shadow: var(--clay-soft);
+}
+
+.studio-outline h3 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(22px, 3vw, 28px);
+  font-weight: 400;
+  color: var(--primary-deep);
+}
+
+.studio-beats {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-self: stretch;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.studio-beats li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.studio-beats p {
+  margin: 0;
+  line-height: 1.6;
+}
+
+.studio-beat-label {
+  flex: none;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--tile-yellow);
+  color: #6b5216;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.studio-lesson {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  color: var(--ink-soft);
+  font-weight: 700;
+}
+
+.studio-outline-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.studio-outline-actions .studio-go {
+  align-self: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .studio-wait-tobi,
+  .studio-dots i {
+    animation: none;
+  }
+}

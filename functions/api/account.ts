@@ -54,6 +54,7 @@ export const onRequestDelete: PagesFunction<Env> = async ({ request, env }) => {
     env.DB.prepare('DELETE FROM books WHERE parent_id = ?').bind(id),
     env.DB.prepare('DELETE FROM characters WHERE parent_id = ?').bind(id),
     env.DB.prepare('DELETE FROM children WHERE parent_id = ?').bind(id),
+    env.DB.prepare('DELETE FROM studio_usage WHERE parent_id = ?').bind(id),
     env.DB.prepare('DELETE FROM sessions WHERE parent_id = ?').bind(id),
     env.DB.prepare('DELETE FROM auth_identities WHERE parent_id = ?').bind(id),
     env.DB.prepare('DELETE FROM parents WHERE id = ?').bind(id),

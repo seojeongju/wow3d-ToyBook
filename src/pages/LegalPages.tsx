@@ -152,6 +152,11 @@ export function PrivacyPage() {
                 <td>미국 등 (서비스 지역에 따라 다름)</td>
               </tr>
               <tr>
+                <td>Anthropic, PBC</td>
+                <td>이야기 공방에서 그림책 줄거리와 글 만들기 (아이 별명, 좋아하는 것, 고른 주제가 들어감)</td>
+                <td>미국</td>
+              </tr>
+              <tr>
                 <td>OpenAI, L.L.C.</td>
                 <td>그림책 문장을 읽어 주는 음성으로 바꾸기 (책 문장에 아이 별명이 들어갈 수 있음)</td>
                 <td>미국</td>
