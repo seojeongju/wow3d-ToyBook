@@ -57,9 +57,24 @@ npm run preview              # 빌드 후 http://localhost:8788 에서 화면+AP
 | 네이버 | developers.naver.com > 애플리케이션 등록 > 네이버 로그인, 제공 정보: 별명·이메일 | `https://wow3d-toybook.pages.dev/api/auth/naver/callback` | `NAVER_CLIENT_ID`, `NAVER_CLIENT_SECRET` |
 | 구글 | console.cloud.google.com > API 및 서비스 > OAuth 동의 화면 + 사용자 인증 정보(웹 애플리케이션) | `https://wow3d-toybook.pages.dev/api/auth/google/callback` | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` |
 
+- **나이 확인(만 14세 미만 가입 막기)**: 카카오는 동의 항목에서 "출생 연도" 또는 "연령대"를, 네이버는 제공 정보에서 "출생연도"를 켜 두면 가입 때 확인합니다(저장하지 않음). 정보가 없으면(구글 등) 가입 화면의 "만 14세 이상" 확인으로 받습니다.
 - 로컬에서 시험할 때는 같은 앱에 `http://localhost:8788/api/auth/{kakao|naver|google}/callback` 도 등록하고 `.dev.vars` 에 키를 넣으세요.
 - 키 없이 가입 흐름만 볼 때는 `.dev.vars` 의 `ALLOW_DEV_LOGIN=true` 로 "시험용 로그인"이 나타납니다. **운영에는 절대 넣지 마세요.**
 - 가입 흐름: 간편 로그인 → `/signup` 약관 동의(필수: 만 14세 이상 보호자·이용약관·개인정보 수집·이용·아이 정보 법정대리인 동의 / 선택: 소식 받기) → 가입 완료. 동의 전에 그만두면 받은 정보를 바로 지웁니다.
+
+### 보호자 본인인증 (포트원 V2)
+
+법정대리인 동의 확인용. 키가 없으면 꺼져 있고(동의 체크로만 받음), 아래 세 값을 Cloudflare 환경 변수(암호화)에 넣으면 가입 마지막 단계와 "우리 아이" 화면에 본인인증이 켜집니다. 켜지면 인증을 마친 보호자만 아이 프로필을 만들 수 있습니다.
+
+| 환경 변수 | 어디서 |
+|---|---|
+| `PORTONE_API_SECRET` | 포트원 콘솔 > 연동 정보 > V2 API Secret |
+| `PORTONE_STORE_ID` | 포트원 콘솔 > 연동 정보 > 상점 아이디 |
+| `PORTONE_IDV_CHANNEL_KEY` | 포트원 콘솔 > 채널 관리 > 본인인증 채널(다날 휴대폰 본인인증, KG이니시스 통합인증 등)의 채널 키 |
+
+- 결과에서 성인(만 19세 이상)인지만 확인하고 이름·전화번호·생년월일·CI 는 저장하지 않습니다 (`functions/_lib/verify.ts`).
+- 처음 켤 때 실제 휴대폰으로 PC·휴대폰 각각 한 번씩 인증해 보세요. 인증 창이 막히면 `public/_headers` 의 CSP(`cdn.portone.io`, `*.portone.io`, `*.iamport.kr`)를 확인합니다.
+- 로컬에서는 `ALLOW_DEV_LOGIN=true` 이면 시험용 본인인증(확인 = 성인, 취소 = 미성년)이 나옵니다.
 
 ### 자동 배포 (GitHub Actions)
 
@@ -100,7 +115,7 @@ wrangler.toml         Cloudflare 설정 (D1·R2 바인딩)
 
 ## 다음 개발 순서 (PRD 13장 MVP 기준)
 
-1. 회원가입 다음 단계: 법정대리인 휴대폰 본인인증, PIN 잊었을 때 다시 로그인으로 재설정, 운영 DB 데모 데이터 정리 (1·2단계 간편 가입·약관 동의·아이 프로필·부모 PIN·탈퇴는 완료)
+1. 회원가입 다음 단계: 포트원 본인인증 키 등록 후 실제 인증 시험, PIN 잊었을 때 다시 로그인으로 재설정, 운영 DB 데모 데이터 정리 (1·2단계 간편 가입·약관 동의·아이 프로필·부모 PIN·탈퇴는 완료)
 2. 이야기 공방: Claude API 로 줄거리·본문 생성, 이미지 API 로 삽화 생성 → R2 저장
 3. 마법 상자: Meshy/Tripo API 로 이미지→3D (Cloudflare Queues 로 비동기 처리), three.js 뷰어
 4. 장난감 공장: "갖고 싶어요" → 부모 승인 → 결제(포트원/토스) → wow3d pro 주문 전달

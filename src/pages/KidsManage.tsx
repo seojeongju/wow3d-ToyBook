@@ -7,6 +7,7 @@ import DashLayout from '../components/DashLayout';
 import { PARENT_MENU, parentProfile, useLeaveParent, useRelock } from '../components/ParentArea';
 import { isParentUnlocked } from '../parentLock';
 import { useAsync } from '../useAsync';
+import GuardianVerify from '../components/GuardianVerify';
 
 /**
  * 우리 아이 (회원가입 2단계, PRD 9.1): 아이 프로필 만들기·고치기·지우기.
@@ -29,7 +30,7 @@ function modeFor(year: number): Child['age_mode'] {
 const EMPTY: ChildForm = { nickname: '', birthYear: thisYear - 6, avatar: AVATARS[0], likes: '' };
 
 export default function KidsManage() {
-  const { loading, user } = useMe();
+  const { loading, user, verify, reload } = useMe();
   const leave = useLeaveParent();
   const relock = useRelock();
   const [n, setN] = useState(0);
@@ -81,6 +82,12 @@ export default function KidsManage() {
         <p className="demo-banner">
           지금은 데모 가족이에요. <Link to="/login?next=/dashboard/kids">로그인하면 우리 아이 프로필을 만들 수 있어요</Link>
         </p>
+      )}
+
+      {member && user?.verifyRequired && (
+        <section className="kids-verify">
+          <GuardianVerify config={verify} onDone={() => (reload(), setNotice('보호자 인증을 마쳤어요!'))} />
+        </section>
       )}
 
       <section className="kids-intro">
@@ -138,7 +145,7 @@ export default function KidsManage() {
         )}
       </ul>
 
-      {member && !editing && kids.length < 6 && (
+      {member && !user?.verifyRequired && !editing && kids.length < 6 && (
         <button type="button" className="pill-btn kids-add" onClick={() => setEditing({ id: null, form: EMPTY })}>
           + 아이 프로필 만들기
         </button>

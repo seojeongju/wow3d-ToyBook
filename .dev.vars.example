@@ -20,4 +20,7 @@ GOOGLE_CLIENT_ID=
 GOOGLE_CLIENT_SECRET=
 # 로컬 시험용 가짜 로그인 (키 없이 가입 흐름 확인). 운영에는 넣지 말 것
 ALLOW_DEV_LOGIN=true
+# 결제·보호자 본인인증 (포트원 V2). 본인인증은 STORE_ID·IDV_CHANNEL_KEY 까지 넣으면 가입 단계에 켜짐
 PORTONE_API_SECRET=
+PORTONE_STORE_ID=
+PORTONE_IDV_CHANNEL_KEY=

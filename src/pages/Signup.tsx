@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { cancelSignup, completeSignup, PROVIDER_NAME, useMe } from '../auth';
 import ClayArt from '../components/ClayArt';
+import GuardianVerify from '../components/GuardianVerify';
 import { SubHeader } from '../components/SiteHeader';
 import Tobi from '../components/Tobi';
 import { setParentUnlocked } from '../parentLock';
@@ -37,11 +38,14 @@ export default function Signup() {
   const navigate = useNavigate();
   const [params] = useSearchParams();
   const next = params.get('next');
-  const { loading, user } = useMe();
+  const { loading, user, verify } = useMe();
   const [agree, setAgree] = useState(EMPTY);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState(false);
+  // 약관 동의 뒤 보호자 본인인증 단계 (인증이 켜져 있을 때만)
+  const [verifying, setVerifying] = useState(false);
+  const atVerify = verifying || Boolean(user?.status === 'pending' && user.consented);
 
   // 로그인 전이면 로그인 화면으로, 이미 가입을 마쳤으면 책장으로
   useEffect(() => {
@@ -57,7 +61,8 @@ export default function Signup() {
     setBusy(true);
     setError(null);
     try {
-      await completeSignup(agree);
+      const step = await completeSignup(agree);
+      if (step === 'verify') return setVerifying(true);
       // 방금 보호자 동의를 마쳤으니 이어서 아이 프로필을 만들 수 있게 부모 모드를 열어 둠
       setParentUnlocked(true);
       setDone(true);
@@ -97,6 +102,23 @@ export default function Signup() {
               </button>
             </div>
           </>
+        ) : atVerify ? (
+          <>
+            <h1 className="login-title">보호자 인증만 남았어요</h1>
+            <p className="login-sub">약관 동의를 마쳤어요. 마지막으로 보호자 본인인증을 해 주세요.</p>
+            <div className="login-form consent-form">
+              <GuardianVerify
+                config={verify}
+                onDone={() => {
+                  setParentUnlocked(true);
+                  setDone(true);
+                }}
+              />
+              <button type="button" className="login-sub-btn" onClick={quit} disabled={busy}>
+                가입 그만두기
+              </button>
+            </div>
+          </>
         ) : (
           <>
             <h1 className="login-title">가입을 마무리해요</h1>
@@ -109,7 +131,7 @@ export default function Signup() {
                 '확인하는 중…'
               )}
               <br />
-              아래 내용에 동의하면 가입이 끝나요.
+              {verify.mode === 'off' ? '아래 내용에 동의하면 가입이 끝나요.' : '아래 내용에 동의하고 보호자 본인인증을 하면 가입이 끝나요.'}
             </p>
 
             <div className="login-form consent-form">
@@ -131,6 +153,9 @@ export default function Signup() {
                       <Link to={i.link} target="_blank" className="consent-view">
                         보기
                       </Link>
+                    )}
+                    {i.key === 'age14' && user?.ageCheck === 'provider' && (
+                      <p className="consent-detail ok">{user.providers.map((p) => PROVIDER_NAME[p]).join('·')} 계정 정보로 만 14세 이상임을 확인했어요.</p>
                     )}
                     {i.detail && <p className="consent-detail">{i.detail}</p>}
                   </li>

@@ -13,6 +13,32 @@ export interface Profile {
   id: string;
   nickname: string | null;
   email: string | null;
+  /** 출생 연도 (회사가 주고 사용자가 동의한 경우만). 나이 확인에만 쓰고 저장하지 않음 */
+  birthYear?: number | null;
+  /** 연령대의 끝 나이 (카카오 "10~14" → 14, 네이버 "10-19" → 19). 나이 확인에만 씀 */
+  ageMax?: number | null;
+}
+
+/** "20~29" · "20-29" · "1~9" → 끝 나이 */
+function rangeMax(v: string | undefined): number | null {
+  const m = v?.match(/(\d+)\s*[~-]\s*(\d+)/);
+  return m ? Number(m[2]) : null;
+}
+
+function yearOf(v: string | undefined): number | null {
+  const n = Number(v);
+  return Number.isInteger(n) && n > 1900 ? n : null;
+}
+
+/**
+ * 만 14세 미만일 수 있는지 (가입은 만 14세 이상 보호자만).
+ * 출생 연도로 올해 나이가 14 이하면 생일 전에는 13세일 수 있으므로 막음. 연령대는 끝 나이가 14 이하일 때만 막음.
+ * 둘 다 없으면(구글, 동의 안 함) 판단하지 않고 가입 화면의 "만 14세 이상" 확인으로 받음
+ */
+export function ageCheck(p: Profile, now = new Date()): 'under14' | 'ok' | 'unknown' {
+  if (p.birthYear) return now.getFullYear() - p.birthYear <= 14 ? 'under14' : 'ok';
+  if (p.ageMax != null) return p.ageMax <= 14 ? 'under14' : p.ageMax >= 20 ? 'ok' : 'unknown';
+  return 'unknown';
 }
 
 interface ProviderConfig {
@@ -57,13 +83,18 @@ const CONFIG: Record<Exclude<Provider, 'dev'>, ProviderConfig> = {
         '카카오',
       ),
     profile: async (token) => {
-      const me = await getJson<{ id: number; kakao_account?: { email?: string; is_email_verified?: boolean; profile?: { nickname?: string } } }>(
-        'https://kapi.kakao.com/v2/user/me',
-        token,
-        '카카오',
-      );
+      const me = await getJson<{
+        id: number;
+        kakao_account?: { email?: string; is_email_verified?: boolean; profile?: { nickname?: string }; birthyear?: string; age_range?: string };
+      }>('https://kapi.kakao.com/v2/user/me', token, '카카오');
       const acc = me.kakao_account;
-      return { id: String(me.id), nickname: acc?.profile?.nickname ?? null, email: acc?.is_email_verified ? (acc.email ?? null) : null };
+      return {
+        id: String(me.id),
+        nickname: acc?.profile?.nickname ?? null,
+        email: acc?.is_email_verified ? (acc.email ?? null) : null,
+        birthYear: yearOf(acc?.birthyear),
+        ageMax: rangeMax(acc?.age_range),
+      };
     },
   },
   naver: {
@@ -81,10 +112,14 @@ const CONFIG: Record<Exclude<Provider, 'dev'>, ProviderConfig> = {
         '네이버',
       ),
     profile: async (token) => {
-      const me = await getJson<{ response?: { id?: string; nickname?: string; name?: string; email?: string } }>('https://openapi.naver.com/v1/nid/me', token, '네이버');
+      const me = await getJson<{ response?: { id?: string; nickname?: string; name?: string; email?: string; birthyear?: string; age?: string } }>(
+        'https://openapi.naver.com/v1/nid/me',
+        token,
+        '네이버',
+      );
       const r = me.response;
       if (!r?.id) throw new Error('네이버 회원 번호가 없어요');
-      return { id: r.id, nickname: r.nickname ?? r.name ?? null, email: r.email ?? null };
+      return { id: r.id, nickname: r.nickname ?? r.name ?? null, email: r.email ?? null, birthYear: yearOf(r.birthyear), ageMax: rangeMax(r.age) };
     },
   },
   google: {
@@ -138,7 +173,12 @@ export function redirectUri(request: Request, provider: Provider): string {
 
 export function authorizeUrl(env: Env, request: Request, provider: Provider, state: string): string {
   // 시험용: /api/auth/dev/start?as=이름 으로 다른 사람인 척
-  if (provider === 'dev') return `${redirectUri(request, provider)}?${qs({ code: 'dev', state, as: new URL(request.url).searchParams.get('as') ?? undefined })}`;
+  if (provider === 'dev') return `${redirectUri(request, provider)}?${qs({
+      code: 'dev',
+      state,
+      as: new URL(request.url).searchParams.get('as') ?? undefined,
+      born: new URL(request.url).searchParams.get('born') ?? undefined,
+    })}`;
   const c = CONFIG[provider];
   return c.authorizeUrl({ clientId: c.clientId(env)!, redirectUri: redirectUri(request, provider), state });
 }
@@ -148,7 +188,9 @@ export async function fetchProfile(env: Env, request: Request, provider: Provide
   if (provider === 'dev') {
     // 로컬 시험: ?as=이름 으로 다른 사람인 척 (기본은 '시험 부모')
     const as = new URL(request.url).searchParams.get('as') ?? 'tester';
-    return { id: `dev-${as}`, nickname: as === 'tester' ? '시험 부모' : as, email: null };
+    // ?born=2015 처럼 출생 연도를 붙이면 나이 확인도 시험할 수 있음
+    const born = new URL(request.url).searchParams.get('born');
+    return { id: `dev-${as}`, nickname: as === 'tester' ? '시험 부모' : as, email: null, birthYear: born ? yearOf(born) : null };
   }
   const c = CONFIG[provider];
   const token = await c.exchange({ clientId: c.clientId(env)!, clientSecret: c.clientSecret(env), redirectUri: redirectUri(request, provider), code, state });
@@ -211,6 +253,12 @@ export interface SessionParent {
   unlocked_until: string | null;
   /** 세션 토큰의 해시 (부모 모드 열기·닫기용) */
   session_hash: string;
+  /** 만 14세 이상 확인 방법 (provider·self) */
+  age_check: string | null;
+  /** 약관 동의 시각 (본인인증 단계 전에 동의를 마쳤는지) */
+  terms_agreed_at: string | null;
+  /** 보호자 본인인증 시각 */
+  guardian_verified_at: string | null;
 }
 
 /** 쿠키의 세션 → 부모 계정 (없거나 만료면 null) */
@@ -219,7 +267,8 @@ export async function sessionParent(request: Request, env: Env): Promise<Session
   if (!token) return null;
   return env.DB.prepare(
     `SELECT p.id, p.display_name, p.email, p.status, p.marketing_agreed_at,
-            (p.pin_hash IS NOT NULL) AS has_pin, s.unlocked_until, s.id_hash AS session_hash
+            (p.pin_hash IS NOT NULL) AS has_pin, s.unlocked_until, s.id_hash AS session_hash,
+            p.age_check, p.terms_agreed_at, p.guardian_verified_at
        FROM sessions s JOIN parents p ON p.id = s.parent_id
       WHERE s.id_hash = ? AND s.expires_at > ?`,
   )

@@ -2,6 +2,7 @@ import type { Env } from '../../_lib/env';
 import { error, json, newId, requireParent } from '../../_lib/http';
 import { MAX_CHILDREN, parseChild, type ChildInput } from '../../_lib/children';
 import { requireParentMode } from '../../_lib/parent';
+import { verifyMode } from '../../_lib/verify';
 
 export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
   const parentId = await requireParent(request, env);
@@ -19,6 +20,9 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
 export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
   const me = await requireParentMode(request, env);
   if (me instanceof Response) return me;
+
+  // 보호자 본인인증이 켜져 있으면 인증을 마친 보호자만 아이 정보를 넣을 수 있음 (법정대리인 동의 확인)
+  if (verifyMode(env) !== 'off' && !me.guardian_verified_at) return error('아이 정보를 넣기 전에 보호자 본인인증을 해 주세요', 428);
 
   const child = parseChild((await request.json().catch(() => ({}))) as ChildInput);
   if (typeof child === 'string') return error(child);

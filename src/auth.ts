@@ -14,6 +14,20 @@ export interface Me {
   hasPin: boolean;
   /** 부모 기능을 지금 쓸 수 있는지 (PIN 이 없거나 이 세션에서 PIN 을 맞힘, 30분) */
   unlocked: boolean;
+  /** 약관 동의를 마쳤는지 (본인인증 단계만 남은 경우 true) */
+  consented: boolean;
+  /** 만 14세 이상 확인 방법: provider(카카오·네이버 정보) · self(가입 화면에서 본인 확인) */
+  ageCheck: 'provider' | 'self' | null;
+  guardianVerified: boolean;
+  /** 보호자 본인인증이 켜져 있는데 아직 안 함 */
+  verifyRequired: boolean;
+}
+
+/** 보호자 본인인증 설정 (functions/_lib/verify.ts) */
+export interface VerifyConfig {
+  mode: 'off' | 'portone' | 'dev';
+  storeId?: string;
+  channelKey?: string;
 }
 
 export interface AuthState {
@@ -21,6 +35,7 @@ export interface AuthState {
   user: Me | null;
   /** 이 서버에 키가 등록된 로그인 수단 */
   available: Provider[];
+  verify: VerifyConfig;
 }
 
 export async function fetchMe(): Promise<Omit<AuthState, 'loading'>> {
@@ -31,13 +46,13 @@ export async function fetchMe(): Promise<Omit<AuthState, 'loading'>> {
 
 /** 로그인 상태 (화면이 그려진 뒤 불러옴 — 미리 그리는 공개 페이지에서도 안전) */
 export function useMe(): AuthState & { reload: () => void } {
-  const [state, setState] = useState<AuthState>({ loading: true, user: null, available: [] });
+  const [state, setState] = useState<AuthState>({ loading: true, user: null, available: [], verify: { mode: 'off' } });
   const [n, setN] = useState(0);
   useEffect(() => {
     let alive = true;
     fetchMe()
       .then((r) => alive && setState({ loading: false, ...r }))
-      .catch(() => alive && setState({ loading: false, user: null, available: [] }));
+      .catch(() => alive && setState({ loading: false, user: null, available: [], verify: { mode: 'off' } }));
     return () => {
       alive = false;
     };
@@ -69,10 +84,13 @@ export async function logout(): Promise<void> {
   await clearPrivateCache();
 }
 
-export async function completeSignup(consent: { age14: boolean; terms: boolean; privacy: boolean; guardian: boolean; marketing: boolean }) {
+/** 약관 동의. 다음 단계가 본인인증이면 'verify' */
+export async function completeSignup(consent: { age14: boolean; terms: boolean; privacy: boolean; guardian: boolean; marketing: boolean }): Promise<'verify' | 'done'> {
   const res = await fetch('/api/auth/signup', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(consent) });
-  if (!res.ok) throw new Error((await res.json().catch(() => null))?.error ?? '가입을 마치지 못했어요');
+  const data = await res.json().catch(() => null);
+  if (!res.ok) throw new Error(data?.error ?? '가입을 마치지 못했어요');
   await clearPrivateCache();
+  return data?.next === 'verify' ? 'verify' : 'done';
 }
 
 export async function cancelSignup() {
@@ -115,3 +133,5 @@ export async function withdraw(confirm: string) {
   await send('/api/account', 'DELETE', { confirm });
   await clearPrivateCache();
 }
+
+export const confirmGuardian = (id: string) => send('/api/auth/verify', 'POST', { id });

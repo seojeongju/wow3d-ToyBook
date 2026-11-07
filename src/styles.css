@@ -5976,3 +5976,46 @@ a.login-btn {
   color: var(--ink-soft);
   font-size: 13px;
 }
+
+/* 보호자 본인인증 (가입 마지막 단계 · 우리 아이 화면) */
+.verify-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  text-align: center;
+}
+
+.verify-box h2 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 800;
+}
+
+.verify-box p {
+  margin: 0;
+  line-height: 1.6;
+}
+
+.verify-box .login-btn {
+  align-self: stretch;
+}
+
+.verify-note {
+  color: var(--ink-soft);
+  font-size: 14px;
+}
+
+.consent-detail.ok {
+  color: #2f7d57;
+  font-weight: 700;
+}
+
+.kids-verify {
+  max-width: 620px;
+  margin-bottom: 18px;
+  padding: 22px 20px;
+  border: 2px solid var(--tint-strong);
+  border-radius: 28px;
+  background: var(--surface);
+}

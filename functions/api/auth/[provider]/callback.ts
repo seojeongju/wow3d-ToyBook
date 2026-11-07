@@ -1,6 +1,6 @@
 import type { Env } from '../../../_lib/env';
 import { newId } from '../../../_lib/http';
-import { cookie, createSession, enabledProviders, fetchProfile, isProvider, OAUTH_COOKIE, readCookie, safeNext } from '../../../_lib/auth';
+import { ageCheck, cookie, createSession, enabledProviders, fetchProfile, isProvider, OAUTH_COOKIE, readCookie, safeNext } from '../../../_lib/auth';
 
 /**
  * 간편 로그인에서 돌아오는 곳.
@@ -47,14 +47,18 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env, params })
     status = found.status;
     await env.DB.prepare('UPDATE parents SET last_login_at = ? WHERE id = ?').bind(now, parentId).run();
   } else {
+    // 카카오·네이버가 출생 연도·연령대를 주면 만 14세 미만은 계정을 만들지 않음 (받은 정보도 남기지 않음)
+    const age = ageCheck(profile);
+    if (age === 'under14') return fail('under14');
     parentId = newId();
     status = 'pending';
     await env.DB.batch([
-      env.DB.prepare("INSERT INTO parents (id, display_name, email, status, last_login_at) VALUES (?, ?, ?, 'pending', ?)").bind(
+      env.DB.prepare("INSERT INTO parents (id, display_name, email, status, last_login_at, age_check) VALUES (?, ?, ?, 'pending', ?, ?)").bind(
         parentId,
         (profile.nickname ?? '').trim().slice(0, 30) || '부모님',
         profile.email,
         now,
+        age === 'ok' ? 'provider' : null,
       ),
       env.DB.prepare('INSERT INTO auth_identities (provider, provider_user_id, parent_id, email) VALUES (?, ?, ?, ?)').bind(
         provider,

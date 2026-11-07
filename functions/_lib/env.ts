@@ -19,4 +19,7 @@ export interface Env {
   /** "true" 면 로컬 시험용 가짜 로그인을 엶. 운영에는 절대 넣지 말 것 */
   ALLOW_DEV_LOGIN?: string;
   PORTONE_API_SECRET?: string;
+  /** 보호자 본인인증 (functions/_lib/verify.ts). 세 값이 모두 있어야 가입 때 본인인증 단계가 켜짐 */
+  PORTONE_STORE_ID?: string;
+  PORTONE_IDV_CHANNEL_KEY?: string;
 }

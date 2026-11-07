@@ -15,6 +15,7 @@ const ERRORS: Record<string, string> = {
   cancelled: '로그인을 취소했어요. 다시 하려면 아래 버튼을 눌러 주세요.',
   expired: '로그인 시간이 지났어요. 버튼을 한 번 더 눌러 주세요.',
   provider: '로그인 서버와 연결하지 못했어요. 잠시 뒤 다시 해 주세요.',
+  under14: '토이북 가입은 만 14세 이상 보호자만 할 수 있어요. 어린이는 보호자 계정 안의 프로필로 함께 이용해 주세요.',
 };
 
 export default function Login() {
