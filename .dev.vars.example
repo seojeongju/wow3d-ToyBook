@@ -9,7 +9,15 @@ OPENAI_TTS_MODEL=gpt-4o-mini-tts
 OPENAI_TTS_VOICE=coral
 IMAGE_API_KEY=
 MESHY_API_KEY=
+# 간편 로그인: 각 개발자 센터에 돌아올 주소(Redirect URI)를 등록
+#   로컬  http://localhost:8788/api/auth/{kakao|naver|google}/callback
+#   운영  https://wow3d-toybook.pages.dev/api/auth/{kakao|naver|google}/callback
 KAKAO_REST_API_KEY=
-KAKAO_REDIRECT_URI=http://localhost:8788/api/auth/kakao/callback
-SESSION_SECRET=
+KAKAO_CLIENT_SECRET=
+NAVER_CLIENT_ID=
+NAVER_CLIENT_SECRET=
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+# 로컬 시험용 가짜 로그인 (키 없이 가입 흐름 확인). 운영에는 넣지 말 것
+ALLOW_DEV_LOGIN=true
 PORTONE_API_SECRET=

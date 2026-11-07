@@ -1,5 +1,6 @@
 import { useEffect, useState, type MouseEvent, type ReactNode } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { useMe } from '../auth';
 import { LineIcon } from './Icons';
 
 export function Logo({ variant = 'header' }: { variant?: 'header' | 'hero' }) {
@@ -65,6 +66,9 @@ export function SubHeader({ left, title, right }: SubHeaderProps) {
   const { pathname } = useLocation();
   const [open, setOpen] = useState(false);
   const hasPageBar = Boolean(left || title);
+  const { user } = useMe();
+  // 로그인했으면 '로그인' 자리에 이름 (누르면 로그인 화면에서 로그아웃·가입 마무리)
+  const nav = SUB_NAV.map((n) => (n.to === '/login' && user ? { ...n, label: user.status === 'active' ? `${user.name.slice(0, 8)}님` : '가입 마무리', to: user.status === 'active' ? '/login' : '/signup' } : n));
 
   useEffect(() => setOpen(false), [pathname]);
 
@@ -74,7 +78,7 @@ export function SubHeader({ left, title, right }: SubHeaderProps) {
         <Logo />
 
         <nav id="sub-site-nav" className="site-nav sub-nav" aria-label="서브 페이지 이동 메뉴">
-          {SUB_NAV.map((item) => {
+          {nav.map((item) => {
             const active = item.to === '/' ? pathname === '/' : pathname.startsWith(item.to);
             return (
               <Link
@@ -125,6 +129,9 @@ export function SubHeader({ left, title, right }: SubHeaderProps) {
 export default function SiteHeader() {
   const [open, setOpen] = useState(false);
   const { hash } = useLocation();
+  const { user } = useMe();
+  const account = user ? (user.status === 'active' ? `${user.name.slice(0, 8)}님` : '가입 마무리') : '로그인';
+  const accountTo = user?.status === 'pending' ? '/signup' : '/login';
 
   // 메뉴에서 섹션을 고르면 닫기
   useEffect(() => setOpen(false), [hash]);
@@ -144,12 +151,12 @@ export default function SiteHeader() {
             </Link>
           ),
         )}
-        <Link to="/login" className="nav-login">
-          로그인
+        <Link to={accountTo} className="nav-login">
+          {account}
         </Link>
       </nav>
-      <Link to="/login" className="ghost-link login-link">
-        로그인
+      <Link to={accountTo} className="ghost-link login-link">
+        {account}
       </Link>
       <Link to="/profiles" className="pill-btn small-pill">
         시작하기 <LineIcon name="arrow" size={18} />

@@ -5369,3 +5369,255 @@ a {
     flex-wrap: nowrap;
   }
 }
+
+/* ───────── 회원가입·로그인 (간편 가입: 카카오·네이버·구글) ───────── */
+a.login-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+
+.login-btn:disabled {
+  opacity: 0.45;
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+.login-sub-btn {
+  min-height: 48px;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ink-soft);
+  font-size: 15px;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.login-error {
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: 16px;
+  background: #fde8e4;
+  color: #9b3320;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.login-wait {
+  margin: 8px 0;
+  color: var(--ink-soft);
+  text-align: center;
+}
+
+.login-done {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  text-align: center;
+}
+
+.login-done p {
+  margin: 0 0 4px;
+  font-size: 17px;
+}
+
+/* 간편 로그인 버튼: 각 회사 디자인 규칙의 색·로고 그대로 */
+.sns-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.sns-btn {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 54px;
+  padding: 0 52px;
+  border-radius: 12px;
+  font-size: 17px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.sns-btn:not(.is-off):hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 18px rgba(43, 40, 80, 0.14);
+}
+
+.sns-logo {
+  position: absolute;
+  left: 18px;
+  display: grid;
+  place-items: center;
+}
+
+.sns-btn.kakao {
+  background: #fee500;
+  color: rgba(0, 0, 0, 0.85);
+}
+
+.sns-btn.naver {
+  background: #03c75a;
+  color: #fff;
+}
+
+.sns-btn.google {
+  border: 1px solid #747775;
+  background: #fff;
+  color: #1f1f1f;
+}
+
+.sns-btn.dev {
+  border: 2px dashed var(--tint-strong);
+  background: var(--surface);
+  color: var(--primary-deep);
+}
+
+.sns-btn.is-off {
+  filter: grayscale(0.6);
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.sns-soon {
+  position: absolute;
+  right: 12px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.85);
+  color: #5b5470;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.login-help {
+  margin: 2px 0 0;
+  color: var(--ink-soft);
+  font-size: 14px;
+  line-height: 1.6;
+  text-align: center;
+}
+
+.login-demo {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+}
+
+.signup a {
+  color: var(--primary-deep);
+  font-weight: 800;
+}
+
+/* 가입 마무리: 약관 동의 */
+.signup-card {
+  width: min(480px, 100%);
+  margin-top: 8px;
+}
+
+.signup-card .login-title {
+  margin-top: 14px;
+}
+
+.consent-form {
+  margin-top: 16px;
+  padding-top: 20px;
+}
+
+.consent-all {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: 18px;
+  background: var(--tint);
+  font-size: 18px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.consent-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0;
+  padding: 0 4px;
+  list-style: none;
+}
+
+.consent-list li {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  column-gap: 8px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--tint);
+}
+
+.consent-list label {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  font-size: 15px;
+  line-height: 1.5;
+  cursor: pointer;
+}
+
+.consent-form input[type='checkbox'] {
+  flex: none;
+  width: 24px;
+  height: 24px;
+  margin: 0;
+  accent-color: var(--primary-deep);
+}
+
+.consent-list em {
+  font-style: normal;
+  font-weight: 800;
+}
+
+.consent-list em.req {
+  color: var(--primary-deep);
+}
+
+.consent-list em.opt {
+  color: var(--ink-soft);
+}
+
+.consent-view {
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--tint);
+  color: var(--primary-deep);
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.consent-detail {
+  grid-column: 1 / -1;
+  margin: 4px 0 0 36px;
+  color: var(--ink-soft);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.signup-done {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  margin-top: 12px;
+}
+
+.signup-done .login-btn {
+  width: 100%;
+}

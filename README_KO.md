@@ -19,9 +19,10 @@ AI 동화책 만들기 + 캐릭터 3D 프린팅 웹앱. 설계 문서는 [`docs/
 | `GET /api/children` | 아이 프로필 목록 |
 | `GET/POST /api/books`, `GET /api/books/:id` | 책 목록·생성·조회 (D1) |
 | `POST /api/upload`, `GET /api/files/*` | 이미지·GLB 업로드/다운로드 (R2, 가족별 폴더 분리) |
+| `/api/auth/{kakao|naver|google}/start·callback`, `/api/auth/me`, `/api/auth/logout`, `/api/auth/signup` | 간편 가입·로그인, 약관 동의, 로그아웃, 가입 그만두기 (`functions/_lib/auth.ts`) |
 | `migrations/0001_init.sql` | 부모·아이·캐릭터·책·페이지·3D모델·갖고싶어요·주문 테이블 |
 
-아직 없는 것: 실제 로그인(지금은 데모 부모 계정 고정), AI 글·삽화 생성, 이미지→3D, 주문·결제.
+아직 없는 것: 아이 프로필 만들기·탈퇴 화면(회원가입 2단계), AI 글·삽화 생성, 이미지→3D, 주문·결제.
 
 ## 내 PC에서 실행하기 (Windows)
 
@@ -42,8 +43,22 @@ npm run preview              # 빌드 후 http://localhost:8788 에서 화면+AP
 
 - 주소: **https://wow3d-toybook.pages.dev**
 - 리소스 (모두 APAC): Pages 프로젝트 `wow3d-toybook`, D1 `toybook-db`, R2 `toybook-files`. 바인딩은 `wrangler.toml` 에서 자동 적용
-- **로그인 연동 전까지 운영은 보기 전용**입니다. 책 생성·업로드 API 는 `ALLOW_DEMO_WRITES=true` 인 곳(로컬 `.dev.vars`)에서만 열립니다. 운영 환경 변수에는 넣지 마세요.
+- 쓰기 API(책 생성·업로드)는 **가입을 마친 로그인 계정**만 쓸 수 있습니다. 로그인하지 않으면 데모 계정을 보기 전용으로 둘러봅니다. 로컬에서는 `ALLOW_DEMO_WRITES=true` 로 로그인 없이도 쓸 수 있고, 운영 환경 변수에는 넣지 마세요.
 - 운영 DB 에는 지금 데모 데이터(`seed/demo.sql`)가 들어 있습니다. 로그인 연동 후 실제 가입을 받기 전에 지웁니다.
+
+### 간편 가입 키 등록 (카카오·네이버·구글)
+
+키가 없는 로그인 수단은 로그인 화면에 "준비 중"으로 보입니다. 각 개발자 센터에서 앱을 만들고 **돌아올 주소(Redirect URI)** 를 등록한 뒤, Cloudflare Pages > 설정 > 환경 변수에 **암호화(Secret)** 로 넣고 다시 배포하세요.
+
+| 수단 | 만드는 곳 | 돌아올 주소 (운영) | 환경 변수 |
+|---|---|---|---|
+| 카카오 | developers.kakao.com > 내 애플리케이션 > 카카오 로그인 켜기, 동의 항목: 닉네임(필수)·카카오계정 이메일(선택) | `https://wow3d-toybook.pages.dev/api/auth/kakao/callback` | `KAKAO_REST_API_KEY`, (보안 > Client Secret 을 켰다면) `KAKAO_CLIENT_SECRET` |
+| 네이버 | developers.naver.com > 애플리케이션 등록 > 네이버 로그인, 제공 정보: 별명·이메일 | `https://wow3d-toybook.pages.dev/api/auth/naver/callback` | `NAVER_CLIENT_ID`, `NAVER_CLIENT_SECRET` |
+| 구글 | console.cloud.google.com > API 및 서비스 > OAuth 동의 화면 + 사용자 인증 정보(웹 애플리케이션) | `https://wow3d-toybook.pages.dev/api/auth/google/callback` | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` |
+
+- 로컬에서 시험할 때는 같은 앱에 `http://localhost:8788/api/auth/{kakao|naver|google}/callback` 도 등록하고 `.dev.vars` 에 키를 넣으세요.
+- 키 없이 가입 흐름만 볼 때는 `.dev.vars` 의 `ALLOW_DEV_LOGIN=true` 로 "시험용 로그인"이 나타납니다. **운영에는 절대 넣지 마세요.**
+- 가입 흐름: 간편 로그인 → `/signup` 약관 동의(필수: 만 14세 이상 보호자·이용약관·개인정보 수집·이용·아이 정보 법정대리인 동의 / 선택: 소식 받기) → 가입 완료. 동의 전에 그만두면 받은 정보를 바로 지웁니다.
 
 ### 자동 배포 (GitHub Actions)
 
@@ -84,7 +99,7 @@ wrangler.toml         Cloudflare 설정 (D1·R2 바인딩)
 
 ## 다음 개발 순서 (PRD 13장 MVP 기준)
 
-1. 카카오 로그인 + 부모 PIN + 아이 프로필 관리 (`functions/_lib/http.ts` 의 `getParentId` 교체)
+1. 회원가입 2단계: 아이 프로필 만들기·고치기, 내 정보·탈퇴, 부모 PIN (1단계 간편 가입·로그인·약관 동의는 완료)
 2. 이야기 공방: Claude API 로 줄거리·본문 생성, 이미지 API 로 삽화 생성 → R2 저장
 3. 마법 상자: Meshy/Tripo API 로 이미지→3D (Cloudflare Queues 로 비동기 처리), three.js 뷰어
 4. 장난감 공장: "갖고 싶어요" → 부모 승인 → 결제(포트원/토스) → wow3d pro 주문 전달

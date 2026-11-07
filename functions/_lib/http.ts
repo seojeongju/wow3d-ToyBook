@@ -1,3 +1,4 @@
+import { sessionParent } from './auth';
 import type { Env } from './env';
 
 export function json(data: unknown, status = 200, headers: HeadersInit = {}): Response {
@@ -16,11 +17,12 @@ export function newId(): string {
 }
 
 /**
- * 로그인한 부모 id. 지금은 데모 계정 고정.
- * TODO(MVP 1): 카카오 로그인 세션 쿠키 검증으로 교체하고, 세션이 없으면 null 반환 → 401
+ * 지금 보고 있는 부모 id.
+ * 가입을 마친(active) 로그인 세션이면 그 계정, 아니면 둘러보기용 데모 계정(보기 전용)
  */
-export async function getParentId(_request: Request, _env: Env): Promise<string | null> {
-  return 'demo-parent';
+export async function getParentId(request: Request, env: Env): Promise<string | null> {
+  const me = await sessionParent(request, env);
+  return me?.status === 'active' ? me.id : 'demo-parent';
 }
 
 /** 부모 id 를 꺼내고, 없으면 401 응답을 돌려줌 */
@@ -31,11 +33,13 @@ export async function requireParent(request: Request, env: Env): Promise<string 
 
 /**
  * 쓰기 API(책 생성·업로드)용 부모 확인.
- * 로그인이 없는 지금은 누구나 데모 계정으로 쓸 수 있으므로, ALLOW_DEMO_WRITES 가 켜진 곳(로컬)에서만 허용
+ * 가입을 마친 로그인 계정만 허용. 로컬(ALLOW_DEMO_WRITES=true)에서는 로그인 없이 데모 계정으로도 허용
  */
 export async function requireParentForWrite(request: Request, env: Env): Promise<string | Response> {
-  if (env.ALLOW_DEMO_WRITES !== 'true') return error('지금은 보기 전용 데모입니다', 403);
-  return requireParent(request, env);
+  const me = await sessionParent(request, env);
+  if (me?.status === 'active') return me.id;
+  if (env.ALLOW_DEMO_WRITES === 'true') return 'demo-parent';
+  return error(me ? '가입을 마저 끝내 주세요' : '로그인이 필요해요', 401);
 }
 
 /** R2 에서 가족마다 파일을 분리하는 폴더 접두어 */

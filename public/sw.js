@@ -64,6 +64,9 @@ self.addEventListener('fetch', (event) => {
   if (url.origin !== self.location.origin) return;
   const p = url.pathname;
 
+  // 로그인·가입 주소는 서비스 워커가 손대지 않음 (다른 회사 로그인 화면으로 넘어갔다 돌아옴)
+  if (p.startsWith('/api/auth/')) return;
+
   // 화면 이동: 인터넷 먼저, 끊기면 같은 화면 보관본 → 첫 화면 틀
   if (request.mode === 'navigate') {
     event.respondWith(networkFirst(request, '/'));

@@ -1,6 +1,7 @@
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import Home from './pages/Home';
 import Login from './pages/Login';
+import Signup from './pages/Signup';
 import ProfileSelect from './pages/ProfileSelect';
 import Bookshelf from './pages/Bookshelf';
 import BookViewer from './pages/BookViewer';
@@ -30,6 +31,7 @@ export default function App() {
         <Route path="/terms" element={<TermsPage />} />
         <Route path="/licenses" element={<LicensesPage />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
         <Route path="/profiles" element={<ProfileSelect />} />
         <Route path="/shelf/:childId" element={<Bookshelf />} />
         <Route path="/book/:bookId" element={<BookViewer />} />

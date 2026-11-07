@@ -89,7 +89,7 @@ export const PAGE_META: Record<string, PageMeta> = {
 export const PUBLIC_ROUTES = Object.keys(PAGE_META);
 
 /** 검색에서 빼야 하는 화면 (아이 콘텐츠·개인 화면). robots.txt·_headers 와 맞춤 */
-export const PRIVATE_PREFIXES = ['/profiles', '/shelf/', '/book/', '/parent', '/dashboard', '/admin', '/login', '/api/'];
+export const PRIVATE_PREFIXES = ['/profiles', '/shelf/', '/book/', '/parent', '/dashboard', '/admin', '/login', '/signup', '/api/'];
 
 /** 공유 미리보기 이미지 1200×630 (scripts/optimize-images.mjs 로 생성) */
 export const OG_IMAGE = `${SITE_URL}/og-image.jpg`;
@@ -238,7 +238,7 @@ export function llmsTxt(): string {
 - 동화 극장: 한 쪽씩 넘기며 읽고 한국어로 읽어 주기
 - 피규어: 5·8·12cm, wow3d 작업자가 검수 후 국내에서 출력·배송
 - 안전: 아이 실명·연락처를 받지 않음, 아이 사진·그림은 가족만 보고 AI 학습에 쓰지 않음, 광고·채팅 없음, 결제는 부모 잠금 뒤
-- 현재 상태: 미리 보기 단계. 데모 그림책 읽기와 읽어 주기를 제공하고, 책 만들기·3D 미리 보기·피규어 주문은 차례로 열릴 예정
+- 현재 상태: 미리 보기 단계. 데모 그림책 읽기와 읽어 주기를 제공하고, 부모님 회원가입은 카카오·네이버·구글 간편 가입으로 준비 중이며, 책 만들기·3D 미리 보기·피규어 주문은 차례로 열릴 예정
 
 ## 공개 페이지
 ${pages}

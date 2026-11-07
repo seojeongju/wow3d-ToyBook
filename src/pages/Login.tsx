@@ -1,24 +1,35 @@
-import { useState, type FormEvent } from 'react';
-import { Link } from 'react-router-dom';
-import { LineIcon } from '../components/Icons';
+import { useState, type ReactNode } from 'react';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { loginUrl, logout, PROVIDER_NAME, useMe, type Provider } from '../auth';
 import { SubHeader } from '../components/SiteHeader';
 import Tobi from '../components/Tobi';
 import ClayArt from '../components/ClayArt';
 
-type Role = 'parent' | 'admin';
-
 /**
- * 로그인 화면 (템플릿). 실제 인증은 아직 연결 전이라 버튼은 안내만 하고,
- * 데모 대시보드로 가는 길을 열어 둠. 연동 시 handleSubmit·SOCIAL 의 onClick 만 교체하면 됨.
+ * 로그인·회원가입 (간편 가입: 카카오·네이버·구글).
+ * 비밀번호는 만들지 않음. 처음 온 사람은 간편 로그인 → /signup 에서 약관 동의 → 가입 완료
+ * 운영자 로그인은 관리자 기능을 열 때 따로 붙임
  */
-export default function Login() {
-  const [role, setRole] = useState<Role>('parent');
-  const [showPw, setShowPw] = useState(false);
-  const [notice, setNotice] = useState<string | null>(null);
+const ERRORS: Record<string, string> = {
+  not_ready: '이 로그인 방법은 아직 준비 중이에요. 다른 방법으로 시작해 주세요.',
+  cancelled: '로그인을 취소했어요. 다시 하려면 아래 버튼을 눌러 주세요.',
+  expired: '로그인 시간이 지났어요. 버튼을 한 번 더 눌러 주세요.',
+  provider: '로그인 서버와 연결하지 못했어요. 잠시 뒤 다시 해 주세요.',
+};
 
-  const handleSubmit = (e: FormEvent) => {
-    e.preventDefault();
-    setNotice('로그인은 아직 연결 전이에요. 아래 데모로 먼저 둘러보세요.');
+export default function Login() {
+  const [params] = useSearchParams();
+  const navigate = useNavigate();
+  const next = params.get('next');
+  const error = ERRORS[params.get('error') ?? ''];
+  const { loading, user, available, reload } = useMe();
+  const [busy, setBusy] = useState(false);
+
+  const signOut = async () => {
+    setBusy(true);
+    await logout();
+    setBusy(false);
+    reload();
   };
 
   return (
@@ -34,130 +45,136 @@ export default function Login() {
         </span>
         <h1 className="login-title">
           <span className="spark" aria-hidden />
-          다시 만나서 반가워요
+          토이북 시작하기
           <span className="spark right" aria-hidden />
         </h1>
-        <p className="login-sub">로그인하고 우리 아이 책장을 열어요</p>
+        <p className="login-sub">카카오·네이버·구글 계정으로 간편하게 로그인하고 가입해요</p>
 
         <div className="login-mascot">
           <Tobi pose="peek" size={190} />
         </div>
 
-        <form className="login-form" onSubmit={handleSubmit}>
-          <div className="role-switch" role="tablist" aria-label="로그인 대상">
-            <button type="button" role="tab" aria-selected={role === 'parent'} className={role === 'parent' ? 'on' : ''} onClick={() => setRole('parent')}>
-              부모님
-            </button>
-            <button type="button" role="tab" aria-selected={role === 'admin'} className={role === 'admin' ? 'on' : ''} onClick={() => setRole('admin')}>
-              wow3d 운영자
-            </button>
-          </div>
+        <div className="login-form">
+          {error && (
+            <p className="login-error" role="alert">
+              {error}
+            </p>
+          )}
 
-          <label className="field">
-            <span className="field-icon">
-              <LineIcon name="mail" size={20} />
-            </span>
-            <input type="email" placeholder="이메일" autoComplete="username" aria-label="이메일" />
-          </label>
-          <label className="field">
-            <span className="field-icon">
-              <LineIcon name="lock" size={20} />
-            </span>
-            <input type={showPw ? 'text' : 'password'} placeholder="비밀번호" autoComplete="current-password" aria-label="비밀번호" />
-            <button type="button" className="field-eye" onClick={() => setShowPw((v) => !v)} aria-label={showPw ? '비밀번호 숨기기' : '비밀번호 보기'}>
-              <LineIcon name={showPw ? 'eyeOff' : 'eye'} size={20} />
-            </button>
-          </label>
-          <button type="button" className="forgot" onClick={() => setNotice('비밀번호 찾기는 로그인 연동 때 함께 열려요.')}>
-            비밀번호를 잊으셨나요?
-          </button>
-
-          <button type="submit" className="login-btn">
-            로그인
-          </button>
-
-          {role === 'parent' && (
+          {loading ? (
+            <p className="login-wait" aria-busy="true">
+              확인하는 중…
+            </p>
+          ) : user?.status === 'active' ? (
+            <div className="login-done">
+              <p>
+                <strong>{user.name}</strong>님, 로그인되어 있어요.
+              </p>
+              <button type="button" className="login-btn" onClick={() => navigate(next ?? '/profiles')}>
+                우리 아이 책장으로
+              </button>
+              <button type="button" className="login-sub-btn" onClick={signOut} disabled={busy}>
+                로그아웃
+              </button>
+            </div>
+          ) : user?.status === 'pending' ? (
+            <div className="login-done">
+              <p>
+                <strong>{user.name}</strong>님, 약관 동의만 하면 가입이 끝나요.
+              </p>
+              <Link to={`/signup${next ? `?next=${encodeURIComponent(next)}` : ''}`} className="login-btn">
+                가입 마저 하기
+              </Link>
+            </div>
+          ) : (
             <>
-              <div className="or-line">
-                <span>또는 간편 로그인</span>
-              </div>
-              <div className="social">
-                {SOCIAL.map((s) => (
-                  <button key={s.name} type="button" className="social-btn" aria-label={`${s.name}로 로그인`} onClick={() => setNotice(`${s.name} 로그인은 곧 연결돼요.`)}>
-                    {s.icon}
-                  </button>
+              <div className="sns-list">
+                {(['kakao', 'naver', 'google'] as const).map((p) => (
+                  <SnsButton key={p} provider={p} ready={available.includes(p)} next={next} />
                 ))}
+                {available.includes('dev') && <SnsButton provider="dev" ready next={next} />}
               </div>
+              <p className="login-help">
+                처음이라면 로그인한 뒤 약관에 동의하면 가입이 끝나요. 비밀번호는 따로 만들지 않아요.
+                <br />
+                가입은 만 14세 이상 보호자만 할 수 있고, 아이는 보호자 계정 안의 프로필로 들어와요.
+              </p>
             </>
           )}
 
-          {notice && (
-            <div className="login-notice" role="status">
-              <p>{notice}</p>
-              <div>
-                <Link to="/parent" className="demo-link">
-                  부모 대시보드 데모
-                </Link>
-                <Link to="/admin" className="demo-link">
-                  관리자 대시보드 데모
-                </Link>
-              </div>
-            </div>
-          )}
+          <div className="or-line">
+            <span>먼저 둘러보기</span>
+          </div>
+          <div className="login-demo">
+            <Link to="/profiles" className="demo-link">
+              데모 책장
+            </Link>
+            <Link to="/parent" className="demo-link">
+              부모 대시보드 데모
+            </Link>
+          </div>
 
           <p className="signup">
-            아직 회원이 아니신가요?{' '}
-            <button type="button" onClick={() => setNotice('회원가입은 로그인 연동 때 함께 열려요.')}>
-              가입하기
-            </button>
+            가입하면 <Link to="/terms">이용약관</Link>과 <Link to="/privacy">개인정보처리방침</Link>을 확인할 수 있어요.
           </p>
-        </form>
+        </div>
       </section>
     </div>
   );
 }
 
-const SOCIAL = [
-  {
-    name: '카카오',
-    icon: (
-      <svg viewBox="0 0 40 40" width="40" height="40">
-        <circle cx="20" cy="20" r="20" fill="#FEE500" />
-        <path d="M20 11c-6 0-10.5 3.7-10.5 8.2 0 2.9 1.9 5.4 4.8 6.9l-1 3.7c-.1.3.3.6.6.4l4.3-2.9c.6.1 1.2.1 1.8.1 6 0 10.5-3.7 10.5-8.2S26 11 20 11z" fill="#191919" />
-      </svg>
-    ),
-  },
-  {
-    name: '네이버',
-    icon: (
-      <svg viewBox="0 0 40 40" width="40" height="40">
-        <circle cx="20" cy="20" r="20" fill="#03C75A" />
-        <path d="M14 13h4.6l4 6.2V13H27v14h-4.6l-4-6.2V27H14z" fill="#fff" />
-      </svg>
-    ),
-  },
-  {
-    name: '구글',
-    icon: (
-      <svg viewBox="0 0 40 40" width="40" height="40">
-        <circle cx="20" cy="20" r="20" fill="#fff" />
-        <path d="M29 20.2c0-.7-.1-1.3-.2-1.9H20v3.6h5c-.2 1.2-.9 2.2-1.9 2.8v2.4h3.1c1.8-1.7 2.8-4.1 2.8-6.9z" fill="#4285F4" />
-        <path d="M20 29.5c2.6 0 4.7-.9 6.2-2.3l-3.1-2.4c-.8.6-1.9.9-3.1.9-2.4 0-4.4-1.6-5.2-3.8h-3.2v2.5c1.5 3 4.7 5.1 8.4 5.1z" fill="#34A853" />
-        <path d="M14.8 21.9c-.2-.6-.3-1.2-.3-1.9s.1-1.3.3-1.9v-2.5h-3.2c-.7 1.3-1 2.8-1 4.4s.4 3.1 1 4.4z" fill="#FBBC05" />
-        <path d="M20 14.3c1.4 0 2.6.5 3.6 1.4l2.7-2.7c-1.6-1.5-3.8-2.5-6.3-2.5-3.7 0-6.9 2.1-8.4 5.1l3.2 2.5c.8-2.2 2.8-3.8 5.2-3.8z" fill="#EA4335" />
-      </svg>
-    ),
-  },
-  {
-    name: '애플',
-    icon: (
-      <svg viewBox="0 0 40 40" width="40" height="40">
-        <circle cx="20" cy="20" r="20" fill="#111" />
-        <path d="M24.3 20.6c0-2.2 1.8-3.2 1.9-3.3-1-1.5-2.6-1.7-3.2-1.7-1.4-.1-2.6.8-3.3.8s-1.7-.8-2.9-.8c-1.5 0-2.8.9-3.6 2.2-1.5 2.7-.4 6.6 1.1 8.7.7 1.1 1.6 2.2 2.7 2.2s1.5-.7 2.8-.7 1.7.7 2.9.7 1.9-1.1 2.6-2.1c.8-1.2 1.1-2.4 1.2-2.4-.1 0-2.2-.9-2.2-3.6zM22.2 14c.6-.7 1-1.7.9-2.7-.9 0-1.9.6-2.6 1.3-.6.6-1.1 1.6-.9 2.6 1 .1 2-.5 2.6-1.2z" fill="#fff" />
-      </svg>
-    ),
-  },
-];
+/** 각 회사 디자인 규칙에 맞춘 간편 로그인 버튼 (상표 로고라 점토 스타일 대신 공식 색·모양 그대로) */
+function SnsButton({ provider, ready, next }: { provider: Provider; ready: boolean; next: string | null }) {
+  const label: Record<Provider, string> = {
+    kakao: '카카오 로그인',
+    naver: '네이버 로그인',
+    google: 'Google 계정으로 로그인',
+    dev: '시험용 로그인 (로컬 전용)',
+  };
+  const body = (
+    <>
+      <span className="sns-logo" aria-hidden>
+        {LOGOS[provider]}
+      </span>
+      <span className="sns-label">{label[provider]}</span>
+      {!ready && <span className="sns-soon">준비 중</span>}
+    </>
+  );
+  if (!ready) {
+    return (
+      <span className={`sns-btn ${provider} is-off`} aria-disabled="true" title={`${PROVIDER_NAME[provider]} 로그인은 준비 중이에요`}>
+        {body}
+      </span>
+    );
+  }
+  return (
+    <a className={`sns-btn ${provider}`} href={loginUrl(provider, next)}>
+      {body}
+    </a>
+  );
+}
+
+const LOGOS: Record<Provider, ReactNode> = {
+  kakao: (
+    <svg viewBox="0 0 24 24" width="22" height="22">
+      <path d="M12 3.5C6.8 3.5 2.6 6.8 2.6 10.9c0 2.6 1.7 4.9 4.3 6.2l-1.1 4c-.1.3.3.6.6.4l4.7-3.1c.3 0 .6.1.9.1 5.2 0 9.4-3.3 9.4-7.4S17.2 3.5 12 3.5z" fill="#000" />
+    </svg>
+  ),
+  naver: (
+    <svg viewBox="0 0 24 24" width="18" height="18">
+      <path d="M14.6 12.4 9.1 4.5H5v15h4.4v-7.9l5.5 7.9H19v-15h-4.4z" fill="#fff" />
+    </svg>
+  ),
+  google: (
+    <svg viewBox="0 0 48 48" width="20" height="20">
+      <path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.6l6.8-6.8C35.8 2.4 30.3 0 24 0 14.6 0 6.6 5.4 2.6 13.3l7.9 6.1C12.4 13.7 17.7 9.5 24 9.5z" />
+      <path fill="#4285F4" d="M46.1 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.4c-.5 2.9-2.2 5.3-4.6 6.9l7.4 5.7c4.3-4 6.9-9.9 6.9-17.1z" />
+      <path fill="#FBBC05" d="M10.5 28.6c-.5-1.4-.8-3-.8-4.6s.3-3.2.8-4.6l-7.9-6.1C.9 16.6 0 20.2 0 24s.9 7.4 2.6 10.7l7.9-6.1z" />
+      <path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.4-5.7c-2.1 1.4-4.8 2.3-8.5 2.3-6.3 0-11.6-4.2-13.5-9.9l-7.9 6.1C6.6 42.6 14.6 48 24 48z" />
+    </svg>
+  ),
+  dev: <ClayArt name="robot" size={26} />,
+};
 
 /** 배경 장식: 구름·화분·꽃 (점토 느낌) */
 function Decor() {
