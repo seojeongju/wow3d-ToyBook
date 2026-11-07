@@ -159,7 +159,7 @@ export default function ProfileSelect() {
             );
           })}
 
-          <Link to="/parent" className="who-card who-add" aria-label="어른과 함께 친구 추가하기">
+          <Link to="/parent?next=/dashboard/kids" className="who-card who-add" aria-label="어른과 함께 친구 추가하기">
             <span className="who-plus" aria-hidden>
               +
             </span>

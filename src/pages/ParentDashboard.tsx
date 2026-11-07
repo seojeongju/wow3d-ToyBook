@@ -1,23 +1,17 @@
 import { useState } from 'react';
-import { Link, Navigate, useNavigate } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
 import { api } from '../api';
 import { BarChart, DonutChart } from '../components/Charts';
-import DashLayout, { type DashMenuItem } from '../components/DashLayout';
+import DashLayout from '../components/DashLayout';
+import { PARENT_MENU, parentProfile, useLeaveParent } from '../components/ParentArea';
+import { useMe } from '../auth';
 import { ClayIcon, LineIcon, type ClayIconName } from '../components/Icons';
 import Tobi from '../components/Tobi';
-import { isParentUnlocked, setParentUnlocked } from '../parentLock';
+import { isParentUnlocked } from '../parentLock';
 import { weeklyPages } from '../readingLog';
 import { useAsync } from '../useAsync';
 import { ClayEmoji } from '../components/ClayArt';
 
-const MENU: DashMenuItem[] = [
-  { icon: 'grid', label: '대시보드', to: '/dashboard' },
-  { icon: 'smile', label: '우리 아이' },
-  { icon: 'book', label: '책장', to: '/profiles' },
-  { icon: 'cube', label: '3D 모델' },
-  { icon: 'box', label: '주문·배송' },
-  { icon: 'gear', label: '설정' },
-];
 
 // 주제 분류는 아직 저장하지 않으므로 예시 값 (PRD B-01 연동 후 교체)
 const SAMPLE_TOPICS = [
@@ -27,8 +21,9 @@ const SAMPLE_TOPICS = [
 ];
 
 export default function ParentDashboard() {
-  const navigate = useNavigate();
   const [notice, setNotice] = useState<string | null>(null);
+  const { loading: meLoading, user } = useMe();
+  const leave = useLeaveParent();
   // 이 기기에서 읽은 쪽 (모든 아이 합계, 로그인 연동 후 서버 기록으로 교체)
   const [reading] = useState(() => weeklyPages());
   const readTotal = reading.reduce((s, d) => s + d.value, 0);
@@ -50,13 +45,10 @@ export default function ParentDashboard() {
   return (
     <DashLayout
       title="부모 대시보드"
-      profile={{ avatar: <Tobi pose="peek" size={76} />, name: '데모 부모님', sub: '안녕하세요!' }}
-      menu={MENU}
+      profile={parentProfile(user, meLoading)}
+      menu={PARENT_MENU}
       active={0}
-      onLogout={() => {
-        setParentUnlocked(false);
-        navigate('/');
-      }}
+      onLogout={leave}
       promo={
         <>
           <ClayIcon name="magic" size={44} tile={false} />
@@ -68,12 +60,18 @@ export default function ParentDashboard() {
         </>
       }
     >
+      {!meLoading && user?.status !== 'active' && (
+        <p className="demo-banner">
+          지금은 데모 가족을 보고 있어요. <Link to="/login?next=/dashboard/kids">로그인하고 우리 아이 프로필 만들기</Link>
+        </p>
+      )}
+
       <section className="dash-hero">
         <div className="dash-hero-art">
           <Tobi pose="wave" size={150} />
         </div>
         <div className="dash-hero-copy">
-          <h2>안녕하세요, 부모님!</h2>
+          <h2>안녕하세요, {user?.status === 'active' ? `${user.name}님` : '부모님'}!</h2>
           <p>오늘은 아이와 어떤 이야기를 만들어 볼까요?</p>
           <button className="pill-btn small-pill" onClick={() => setNotice('이야기 공방(AI 책 만들기)은 곧 열려요')}>
             새 책 만들기 <LineIcon name="arrow" size={18} />

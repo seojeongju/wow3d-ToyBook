@@ -10,6 +10,10 @@ export interface Me {
   status: 'pending' | 'active';
   marketing: boolean;
   providers: Provider[];
+  /** 부모 PIN 을 만들었는지 */
+  hasPin: boolean;
+  /** 부모 기능을 지금 쓸 수 있는지 (PIN 이 없거나 이 세션에서 PIN 을 맞힘, 30분) */
+  unlocked: boolean;
 }
 
 export interface AuthState {
@@ -77,3 +81,37 @@ export async function cancelSignup() {
 }
 
 export const PROVIDER_NAME: Record<Provider, string> = { kakao: '카카오', naver: '네이버', google: '구글', dev: '시험용' };
+
+/* ───────── 부모 모드·내 정보 (회원가입 2단계) ───────── */
+
+/** 서버 응답 오류. status 423 = 부모 PIN 을 다시 넣어야 함 */
+export class ApiError extends Error {
+  constructor(
+    message: string,
+    public status: number,
+  ) {
+    super(message);
+  }
+}
+
+export async function send<T = { ok: true }>(path: string, method: string, body?: unknown): Promise<T> {
+  const res = await fetch(path, {
+    method,
+    headers: body === undefined ? {} : { 'content-type': 'application/json' },
+    body: body === undefined ? undefined : JSON.stringify(body),
+  });
+  const data = await res.json().catch(() => null);
+  if (!res.ok) throw new ApiError(data?.error ?? `요청 실패 (${res.status})`, res.status);
+  return data as T;
+}
+
+export const unlockWithPin = (pin: string) => send('/api/parent/unlock', 'POST', { pin });
+export const lockParentMode = () => send('/api/parent/lock', 'POST').catch(() => null);
+export const savePin = (pin: string) => send('/api/parent/pin', 'POST', { pin });
+export const removePin = () => send('/api/parent/pin', 'DELETE');
+export const updateAccount = (patch: { name?: string; marketing?: boolean }) => send('/api/account', 'PATCH', patch);
+
+export async function withdraw(confirm: string) {
+  await send('/api/account', 'DELETE', { confirm });
+  await clearPrivateCache();
+}

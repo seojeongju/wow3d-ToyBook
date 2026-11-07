@@ -20,9 +20,10 @@ AI 동화책 만들기 + 캐릭터 3D 프린팅 웹앱. 설계 문서는 [`docs/
 | `GET/POST /api/books`, `GET /api/books/:id` | 책 목록·생성·조회 (D1) |
 | `POST /api/upload`, `GET /api/files/*` | 이미지·GLB 업로드/다운로드 (R2, 가족별 폴더 분리) |
 | `/api/auth/{kakao|naver|google}/start·callback`, `/api/auth/me`, `/api/auth/logout`, `/api/auth/signup` | 간편 가입·로그인, 약관 동의, 로그아웃, 가입 그만두기 (`functions/_lib/auth.ts`) |
+| `/api/children` (POST), `/api/children/:id` (PATCH·DELETE), `/api/parent/pin·unlock·lock`, `/api/account` (PATCH·DELETE) | 아이 프로필 만들기·고치기·지우기, 부모 PIN·부모 모드, 내 정보·탈퇴 (부모 모드에서만, `functions/_lib/parent.ts`) |
 | `migrations/0001_init.sql` | 부모·아이·캐릭터·책·페이지·3D모델·갖고싶어요·주문 테이블 |
 
-아직 없는 것: 아이 프로필 만들기·탈퇴 화면(회원가입 2단계), AI 글·삽화 생성, 이미지→3D, 주문·결제.
+아직 없는 것: AI 글·삽화 생성, 이미지→3D, 주문·결제.
 
 ## 내 PC에서 실행하기 (Windows)
 
@@ -99,7 +100,7 @@ wrangler.toml         Cloudflare 설정 (D1·R2 바인딩)
 
 ## 다음 개발 순서 (PRD 13장 MVP 기준)
 
-1. 회원가입 2단계: 아이 프로필 만들기·고치기, 내 정보·탈퇴, 부모 PIN (1단계 간편 가입·로그인·약관 동의는 완료)
+1. 회원가입 다음 단계: 법정대리인 휴대폰 본인인증, PIN 잊었을 때 다시 로그인으로 재설정, 운영 DB 데모 데이터 정리 (1·2단계 간편 가입·약관 동의·아이 프로필·부모 PIN·탈퇴는 완료)
 2. 이야기 공방: Claude API 로 줄거리·본문 생성, 이미지 API 로 삽화 생성 → R2 저장
 3. 마법 상자: Meshy/Tripo API 로 이미지→3D (Cloudflare Queues 로 비동기 처리), three.js 뷰어
 4. 장난감 공장: "갖고 싶어요" → 부모 승인 → 결제(포트원/토스) → wow3d pro 주문 전달

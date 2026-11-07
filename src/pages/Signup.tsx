@@ -4,6 +4,7 @@ import { cancelSignup, completeSignup, PROVIDER_NAME, useMe } from '../auth';
 import ClayArt from '../components/ClayArt';
 import { SubHeader } from '../components/SiteHeader';
 import Tobi from '../components/Tobi';
+import { setParentUnlocked } from '../parentLock';
 
 /**
  * 가입 마무리 (간편 로그인 직후). 필수 동의 4가지 + 선택 1가지를 받고 계정을 엶.
@@ -57,6 +58,8 @@ export default function Signup() {
     setError(null);
     try {
       await completeSignup(agree);
+      // 방금 보호자 동의를 마쳤으니 이어서 아이 프로필을 만들 수 있게 부모 모드를 열어 둠
+      setParentUnlocked(true);
       setDone(true);
     } catch (e) {
       setError(e instanceof Error ? e.message : '가입을 마치지 못했어요');
@@ -86,11 +89,11 @@ export default function Signup() {
         {done ? (
           <>
             <h1 className="login-title">가입을 마쳤어요!</h1>
-            <p className="login-sub">이제 우리 아이 책장을 열 수 있어요.</p>
+            <p className="login-sub">이제 아이 프로필을 만들면 아이만의 책장이 생겨요.</p>
             <div className="signup-done">
               <Tobi pose="wave" size={170} />
-              <button type="button" className="login-btn" onClick={() => navigate(next ?? '/profiles')}>
-                우리 아이 책장으로
+              <button type="button" className="login-btn" onClick={() => navigate(next ?? '/dashboard/kids')}>
+                아이 프로필 만들기
               </button>
             </div>
           </>

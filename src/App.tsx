@@ -7,6 +7,8 @@ import Bookshelf from './pages/Bookshelf';
 import BookViewer from './pages/BookViewer';
 import ParentGate from './pages/ParentGate';
 import ParentDashboard from './pages/ParentDashboard';
+import KidsManage from './pages/KidsManage';
+import AccountPage from './pages/AccountPage';
 import AdminDashboard from './pages/AdminDashboard';
 import { AboutPage, FaqPage, FigurePage, SafetyPage } from './pages/InfoPages';
 import { LicensesPage, PrivacyPage, TermsPage } from './pages/LegalPages';
@@ -37,6 +39,8 @@ export default function App() {
         <Route path="/book/:bookId" element={<BookViewer />} />
         <Route path="/parent" element={<ParentGate />} />
         <Route path="/dashboard" element={<ParentDashboard />} />
+        <Route path="/dashboard/kids" element={<KidsManage />} />
+        <Route path="/dashboard/account" element={<AccountPage />} />
         <Route path="/admin" element={<AdminDashboard />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

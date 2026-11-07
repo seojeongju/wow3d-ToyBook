@@ -4189,10 +4189,18 @@ a {
     width: 100%;
   }
   .dash-promo,
-  .dash-logout,
   .dash-search,
   .dash-hero-art {
     display: none;
+  }
+  /* 나가기(부모 모드 잠그기)는 프로필 옆 오른쪽에 — 아이에게 넘겨주기 전에 누를 수 있게 */
+  .dash-logout {
+    order: 1;
+    width: auto;
+    margin-left: auto;
+  }
+  .dash-menu {
+    order: 2;
   }
   .dash-round {
     margin-left: auto;
@@ -5620,4 +5628,351 @@ a.login-btn {
 
 .signup-done .login-btn {
   width: 100%;
+}
+
+/* ───────── 부모 화면: 우리 아이 · 설정 · PIN (회원가입 2단계) ───────── */
+.demo-banner {
+  margin: 0 0 14px;
+  padding: 12px 16px;
+  border-radius: 18px;
+  background: var(--tile-yellow);
+  color: #5a4515;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.demo-banner a {
+  color: var(--primary-deep);
+  font-weight: 800;
+}
+
+.kids-intro h2,
+.kids-form h2,
+.account-card h2 {
+  margin: 0 0 6px;
+  font-size: 20px;
+  font-weight: 800;
+}
+
+.kids-intro p {
+  margin: 0 0 14px;
+  color: var(--ink-soft);
+  line-height: 1.6;
+}
+
+.kids-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 0 0 16px;
+  padding: 0;
+  list-style: none;
+}
+
+.kids-item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  border-radius: 24px;
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.kids-face {
+  display: grid;
+  place-items: center;
+  width: 72px;
+  height: 72px;
+  border-radius: 22px;
+  background: var(--tint);
+}
+
+.kids-info {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 160px;
+}
+
+.kids-info strong {
+  font-size: 19px;
+}
+
+.kids-info span {
+  color: var(--ink-soft);
+  font-size: 14px;
+}
+
+.kids-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.text-danger {
+  min-height: 40px;
+  padding: 0 8px;
+  border: none;
+  background: none;
+  color: #b4402a;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.kids-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 24px;
+  border-radius: 24px;
+  background: var(--surface);
+  color: var(--ink-soft);
+  text-align: center;
+}
+
+.kids-empty p {
+  margin: 0;
+}
+
+.kids-add {
+  margin-bottom: 16px;
+}
+
+.kids-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 620px;
+  padding: 20px;
+  border-radius: 28px;
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.kids-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  border: none;
+  font-weight: 700;
+}
+
+.kids-field legend {
+  margin-bottom: 6px;
+  padding: 0;
+}
+
+.kids-field input,
+.kids-field select {
+  min-height: 48px;
+  padding: 0 14px;
+  border: 2px solid var(--tint-strong);
+  border-radius: 14px;
+  background: #fff;
+  font: inherit;
+  font-weight: 500;
+}
+
+.kids-field input:focus,
+.kids-field select:focus {
+  border-color: var(--primary);
+  outline: none;
+}
+
+.kids-field small {
+  color: var(--ink-soft);
+  font-weight: 500;
+}
+
+.kids-avatars {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.kids-avatars button,
+.kids-modes button {
+  border: 3px solid transparent;
+  border-radius: 18px;
+  background: var(--tint);
+  transition: border-color 0.15s, transform 0.15s;
+}
+
+.kids-avatars button {
+  display: grid;
+  place-items: center;
+  width: 72px;
+  height: 72px;
+}
+
+.kids-avatars button.on,
+.kids-modes button.on {
+  border-color: var(--primary-deep);
+  background: #fff;
+  transform: translateY(-2px);
+}
+
+.kids-modes {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.kids-modes button {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px 6px;
+}
+
+.kids-modes span {
+  color: var(--ink-soft);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.kids-form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+/* 설정 */
+.account-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+@media (min-width: 900px) {
+  .account-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.account-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.account-card .kids-field {
+  align-self: stretch;
+}
+
+.account-card p {
+  margin: 0;
+  line-height: 1.6;
+}
+
+.account-dl {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 6px 14px;
+  margin: 0;
+}
+
+.account-dl dt {
+  color: var(--ink-soft);
+  font-weight: 700;
+}
+
+.account-dl dd {
+  margin: 0;
+}
+
+.account-toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.account-toggle input {
+  width: 22px;
+  height: 22px;
+  accent-color: var(--primary-deep);
+}
+
+.pin-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-self: stretch;
+}
+
+.danger-card {
+  border: 2px solid #f4c6bb;
+}
+
+.danger-btn {
+  min-height: 48px;
+  padding: 0 22px;
+  border: none;
+  border-radius: 999px;
+  background: #c4452d;
+  color: #fff;
+  font-weight: 800;
+}
+
+.danger-btn:disabled {
+  opacity: 0.4;
+}
+
+/* 부모 PIN 숫자판 */
+.pin-dots {
+  display: flex;
+  gap: 14px;
+}
+
+.pin-dots span {
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--primary);
+  border-radius: 50%;
+  transition: background 0.15s;
+}
+
+.pin-dots span.on {
+  background: var(--primary-deep);
+}
+
+.pin-pad {
+  display: grid;
+  grid-template-columns: repeat(3, 72px);
+  gap: 10px;
+}
+
+.pin-pad button {
+  height: 64px;
+  border: none;
+  border-radius: 20px;
+  background: var(--tint);
+  color: var(--ink);
+  font-size: 26px;
+  font-weight: 800;
+  box-shadow: var(--clay-soft);
+}
+
+.pin-pad button:active {
+  transform: translateY(2px);
+}
+
+.pin-pad .pin-del {
+  font-size: 15px;
+}
+
+.pin-help {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 13px;
 }

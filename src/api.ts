@@ -1,3 +1,4 @@
+import { send } from './auth';
 export interface Child {
   id: string;
   nickname: string;
@@ -49,6 +50,24 @@ export const api = {
       (r) => r.books,
     ),
   book: (id: string) => get<BookDetail>(`/api/books/${encodeURIComponent(id)}`),
+};
+
+/** 아이 프로필 만들기·고치기에 쓰는 값 */
+export interface ChildForm {
+  nickname: string;
+  birthYear: number;
+  avatar: string;
+  likes: string;
+  ageMode?: Child['age_mode'];
+}
+
+/** 아이 프로필로 고를 수 있는 점토 캐릭터 (functions/_lib/children.ts AVATARS 와 같게) */
+export const AVATARS = ['🐻', '🐰', '🦖', '🐣', '🤖', '🧚'];
+
+export const childApi = {
+  create: (f: ChildForm) => send<{ child: Child }>('/api/children', 'POST', f),
+  update: (id: string, f: ChildForm) => send<{ child: Child }>(`/api/children/${encodeURIComponent(id)}`, 'PATCH', f),
+  remove: (id: string) => send(`/api/children/${encodeURIComponent(id)}`, 'DELETE'),
 };
 
 export const fileUrl = (key: string) => `/api/files/${key}`;

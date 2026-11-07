@@ -137,7 +137,8 @@ export function redirectUri(request: Request, provider: Provider): string {
 }
 
 export function authorizeUrl(env: Env, request: Request, provider: Provider, state: string): string {
-  if (provider === 'dev') return `${redirectUri(request, provider)}?${qs({ code: 'dev', state })}`;
+  // 시험용: /api/auth/dev/start?as=이름 으로 다른 사람인 척
+  if (provider === 'dev') return `${redirectUri(request, provider)}?${qs({ code: 'dev', state, as: new URL(request.url).searchParams.get('as') ?? undefined })}`;
   const c = CONFIG[provider];
   return c.authorizeUrl({ clientId: c.clientId(env)!, redirectUri: redirectUri(request, provider), state });
 }
@@ -179,7 +180,7 @@ export function randomToken(bytes = 32): string {
   return btoa(String.fromCharCode(...a)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 }
 
-async function sha256(text: string): Promise<string> {
+export async function sha256(text: string): Promise<string> {
   const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
   return [...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, '0')).join('');
 }
@@ -204,6 +205,12 @@ export interface SessionParent {
   email: string | null;
   status: 'pending' | 'active';
   marketing_agreed_at: string | null;
+  /** 부모 PIN 을 만들었는지 (1/0) */
+  has_pin: number;
+  /** 이 세션에서 부모 모드가 열려 있는 마지막 시각 */
+  unlocked_until: string | null;
+  /** 세션 토큰의 해시 (부모 모드 열기·닫기용) */
+  session_hash: string;
 }
 
 /** 쿠키의 세션 → 부모 계정 (없거나 만료면 null) */
@@ -211,7 +218,8 @@ export async function sessionParent(request: Request, env: Env): Promise<Session
   const token = readCookie(request, SESSION_COOKIE);
   if (!token) return null;
   return env.DB.prepare(
-    `SELECT p.id, p.display_name, p.email, p.status, p.marketing_agreed_at
+    `SELECT p.id, p.display_name, p.email, p.status, p.marketing_agreed_at,
+            (p.pin_hash IS NOT NULL) AS has_pin, s.unlocked_until, s.id_hash AS session_hash
        FROM sessions s JOIN parents p ON p.id = s.parent_id
       WHERE s.id_hash = ? AND s.expires_at > ?`,
   )
