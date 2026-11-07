@@ -24,3 +24,8 @@ ALLOW_DEV_LOGIN=true
 PORTONE_API_SECRET=
 PORTONE_STORE_ID=
 PORTONE_IDV_CHANNEL_KEY=
+# 운영자 화면(/admin/ai)에 저장하는 AI API 키 암호화용 비밀값 (16자 이상 아무 긴 문장, 바꾸면 저장한 키를 다시 넣어야 함)
+AI_KEYS_SECRET=
+# 그림 AI 환경 변수 키 (운영자 화면에 키를 저장하지 않을 때)
+GEMINI_API_KEY=
+FAL_KEY=

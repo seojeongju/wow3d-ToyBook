@@ -8168,3 +8168,121 @@ a.primary-btn {
   flex-wrap: wrap;
   gap: 8px;
 }
+
+/* 운영자 · AI 설정 (그림 AI 공급사) */
+.ai-intro h2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 6px;
+  font-size: 20px;
+}
+
+.ai-intro p {
+  margin: 0 0 8px;
+  line-height: 1.6;
+}
+
+.ai-now {
+  font-size: 15px;
+}
+
+.ai-warn {
+  color: #b4402a;
+}
+
+.ai-privacy {
+  color: var(--ink-soft);
+  font-size: 13px;
+}
+
+.ai-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 16px 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ai-item {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ai-item.off {
+  opacity: 0.6;
+}
+
+.ai-item-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.ai-rank {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--primary-deep);
+  color: #fff;
+  font-weight: 800;
+}
+
+.ai-item-title {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 180px;
+}
+
+.ai-item-title strong {
+  font-size: 17px;
+}
+
+.ai-item-title span {
+  color: var(--ink-soft);
+  font-size: 13.5px;
+}
+
+.ai-err {
+  display: block;
+  color: #b4402a;
+  font-size: 12.5px;
+  word-break: break-all;
+}
+
+.ai-key-edit {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.ai-key-edit input {
+  flex: 1;
+  min-width: 220px;
+  min-height: 44px;
+  padding: 0 14px;
+  border: 2px solid var(--tint-strong);
+  border-radius: 14px;
+  font: inherit;
+}
+
+.ai-test-img {
+  margin: 0;
+}
+
+.ai-test-img img {
+  width: min(360px, 100%);
+  border-radius: 18px;
+  box-shadow: var(--clay-soft);
+}
+
+.ai-test-img figcaption {
+  color: var(--ink-soft);
+  font-size: 13px;
+}

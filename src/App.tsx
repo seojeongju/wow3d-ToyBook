@@ -12,6 +12,7 @@ import ParentFigureStudio from './pages/ParentFigureStudio';
 import KidsManage from './pages/KidsManage';
 import AccountPage from './pages/AccountPage';
 import AdminDashboard from './pages/AdminDashboard';
+import AdminAiSettings from './pages/AdminAiSettings';
 import { AboutPage, FaqPage, FigurePage, SafetyPage } from './pages/InfoPages';
 import { LicensesPage, PrivacyPage, TermsPage } from './pages/LegalPages';
 import { useSeo } from './seo';
@@ -47,6 +48,7 @@ export default function App() {
         <Route path="/dashboard/orders" element={<ParentFigureStudio mode="orders" />} />
         <Route path="/dashboard/account" element={<AccountPage />} />
         <Route path="/admin" element={<AdminDashboard />} />
+        <Route path="/admin/ai" element={<AdminAiSettings />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </>

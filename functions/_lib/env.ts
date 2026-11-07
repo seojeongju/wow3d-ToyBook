@@ -7,6 +7,11 @@ export interface Env {
   OPENAI_API_KEY?: string;
   OPENAI_TTS_MODEL?: string;
   OPENAI_TTS_VOICE?: string;
+  /** 그림 AI (functions/_lib/imageai.ts): 운영자 화면에서 키를 저장하지 않았을 때 쓰는 환경 변수 키 */
+  GEMINI_API_KEY?: string;
+  FAL_KEY?: string;
+  /** 운영자 화면에 저장하는 AI API 키를 암호화하는 비밀값 (16자 이상, 바꾸면 저장한 키를 다시 넣어야 함) */
+  AI_KEYS_SECRET?: string;
   IMAGE_API_KEY?: string;
   MESHY_API_KEY?: string;
   /* 간편 로그인 (functions/_lib/auth.ts). 키가 없는 수단은 로그인 화면에서 '준비 중'으로 보임 */

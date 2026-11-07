@@ -33,6 +33,11 @@ export async function isAdmin(env: Env, parentId: string): Promise<boolean> {
   return results.some((r) => r.email && list.includes(r.email.toLowerCase()) && trusted(r.provider, r.email.toLowerCase()));
 }
 
+/** 운영자 작업 기록 (키 값 같은 비밀은 detail 에 넣지 말 것) */
+export async function audit(env: Env, parentId: string, action: string, detail: string) {
+  await env.DB.prepare('INSERT INTO admin_audit (parent_id, action, detail) VALUES (?, ?, ?)').bind(parentId, action, detail.slice(0, 500)).run();
+}
+
 /** 운영자 API 공통 확인: 운영자 + PIN 있음 + 이 세션에서 PIN 을 맞힘 */
 export async function requireAdmin(request: Request, env: Env): Promise<SessionParent | Response> {
   const me = await requireActive(request, env);

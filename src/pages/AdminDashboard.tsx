@@ -14,7 +14,10 @@ const MENU: DashMenuItem[] = [
   { icon: 'box', label: '주문 · 출력 공정', to: '/admin?tab=orders' },
   { icon: 'flag', label: '콘텐츠 안전 신고', to: '/admin?tab=reports' },
   { icon: 'heart', label: '도서관 · 서점 보기', to: '/market' },
+  { icon: 'gear', label: 'AI 설정', to: '/admin/ai' },
 ];
+/** 운영자 화면 공통 메뉴 (AI 설정 화면에서도 같이 씀) */
+export { MENU as ADMIN_MENU };
 
 const ORDER_STATUS_LABELS: Record<string, string> = {
   paid: '결제·접수',
