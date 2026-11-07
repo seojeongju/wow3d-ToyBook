@@ -154,14 +154,14 @@ export default function ParentDashboard() {
       </section>
 
       <section className="dash-banner">
-        <ClayIcon name="drawing" size={48} tile={false} />
+        <ClayIcon name="theater" size={48} tile={false} />
         <div>
-          <strong>아이 그림으로 캐릭터를 만들어 보세요</strong>
-          <span>종이에 그린 그림을 찍으면 삽화와 3D 피규어가 돼요</span>
+          <strong>우리가 만든 책을 도서관·서점에 공유하고 판매해 보세요</strong>
+          <span>다른 가족에게 책을 빌려주거나 판매해 별 코인을 모으고, 새로운 동화도 빌려 읽을 수 있어요</span>
         </div>
-        <button className="pill-btn small-pill" onClick={() => setNotice('그림 업로드는 이야기 공방과 함께 열려요')}>
-          그림 올리기 <LineIcon name="arrow" size={18} />
-        </button>
+        <Link to="/market?tab=mine" className="pill-btn small-pill">
+          도서관·서점 관리 <LineIcon name="arrow" size={18} />
+        </Link>
       </section>
 
       {notice && (

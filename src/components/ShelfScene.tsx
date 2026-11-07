@@ -162,6 +162,22 @@ export default function ShelfScene({
             const tone = COVERS[p.index % COVERS.length];
             const b = p.book;
             const isRead = readBookIds.includes(b.id);
+            const badgeKind =
+              b.ownership === 'borrowed'
+                ? 'borrowed'
+                : b.ownership === 'purchased'
+                  ? 'purchased'
+                  : isRead
+                    ? 'read'
+                    : 'unread';
+            const badgeText =
+              b.ownership === 'borrowed'
+                ? '대여'
+                : b.ownership === 'purchased'
+                  ? '소장'
+                  : isRead
+                    ? '★'
+                    : 'NEW';
             return (
               <button
                 key={b.id}
@@ -171,8 +187,8 @@ export default function ShelfScene({
                 aria-label={`${b.title} 읽기${isRead ? ' (다 읽은 책)' : ''}`}
                 title={b.title}
               >
-                <span className={`shelf-status-badge ${isRead ? 'read' : 'unread'}`} aria-hidden>
-                  {isRead ? '★' : 'NEW'}
+                <span className={`shelf-status-badge ${badgeKind}`} aria-hidden>
+                  {badgeText}
                 </span>
                 <span className="shelf-cover">
                   {b.cover_key ? <img src={fileUrl(b.cover_key)} alt="" /> : <ClayEmoji emoji={b.cover_emoji} size={64} />}

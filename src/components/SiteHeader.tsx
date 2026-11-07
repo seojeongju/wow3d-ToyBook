@@ -36,6 +36,7 @@ export function Logo({ variant = 'header' }: { variant?: 'header' | 'hero' }) {
 // 공개 페이지는 실제 주소로 연결 (검색엔진이 따라가는 내부 링크), 홈 섹션은 해시 링크
 const NAV = [
   { href: '/about', label: '토이북 소개' },
+  { href: '/market', label: '도서관·서점' },
   { href: '/#how', label: '만드는 방법' },
   { href: '/figure', label: '피규어 안내' },
   { href: '/safety', label: '안심 약속' },
@@ -45,6 +46,7 @@ const NAV = [
 const SUB_NAV = [
   { to: '/', icon: 'home' as const, label: '메인페이지' },
   { to: '/profiles', icon: 'book' as const, label: '아이 책장' },
+  { to: '/market', icon: 'heart' as const, label: '도서관·서점' },
   { to: '/parent', icon: 'grid' as const, label: '부모 모드' },
   { to: '/login', icon: 'users' as const, label: '로그인' },
 ];

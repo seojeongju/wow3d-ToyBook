@@ -25,9 +25,10 @@ import { useAsync } from '../useAsync';
 
 type ModalKey = 'studio' | 'magic' | 'factory' | null;
 
-const MENU: { key: 'shelf' | 'studio' | 'magic' | 'factory'; icon: ClayIconName; label: string }[] = [
+const MENU: { key: 'shelf' | 'studio' | 'market' | 'magic' | 'factory'; icon: ClayIconName; label: string }[] = [
   { key: 'shelf', icon: 'home', label: '우리 집 책장' },
   { key: 'studio', icon: 'studio', label: '이야기 공방' },
+  { key: 'market', icon: 'theater', label: '도서관·서점' },
   { key: 'magic', icon: 'magic', label: '마법 상자' },
   { key: 'factory', icon: 'factory', label: '장난감 공장' },
 ];
@@ -156,6 +157,10 @@ export default function Bookshelf() {
             <span>내 피규어 · {activeFigure.name}</span>
           </button>
 
+          <Link to="/market" className="shelf-market-chip">
+            <span>🏛️ 도서관·서점</span>
+          </Link>
+
           {recommendedBook && (
             <button
               type="button"
@@ -273,6 +278,8 @@ export default function Bookshelf() {
                 if (m.key === 'shelf') {
                   setActiveModal(null);
                   tell(`여기는 ${title}이에요`);
+                } else if (m.key === 'market') {
+                  navigate('/market');
                 } else {
                   setActiveModal(m.key);
                 }

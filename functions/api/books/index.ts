@@ -1,5 +1,6 @@
 import type { Env } from '../../_lib/env';
 import { error, familyPrefix, json, newId, requireParent, requireParentForWrite } from '../../_lib/http';
+import { ensureMarketSchema } from '../../_lib/market';
 
 const MAX_PAGES = 32;
 const MAX_TEXT = 1000;
@@ -8,16 +9,66 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
   const parentId = await requireParent(request, env);
   if (parentId instanceof Response) return parentId;
 
+  await ensureMarketSchema(env);
   const childId = new URL(request.url).searchParams.get('childId');
-  const sql =
-    'SELECT b.id, b.child_id, b.title, b.format, b.cover_key, b.cover_emoji, b.status, b.updated_at,' +
-    ' (SELECT COUNT(*) FROM book_pages p WHERE p.book_id = b.id) AS page_count' +
-    ' FROM books b WHERE b.parent_id = ?' +
+  const now = new Date().toISOString();
+
+  // 1. 우리 가족이 직접 만든 책
+  const ownSql =
+    `SELECT b.id, b.child_id, b.title, b.format, b.cover_key, b.cover_emoji, b.status, b.updated_at,
+            (SELECT COUNT(*) FROM book_pages p WHERE p.book_id = b.id) AS page_count,
+            'mine' AS ownership, NULL AS due_at, m.author_name, m.id AS listing_id, m.kind AS market_kind
+       FROM books b
+       LEFT JOIN market_listings m ON m.book_id = b.id AND m.status = 'published'
+      WHERE b.parent_id = ?` +
     (childId ? ' AND b.child_id = ?' : '') +
     ' ORDER BY b.updated_at DESC';
-  const stmt = env.DB.prepare(sql);
-  const { results } = await (childId ? stmt.bind(parentId, childId) : stmt.bind(parentId)).all();
-  return json({ books: results });
+  const ownStmt = env.DB.prepare(ownSql);
+  const { results: ownBooks } = await (childId ? ownStmt.bind(parentId, childId) : ownStmt.bind(parentId)).all<Record<string, unknown>>();
+
+  // 2. 서점에서 구매해 영구 소장한 책
+  const purchasedSql =
+    `SELECT b.id, bp.child_id, b.title, b.format, b.cover_key, b.cover_emoji, b.status, bp.created_at AS updated_at,
+            (SELECT COUNT(*) FROM book_pages p WHERE p.book_id = b.id) AS page_count,
+            'purchased' AS ownership, NULL AS due_at, m.author_name, m.id AS listing_id, m.kind AS market_kind
+       FROM book_purchases bp
+       JOIN books b ON b.id = bp.book_id
+       LEFT JOIN market_listings m ON m.id = bp.listing_id
+      WHERE bp.buyer_parent_id = ?` +
+    (childId ? ' AND (bp.child_id = ? OR bp.child_id IS NULL)' : '') +
+    ' ORDER BY bp.created_at DESC';
+  const purchasedStmt = env.DB.prepare(purchasedSql);
+  const { results: purchasedBooks } = await (childId
+    ? purchasedStmt.bind(parentId, childId)
+    : purchasedStmt.bind(parentId)).all<Record<string, unknown>>();
+
+  // 3. 도서관에서 현재 대여 중인 책 (반납 전 & 만료 전)
+  const borrowedSql =
+    `SELECT b.id, bl.child_id, b.title, b.format, b.cover_key, b.cover_emoji, b.status, bl.borrowed_at AS updated_at,
+            (SELECT COUNT(*) FROM book_pages p WHERE p.book_id = b.id) AS page_count,
+            'borrowed' AS ownership, bl.due_at, m.author_name, m.id AS listing_id, m.kind AS market_kind
+       FROM book_loans bl
+       JOIN books b ON b.id = bl.book_id
+       LEFT JOIN market_listings m ON m.id = bl.listing_id
+      WHERE bl.borrower_parent_id = ? AND bl.returned_at IS NULL AND bl.due_at > ?` +
+    (childId ? ' AND (bl.child_id = ? OR bl.child_id IS NULL)' : '') +
+    ' ORDER BY bl.borrowed_at DESC';
+  const borrowedStmt = env.DB.prepare(borrowedSql);
+  const { results: borrowedBooks } = await (childId
+    ? borrowedStmt.bind(parentId, now, childId)
+    : borrowedStmt.bind(parentId, now)).all<Record<string, unknown>>();
+
+  // 중복 책 제거 (우선순위: 내 책 > 소장 책 > 대여 책)
+  const seen = new Set<string>();
+  const combined: Record<string, unknown>[] = [];
+  for (const b of [...ownBooks, ...purchasedBooks, ...borrowedBooks]) {
+    const id = String(b.id);
+    if (seen.has(id)) continue;
+    seen.add(id);
+    combined.push(b);
+  }
+
+  return json({ books: combined });
 };
 
 interface CreateBookBody {

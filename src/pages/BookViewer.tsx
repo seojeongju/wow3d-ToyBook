@@ -415,16 +415,44 @@ export default function BookViewer() {
             <ClayArt name="star" size={64} />
           </div>
           <Tobi pose="wave" size={140} />
-          <h2>다 읽었어요!</h2>
-          <p>{child ? `${josa(child.nickname, '이', '')} 책장에 반짝 별 스티커가 붙었어요.` : '책장에 반짝 별 스티커가 붙었어요.'}</p>
-          <div className="cover-actions">
-            <button className="pill-btn" onClick={() => goTo(0)}>
-              처음부터 다시 읽기
-            </button>
-            <button className="pill-btn alt" onClick={backToShelf}>
-              책장으로 가기
-            </button>
-          </div>
+          {book.preview_only ? (
+            <>
+              <h2>앞 2쪽 미리보기를 다 읽었어요!</h2>
+              <p>
+                전체 {book.page_count}쪽 뒷이야기가 궁금한가요? 동화 서점에서 소장하면 끝까지 읽고 내 책장에 영구 보관할 수 있어요!
+              </p>
+              <div className="cover-actions">
+                <button className="pill-btn" onClick={() => navigate('/market?tab=bookstore')}>
+                  🏪 서점에서 소장 구매하기 (⭐ {(book.market_price ?? 500).toLocaleString()} 코인)
+                </button>
+                <button className="pill-btn alt" onClick={() => goTo(0)}>
+                  처음부터 다시 보기
+                </button>
+              </div>
+            </>
+          ) : (
+            <>
+              <h2>다 읽었어요!</h2>
+              <p>{child ? `${josa(child.nickname, '이', '')} 책장에 반짝 별 스티커가 붙었어요.` : '책장에 반짝 별 스티커가 붙었어요.'}</p>
+              <div className="cover-actions">
+                <button className="pill-btn" onClick={() => goTo(0)}>
+                  처음부터 다시 읽기
+                </button>
+                {book.ownership === 'mine' ? (
+                  <button className="pill-btn alt" onClick={() => navigate(`/market?tab=mine&publish=${encodeURIComponent(book.id)}`)}>
+                    🏛️ 도서관 공유 · 서점 판매하기
+                  </button>
+                ) : (
+                  <button className="pill-btn alt" onClick={() => navigate('/market')}>
+                    🏛️ 도서관·서점 더 둘러보기
+                  </button>
+                )}
+                <button className="pill-btn alt" onClick={backToShelf}>
+                  책장으로 가기
+                </button>
+              </div>
+            </>
+          )}
         </section>
       )}
     </main>

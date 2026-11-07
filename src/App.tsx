@@ -5,6 +5,7 @@ import Signup from './pages/Signup';
 import ProfileSelect from './pages/ProfileSelect';
 import Bookshelf from './pages/Bookshelf';
 import BookViewer from './pages/BookViewer';
+import BookMarket from './pages/BookMarket';
 import ParentGate from './pages/ParentGate';
 import ParentDashboard from './pages/ParentDashboard';
 import KidsManage from './pages/KidsManage';
@@ -37,6 +38,7 @@ export default function App() {
         <Route path="/profiles" element={<ProfileSelect />} />
         <Route path="/shelf/:childId" element={<Bookshelf />} />
         <Route path="/book/:bookId" element={<BookViewer />} />
+        <Route path="/market" element={<BookMarket />} />
         <Route path="/parent" element={<ParentGate />} />
         <Route path="/dashboard" element={<ParentDashboard />} />
         <Route path="/dashboard/kids" element={<KidsManage />} />

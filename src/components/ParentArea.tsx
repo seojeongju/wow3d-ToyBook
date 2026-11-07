@@ -10,6 +10,7 @@ export const PARENT_MENU: DashMenuItem[] = [
   { icon: 'grid', label: '대시보드', to: '/dashboard' },
   { icon: 'smile', label: '우리 아이', to: '/dashboard/kids' },
   { icon: 'book', label: '책장', to: '/profiles' },
+  { icon: 'heart', label: '도서관·서점', to: '/market' },
   { icon: 'cube', label: '3D 모델' },
   { icon: 'box', label: '주문·배송' },
   { icon: 'gear', label: '설정', to: '/dashboard/account' },
