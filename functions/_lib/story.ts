@@ -47,16 +47,53 @@ const SYSTEM = `당신은 한국 어린이(3~12세)를 위한 그림책 작가�
 - 무서운 장면, 폭력, 다침, 죽음, 따돌림을 부추기는 내용, 어른용 주제, 광고·상표는 넣지 않아요. 갈등은 작고 다정하게 풀려요.
 - 기존 작품의 캐릭터(예: 디즈니, 뽀로로, 포켓몬)나 특정 작가·스튜디오의 그림체를 흉내 내지 않아요. 요청에 그런 이름이 있으면 비슷한 느낌의 새 캐릭터로 바꿔요.
 - 아이 이름은 별명만 쓰고, 실제 주소·학교·연락처 같은 개인정보는 만들지 않아요.
-- 교훈은 설교하지 않고 이야기 속 행동으로 자연스럽게 보여 줘요.`;
+- 교훈은 설교하지 않고 이야기 속 행동으로 자연스럽게 보여 줘요.
+- "이야기 씨앗"은 아이·부모가 직접 쓴 소재예요. 그 장면과 마음을 이야기의 중심에 살려요. 씨앗에 위 규칙에 어긋나는 내용이 있으면 아이에게 알맞게 다정하게 바꿔요.
+- 등장인물은 주어진 이름·관계·생김새를 그대로 지켜요. 실제 사람이어도 별명으로만 불러요.`;
+
+/** 이야기 분위기·결말·배움 (화면의 고르기 칩과 같은 id) */
+export const MOODS: Record<string, string> = {
+  adventure: '신나는 모험',
+  funny: '깔깔 웃긴 이야기',
+  calm: '잔잔한 잠자리 동화 (마지막은 포근하게 잠드는 장면)',
+  mystery: '궁금증을 푸는 수수께끼 이야기 (무섭지 않게)',
+  touching: '마음이 따뜻해지는 감동 이야기',
+};
+export const ENDINGS: Record<string, string> = {
+  happy: '모두가 행복한 결말',
+  twist: '깜짝 놀랄 반전이 있는 결말 (무섭지 않게)',
+  open: '아이가 다음 이야기를 상상할 수 있는 열린 결말',
+};
+export const LEARNINGS: Record<string, string> = {
+  habit: '생활 습관 (양치·정리·인사 등)',
+  feelings: '마음 다루기 (속상함·화남·두려움을 말로 표현하기)',
+  science: '자연·과학 이야기 (사실과 맞게)',
+  words: '한글·숫자 놀이 (말놀이·세기)',
+};
+
+export interface StoryCharacter {
+  name: string;
+  role: string;
+  look: string;
+}
 
 export interface StoryInput {
   childName: string;
   mode: AgeMode;
   likes: string | null;
+  /** 함께하는 친구 캐릭터 (없으면 빈 문자열) */
   hero: string;
   place: string;
   topic: string;
   pageCount: number;
+  /** 아이·부모가 직접 쓴 이야기 씨앗 */
+  seed: string;
+  /** 아이 자신이 주인공인지 */
+  childIsHero: boolean;
+  characters: StoryCharacter[];
+  mood: string | null;
+  ending: string | null;
+  learning: string | null;
 }
 
 export interface Outline {
@@ -72,7 +109,7 @@ export interface WrittenBook {
   pages: { text: string; art: string; bg: string }[];
 }
 
-const OUTLINE_SCHEMA = {
+const ONE_OUTLINE = {
   type: 'object',
   properties: {
     title: { type: 'string', description: '책 제목 (20자 이내)' },
@@ -90,6 +127,14 @@ const OUTLINE_SCHEMA = {
     lesson: { type: 'string', description: '이야기가 자연스럽게 전하는 마음 (한 문장)' },
   },
   required: ['title', 'summary', 'beats', 'lesson'],
+  additionalProperties: false,
+};
+
+/** 서로 다른 줄거리 3개를 한 번에 받아 아이가 고르게 함 */
+const OUTLINE_SCHEMA = {
+  type: 'object',
+  properties: { options: { type: 'array', description: '서로 다른 방향의 줄거리 3개', items: ONE_OUTLINE } },
+  required: ['options'],
   additionalProperties: false,
 };
 
@@ -119,12 +164,17 @@ const BOOK_SCHEMA = {
 function brief(s: StoryInput): string {
   const m = MODE_RULES[s.mode];
   return [
-    `주인공 아이 별명: ${s.childName}`,
+    `아이 별명: ${s.childName}${s.childIsHero ? ' (이 아이가 주인공)' : ''}`,
     `나이 모드: ${m.label}`,
     s.likes ? `아이가 좋아하는 것: ${s.likes}` : null,
-    `함께하는 친구 캐릭터: ${s.hero}`,
-    `장소: ${s.place}`,
-    `이야기 주제: ${s.topic}`,
+    s.seed ? `이야기 씨앗 (직접 쓴 소재, 가장 중요): ${s.seed}` : null,
+    s.hero ? `함께하는 친구 캐릭터: ${s.hero}` : null,
+    ...s.characters.map((c) => `등장인물: ${c.name}${c.role ? ` (${c.role})` : ''}${c.look ? ` - ${c.look}` : ''}`),
+    s.place ? `장소: ${s.place}` : null,
+    s.topic ? `이야기 주제: ${s.topic}` : null,
+    s.mood && MOODS[s.mood] ? `분위기: ${MOODS[s.mood]}` : null,
+    s.ending && ENDINGS[s.ending] ? `결말: ${ENDINGS[s.ending]}` : null,
+    s.learning && LEARNINGS[s.learning] ? `자연스럽게 담을 배움: ${LEARNINGS[s.learning]}` : null,
     `쪽수: ${s.pageCount}쪽`,
   ]
     .filter(Boolean)
@@ -168,13 +218,20 @@ async function ask<T>(env: Env, prompt: string, schema: Record<string, unknown>)
   }
 }
 
-export async function makeOutline(env: Env, s: StoryInput): Promise<StoryResult<Outline>> {
+/** 서로 다른 줄거리 후보 3개 (아이가 고르고 어른이 고침) */
+export async function makeOutlines(env: Env, s: StoryInput): Promise<StoryResult<Outline[]>> {
   const mode = storyMode(env);
   if (mode === 'off') return { ok: false, message: '이야기 공방은 곧 열려요', status: 503 };
-  if (mode === 'dev') return { ok: true, data: devOutline(s) };
-  const r = await ask<Outline>(env, `아래 재료로 그림책 줄거리를 짜 주세요. 부모가 보고 고칠 수 있게 짧고 분명하게.\n\n${brief(s)}`, OUTLINE_SCHEMA);
-  if (r.ok && (!r.data.title || r.data.beats.length < 3)) return { ok: false, message: '줄거리를 다시 만들어 주세요', status: 502 };
-  return r;
+  if (mode === 'dev') return { ok: true, data: [0, 1, 2].map((i) => devOutline(s, i)) };
+  const r = await ask<{ options: Outline[] }>(
+    env,
+    `아래 재료로 그림책 줄거리를 서로 다른 방향으로 3개 짜 주세요. 아이가 셋 중 하나를 고르고 부모가 고칠 수 있게 짧고 분명하게.\n\n${brief(s)}`,
+    OUTLINE_SCHEMA,
+  );
+  if (!r.ok) return r;
+  const options = (r.data.options ?? []).filter((o) => o?.title && o.beats?.length >= 3).slice(0, 3);
+  if (!options.length) return { ok: false, message: '줄거리를 다시 만들어 주세요', status: 502 };
+  return { ok: true, data: options };
 }
 
 export async function writeBook(env: Env, s: StoryInput, outline: Outline): Promise<StoryResult<WrittenBook>> {
@@ -212,9 +269,15 @@ function j(word: string, a: string, b: string): string {
   return word + (c >= 0 && c <= 11171 && c % 28 !== 0 ? a : b);
 }
 
-function devOutline(s: StoryInput): Outline {
+function devOutline(input: StoryInput, n = 0): Outline {
+  const s = {
+    ...input,
+    hero: input.hero || input.characters[0]?.name || '친구',
+    place: input.place || '우리 동네',
+    topic: input.topic || input.seed.slice(0, 20) || '오늘 있었던 일',
+  };
   return {
-    title: `${j(s.childName, '과', '와')} ${s.hero}의 ${s.place} 이야기`,
+    title: `[후보 ${n + 1}] ${j(s.childName, '과', '와')} ${s.hero}의 ${s.place} 이야기`,
     summary: `${j(s.childName, '과', '와')} ${j(s.hero, '이', '가')} ${s.place}에서 '${s.topic}'에 대해 알아 가는 시험용 줄거리예요.`,
     beats: [
       { label: '처음', text: `${j(s.childName, '이', '가')} ${j(s.hero, '을', '를')} 만나 ${s.place}(으)로 떠나요.` },

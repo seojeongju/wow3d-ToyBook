@@ -6208,3 +6208,186 @@ a.login-btn {
     animation: none;
   }
 }
+
+/* 이야기 공방 1단계 고도화: 이야기 씨앗 · 등장인물 · 자세히 정하기 · 줄거리 후보 3개 */
+.modal-step-label em {
+  margin-left: 6px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--tile-yellow);
+  color: #6b5216;
+  font-size: 12px;
+  font-style: normal;
+}
+
+.studio-seed textarea,
+.studio-person input {
+  width: 100%;
+  padding: 10px 14px;
+  border: 2px solid var(--tint-strong);
+  border-radius: 14px;
+  background: #fff;
+  font: inherit;
+  line-height: 1.6;
+  resize: vertical;
+}
+
+.studio-seed textarea:focus,
+.studio-person input:focus {
+  border-color: var(--primary);
+  outline: none;
+}
+
+.studio-seed-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.studio-seed-foot > span {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.studio-seed-foot small,
+.studio-hint {
+  color: var(--ink-soft);
+  font-size: 12.5px;
+}
+
+.studio-hint.center {
+  align-self: center;
+}
+
+.studio-example {
+  padding: 4px 10px;
+  border: none;
+  border-radius: 999px;
+  background: var(--tint);
+  color: var(--primary-deep);
+  font-size: 12.5px;
+  font-weight: 700;
+}
+
+.studio-person {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1.6fr auto;
+  gap: 6px;
+  align-items: center;
+}
+
+@media (max-width: 640px) {
+  .studio-person {
+    grid-template-columns: 1fr 1fr auto;
+  }
+  .studio-person input:nth-child(3) {
+    grid-column: 1 / 3;
+  }
+}
+
+.studio-person-del {
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 50%;
+  background: var(--tint);
+  color: var(--ink-soft);
+  font-size: 20px;
+  line-height: 1;
+}
+
+.studio-add-person {
+  align-self: flex-start;
+}
+
+.studio-more {
+  align-self: flex-start;
+  padding: 6px 2px;
+  border: none;
+  background: none;
+  color: var(--primary-deep);
+  font-size: 14.5px;
+  font-weight: 800;
+}
+
+.studio-more-body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 14px;
+  border-radius: 20px;
+  background: var(--tint);
+}
+
+.studio-more-label {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--ink-soft);
+}
+
+/* 줄거리 후보 3개 */
+.studio-options {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+@media (max-width: 720px) {
+  .studio-options {
+    grid-template-columns: 1fr;
+  }
+}
+
+.studio-option {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  padding: 14px 14px 14px 46px;
+  border: 3px solid transparent;
+  border-radius: 22px;
+  background: var(--surface);
+  box-shadow: var(--clay-soft);
+  color: var(--ink);
+  text-align: left;
+  transition: border-color 0.15s, transform 0.15s;
+}
+
+.studio-option strong {
+  font-size: 16px;
+  line-height: 1.4;
+}
+
+.studio-option span:last-child {
+  color: var(--ink-soft);
+  font-size: 13.5px;
+  line-height: 1.5;
+}
+
+.studio-option.on {
+  border-color: var(--primary-deep);
+  transform: translateY(-2px);
+}
+
+.studio-option-no {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--tile-lavender);
+  color: var(--primary-deep);
+  font-weight: 800;
+}
+
+.studio-option.on .studio-option-no {
+  background: var(--primary-deep);
+  color: #fff;
+}

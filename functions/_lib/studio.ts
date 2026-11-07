@@ -1,7 +1,7 @@
 import type { Env } from './env';
 import { error } from './http';
 import { requireActive } from './parent';
-import { pageCountFor, type AgeMode, type Outline, type StoryInput } from './story';
+import { ENDINGS, LEARNINGS, MOODS, pageCountFor, type AgeMode, type Outline, type StoryInput } from './story';
 
 /** 하루에 만들 수 있는 횟수 (가족마다, 한국 날짜 기준) */
 export const DAILY_LIMIT = { outline: 20, book: 5 } as const;
@@ -49,7 +49,19 @@ export async function readStudioRequest(
   const hero = short(body.hero, 30);
   const place = short(body.place, 30);
   const topic = short(body.topic, 60);
-  if (!hero || !place || !topic) return error('친구·장소·주제를 골라 주세요');
+  const seed = short(body.seed, 300);
+  // 등장인물은 3명까지 (이름·관계·생김새)
+  const characters = (Array.isArray(body.characters) ? body.characters : [])
+    .slice(0, 3)
+    .map((c: { name?: unknown; role?: unknown; look?: unknown }) => ({ name: short(c?.name, 10), role: short(c?.role, 12), look: short(c?.look, 60) }))
+    .filter((c) => c.name);
+  if (!seed && !topic) return error('하고 싶은 이야기를 쓰거나 주제를 골라 주세요');
+  // 직접 쓴 글에 연락처가 들어가지 않게 (아이 개인정보 최소화)
+  const typed = [seed, topic, place, ...characters.flatMap((c) => [c.name, c.role, c.look])].join(' ');
+  if (/01[016789][\s-]?\d{3,4}[\s-]?\d{4}|[\w.+-]+@[\w-]+\.[\w.]+|\d{2,3}-\d{3,4}-\d{4}/.test(typed)) {
+    return error('전화번호·이메일 같은 연락처는 넣지 말아 주세요');
+  }
+  const pick = (v: unknown, allowed: Record<string, string>) => (typeof v === 'string' && v in allowed ? v : null);
 
   if ((await usageLeft(env, me.id, kind)) <= 0) {
     return error(kind === 'book' ? `오늘은 책을 ${DAILY_LIMIT.book}권까지 만들 수 있어요. 내일 또 만들어요!` : '오늘은 줄거리를 많이 만들었어요. 내일 또 만들어요!', 429);
@@ -59,7 +71,21 @@ export async function readStudioRequest(
     parentId: me.id,
     childId,
     body,
-    input: { childName: child.nickname, mode: child.age_mode, likes: child.likes, hero, place, topic, pageCount: pageCountFor(child.age_mode, body.pageCount) },
+    input: {
+      childName: child.nickname,
+      mode: child.age_mode,
+      likes: child.likes,
+      hero,
+      place,
+      topic,
+      pageCount: pageCountFor(child.age_mode, body.pageCount),
+      seed,
+      childIsHero: body.childIsHero !== false,
+      characters,
+      mood: pick(body.mood, MOODS),
+      ending: pick(body.ending, ENDINGS),
+      learning: pick(body.learning, LEARNINGS),
+    },
   };
 }
 
