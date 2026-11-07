@@ -23,6 +23,8 @@ export interface Me {
   verifyRequired: boolean;
   /** 운영자인지 (ADMIN_EMAILS) */
   isAdmin: boolean;
+  /** 로그인 수단별로 받은 이메일 (운영자 등록 확인용) */
+  logins: { provider: Provider; email: string | null }[];
 }
 
 /** 보호자 본인인증 설정 (functions/_lib/verify.ts) */

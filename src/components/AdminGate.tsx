@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
-import { useMe, type Me } from '../auth';
+import { PROVIDER_NAME, useMe, type Me } from '../auth';
 import { PinGate } from '../pages/ParentGate';
 import { SubHeader } from './SiteHeader';
 import Tobi from './Tobi';
@@ -33,6 +33,21 @@ export default function AdminGate({ children }: { children: (me: Me) => ReactNod
       <>
         <h1 className="title-sm">운영자만 볼 수 있어요</h1>
         <p>이 계정은 운영자로 등록되어 있지 않아요.</p>
+        {/* 왜 안 되는지 본인이 확인할 수 있게: 서버가 받은 로그인 이메일 */}
+        <div className="admin-why" style={{ maxWidth: 420, padding: '12px 16px', borderRadius: 18, background: 'var(--tint)', textAlign: 'left', fontSize: 14, lineHeight: 1.6 }}>
+          <strong>이 계정이 로그인할 때 받은 이메일</strong>
+          <ul>
+            {user.logins.map((l, i) => (
+              <li key={i}>
+                {PROVIDER_NAME[l.provider]}: {l.email ?? '받지 못함'}
+              </li>
+            ))}
+          </ul>
+          <small>
+            이 이메일이 Cloudflare 의 ADMIN_EMAILS 에 있어야 운영자가 돼요 (네이버는 @naver.com 주소만). 이메일을 받지 못했다면 네이버 개발자 센터의 제공 정보에서
+            "이메일 주소"를 켜고, 로그아웃 후 다시 로그인해 주세요. ADMIN_EMAILS 를 바꿨다면 다시 배포해야 적용돼요.
+          </small>
+        </div>
         <Link to="/" className="primary-btn">
           메인으로
         </Link>

@@ -9,9 +9,13 @@ import { isAdmin } from '../../_lib/admin';
 export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
   const me = await sessionParent(request, env);
   let providers: string[] = [];
+  let logins: { provider: string; email: string | null }[] = [];
   if (me) {
-    const { results } = await env.DB.prepare('SELECT provider FROM auth_identities WHERE parent_id = ?').bind(me.id).all<{ provider: string }>();
+    const { results } = await env.DB.prepare('SELECT provider, email FROM auth_identities WHERE parent_id = ?')
+      .bind(me.id)
+      .all<{ provider: string; email: string | null }>();
     providers = results.map((r) => r.provider);
+    logins = results;
   }
   return json({
     user: me && {
@@ -32,6 +36,8 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
       verifyRequired: verifyMode(env) !== 'off' && !me.guardian_verified_at,
       /** 운영자인지 (functions/_lib/admin.ts) */
       isAdmin: me.status === 'active' && (await isAdmin(env, me.id)),
+      /** 본인 로그인 수단별로 받은 이메일 (운영자 등록 확인용, 본인에게만 보임) */
+      logins,
     },
     available: enabledProviders(env),
     verify: verifyClientConfig(env),
