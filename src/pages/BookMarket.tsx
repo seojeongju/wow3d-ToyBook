@@ -28,7 +28,7 @@ const REPORT_REASONS: { key: ReportReason; label: string }[] = [
   { key: 'other', label: '기타 확인이 필요한 내용이에요' },
 ];
 
-const CATEGORIES = ['전체', '모험', '생활습관', '우주·과학', '잠자리', '감정'] as const;
+const CATEGORIES = ['전체', '모험', '생활습관', '우주·과학', '잠자리', '감정', '전래·명작'] as const;
 
 const STICKERS: { key: StickerType; emoji: string; label: string }[] = [
   { key: 'star', emoji: '⭐', label: '재미있어요' },
@@ -406,17 +406,20 @@ export default function BookMarket() {
                     <article key={item.id} className={`market-card tone-${tone}`}>
                       <div className="market-card-top">
                         <span className="market-cat-badge">{item.category}</span>
-                        {item.is_mine ? (
-                          <span className="market-state-badge mine">내 출품작</span>
-                        ) : item.is_purchased ? (
-                          <span className="market-state-badge owned">✨ 소장 중</span>
-                        ) : isBorrowed ? (
-                          <span className="market-state-badge borrowed">🏛️ 대여 중 (D-{dLeft})</span>
-                        ) : tab === 'library' ? (
-                          <span className="market-state-badge free">무료 대출 ({item.rent_days}일)</span>
-                        ) : (
-                          <span className="market-state-badge price">⭐ {item.price.toLocaleString()} 코인</span>
-                        )}
+                        <div className="market-badge-stack">
+                          {item.is_classic && <span className="market-state-badge classic">고전 · 퍼블릭 도메인</span>}
+                          {item.is_mine ? (
+                            <span className="market-state-badge mine">내 출품작</span>
+                          ) : item.is_purchased ? (
+                            <span className="market-state-badge owned">✨ 소장 중</span>
+                          ) : isBorrowed ? (
+                            <span className="market-state-badge borrowed">🏛️ 대여 중 (D-{dLeft})</span>
+                          ) : tab === 'library' ? (
+                            <span className="market-state-badge free">무료 대출 ({item.rent_days}일)</span>
+                          ) : (
+                            <span className="market-state-badge price">⭐ {item.price.toLocaleString()} 코인</span>
+                          )}
+                        </div>
                       </div>
 
                       <div
@@ -438,6 +441,9 @@ export default function BookMarket() {
                           <p className="market-author">
                             ✍️ {item.author_name} · {item.page_count}쪽
                           </p>
+                          {item.is_classic && item.catalog_title_original && (
+                            <p className="market-classic-note">원제: {item.catalog_title_original} · 토이북이 다시 쓴 그림책</p>
+                          )}
                           <p className="market-summary">{item.summary}</p>
                         </div>
                       </div>

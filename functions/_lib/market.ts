@@ -21,7 +21,7 @@ export const STICKER_META: Record<StickerType, { emoji: string; label: string }>
   again: { emoji: '📚', label: '또 읽고 싶어요' },
 };
 
-export const MARKET_CATEGORIES = ['전체', '모험', '생활습관', '우주·과학', '잠자리', '감정'] as const;
+export const MARKET_CATEGORIES = ['전체', '모험', '생활습관', '우주·과학', '잠자리', '감정', '전래·명작'] as const;
 
 let schemaReady = false;
 

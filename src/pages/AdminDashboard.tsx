@@ -13,6 +13,7 @@ const MENU: DashMenuItem[] = [
   { icon: 'grid', label: '운영 대시보드', to: '/admin' },
   { icon: 'box', label: '주문 · 출력 공정', to: '/admin?tab=orders' },
   { icon: 'flag', label: '콘텐츠 안전 신고', to: '/admin?tab=reports' },
+  { icon: 'book', label: '고전 동화 인제스트', to: '/admin/catalog' },
   { icon: 'heart', label: '도서관 · 서점 보기', to: '/market' },
   { icon: 'gear', label: 'AI 설정', to: '/admin/ai' },
 ];

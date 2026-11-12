@@ -1,5 +1,6 @@
 import type { Env } from '../../_lib/env';
 import { error, json, newId, requireParent } from '../../_lib/http';
+import { ensureCatalogSchema } from '../../_lib/ingest';
 import {
   checkParentPinForAction,
   ensureMarketSchema,
@@ -21,6 +22,8 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
   const category = url.searchParams.get('category');
   const q = url.searchParams.get('q')?.trim();
 
+  await ensureCatalogSchema(env);
+
   const { results: listings } = await env.DB.prepare(
     `SELECT m.id, m.book_id, m.seller_parent_id, m.author_name, m.kind, m.price, m.rent_days,
             m.summary, m.category, m.status, m.loan_count, m.sales_count, m.likes_count, m.created_at,
@@ -30,9 +33,13 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
               WHERE l.listing_id = m.id AND l.borrower_parent_id = ? AND l.returned_at IS NULL AND l.due_at > ?
               ORDER BY l.due_at DESC LIMIT 1) AS borrowed_until,
             EXISTS(SELECT 1 FROM book_purchases bp WHERE bp.book_id = m.book_id AND bp.buyer_parent_id = ?) AS is_purchased,
-            (SELECT r.sticker FROM market_reactions r WHERE r.listing_id = m.id AND r.parent_id = ?) AS my_sticker
+            (SELECT r.sticker FROM market_reactions r WHERE r.listing_id = m.id AND r.parent_id = ?) AS my_sticker,
+            cs.license AS catalog_license,
+            cs.provider AS catalog_provider,
+            cs.title_original AS catalog_title_original
        FROM market_listings m
        JOIN books b ON b.id = m.book_id
+       LEFT JOIN catalog_sources cs ON cs.book_id = b.id AND cs.status = 'published'
       WHERE (m.status = 'published' OR m.seller_parent_id = ?)
       ORDER BY (m.loan_count + m.sales_count * 2 + m.likes_count) DESC, m.created_at DESC`,
   )
@@ -46,6 +53,9 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
       category: string;
       title: string;
       is_purchased: number;
+      catalog_license: string | null;
+      catalog_provider: string | null;
+      catalog_title_original: string | null;
       [key: string]: unknown;
     }>();
 
@@ -54,6 +64,10 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
       ...item,
       is_purchased: Boolean(item.is_purchased),
       is_mine: item.seller_parent_id === parentId,
+      is_classic: Boolean(item.catalog_license),
+      catalog_license: item.catalog_license ?? null,
+      catalog_provider: item.catalog_provider ?? null,
+      catalog_title_original: item.catalog_title_original ?? null,
     }))
     .filter((item) => {
       if (category && category !== '전체' && item.category !== category) return false;

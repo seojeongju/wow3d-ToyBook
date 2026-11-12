@@ -64,6 +64,11 @@ export interface MarketListing {
   is_purchased?: boolean;
   is_mine?: boolean;
   my_sticker?: StickerType | null;
+  /** 퍼블릭 도메인 큐레이션(고전 동화) 여부 */
+  is_classic?: boolean;
+  catalog_license?: string | null;
+  catalog_provider?: string | null;
+  catalog_title_original?: string | null;
 }
 
 export interface MyMarketBook extends BookSummary {
@@ -357,6 +362,71 @@ export interface AdminOverview {
   orders: AdminOrderRow[];
 }
 
+/* ───────── 운영자 · 고전 동화 인제스트 ───────── */
+export type CatalogProvider = 'childrenstory' | 'gutendex';
+export type CatalogStatus = 'discovered' | 'imported' | 'rewritten' | 'published' | 'rejected' | 'error';
+
+export interface CatalogSearchHit {
+  provider: CatalogProvider;
+  externalId: string;
+  title: string;
+  authors: string[];
+  sourceUrl: string;
+  downloadUrl: string | null;
+  subjects: string[];
+  wordCount: number | null;
+  language: string;
+  license: string;
+  categoryHint: string;
+}
+
+export interface CatalogSourceView {
+  id: string;
+  provider: CatalogProvider;
+  externalId: string;
+  titleOriginal: string;
+  titleKo: string | null;
+  summaryKo: string | null;
+  authors: string[];
+  subjects: string[];
+  language: string;
+  license: string;
+  sourceUrl: string | null;
+  wordCount: number | null;
+  status: CatalogStatus;
+  bookId: string | null;
+  listingId: string | null;
+  category: string;
+  ageBand: '3-5' | '6-8' | '9-12';
+  authorCredit: string | null;
+  coverEmoji: string;
+  errorNote: string | null;
+  hasExcerpt: boolean;
+  excerptPreview: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CatalogOverview {
+  storyMode: 'claude' | 'dev' | 'off';
+  counts: Record<string, number>;
+  sources: CatalogSourceView[];
+  pilotCount: number;
+  pendingPublish: number;
+}
+
+export interface CatalogBatchResult {
+  published: CatalogSourceView[];
+  failed: { id: string; title: string; error: string }[];
+  remaining: number;
+}
+
+export interface CatalogPilotPublishResult extends CatalogBatchResult {
+  imported: CatalogSourceView[];
+  skipped: string[];
+  warnings: string[];
+}
+
 export const adminApi = {
   overview: () => get<AdminOverview>('/api/admin/overview'),
   resolveReport: (reportId: string, decision: 'blind' | 'dismiss') =>
@@ -372,6 +442,31 @@ export const adminApi = {
       nextStatus,
       note,
     }),
+  catalog: () => get<CatalogOverview>('/api/admin/catalog'),
+  catalogSearch: (payload: { provider?: CatalogProvider | 'all'; q?: string; category?: string; limit?: number }) =>
+    send<{ hits: CatalogSearchHit[]; warnings: string[] }>('/api/admin/catalog', 'POST', { action: 'search', ...payload }),
+  catalogEnqueue: (hit: CatalogSearchHit, extras?: { category?: string; ageBand?: '3-5' | '6-8' | '9-12' }) =>
+    send<{ source: CatalogSourceView }>('/api/admin/catalog', 'POST', { action: 'enqueue', hit, ...extras }),
+  catalogPilot: () =>
+    send<{ imported: CatalogSourceView[]; skipped: string[]; warnings: string[] }>('/api/admin/catalog', 'POST', {
+      action: 'pilot',
+    }),
+  catalogPilotPublish: () =>
+    send<CatalogPilotPublishResult>('/api/admin/catalog', 'POST', { action: 'pilot_publish' }),
+  catalogBatchPublish: (batchLimit?: number) =>
+    send<CatalogBatchResult>('/api/admin/catalog', 'POST', { action: 'batch_publish', batchLimit }),
+  catalogRewrite: (sourceId: string) =>
+    send<{ source: CatalogSourceView; preview: { title: string; summary: string; pages: { text: string }[] } }>(
+      '/api/admin/catalog',
+      'POST',
+      { action: 'rewrite', sourceId },
+    ),
+  catalogPublish: (sourceId: string) =>
+    send<{ source: CatalogSourceView }>('/api/admin/catalog', 'POST', { action: 'publish', sourceId }),
+  catalogRewritePublish: (sourceId: string) =>
+    send<{ source: CatalogSourceView }>('/api/admin/catalog', 'POST', { action: 'rewrite_publish', sourceId }),
+  catalogReject: (sourceId: string, note?: string) =>
+    send<{ source: CatalogSourceView }>('/api/admin/catalog', 'POST', { action: 'reject', sourceId, note }),
 };
 
 /** 아이 프로필 만들기·고치기에 쓰는 값 */
